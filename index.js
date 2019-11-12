@@ -33,6 +33,10 @@ MongoClient.connect("mongodb://"+ DB_HOST +"/", function(error, client) {
 	app.get("/login", (req, res) => {
 		asimov.doLogStuff(req, res);
 	});
+	app.get("/logout", (req, res) => {
+		req.session.login = false;
+		res.redirect("/");
+	});
 	app.post("/login", (req, res) => {
 		asimov.login(req, res, db, crypto)
 	});
