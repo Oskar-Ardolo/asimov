@@ -1,0 +1,28 @@
+{
+  "name": "asimov",
+  "version": "1.0.0",
+  "description": "Logiciel de gestion d'élèves en milieu scolaire dans le cadre de la Fondation Asimov.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Oskar-Ardolo/asimov.git"
+  },
+  "author": "ROUILLARD Vincent",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/Oskar-Ardolo/asimov/issues"
+  },
+  "homepage": "https://github.com/Oskar-Ardolo/asimov#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.4",
+    "crypto": "^1.0.1",
+    "ejs": "^2.7.1",
+    "express": "^4.17.1",
+    "express-session": "^1.17.0",
+    "mongodb": "^3.3.4"
+  }
+}
