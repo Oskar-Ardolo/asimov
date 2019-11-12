@@ -1,6 +1,9 @@
 const PORT = 3000;
 const DB_HOST = "localhost"
 const DB_NAME = "asimov"
+const DB_USER = "root"
+const DB_PASS = ""
+
 
 var asimov = require("./asimov.js");
 var express = require('express');
@@ -8,7 +11,13 @@ var session = require('express-session')
 var bodyParser = require("body-parser");
 var crypto = require('crypto');
 var cookieParser = require('cookie-parser');
-var MongoClient = require("mongodb").MongoClient;
+var mysql = require('mysql');
+var db = mysql.createConnection({
+  host: DB_HOST,
+  user: DB_USER,
+  password: DB_PASS,
+  database: DB_NAME
+});
 
 var app = express();
 
@@ -17,11 +26,9 @@ app.use(bodyParser());
 app.use(cookieParser());
 app.use(session({secret: "Shh, its a secret!", resave: true, saveUninitialized: true}));
 
-
-MongoClient.connect("mongodb://"+ DB_HOST +"/", function(error, client) {
-    if (error) return funcCallback(error);
-    let db = client.db(DB_NAME);
-
+db.connect(function(err) {
+  if (err) throw err;
+  console.log("Connecté à la base de données '"+ DB_NAME +"'");
 
     //ROUTES
 	app.get("/", (req, res) => {
@@ -41,8 +48,7 @@ MongoClient.connect("mongodb://"+ DB_HOST +"/", function(error, client) {
 		asimov.login(req, res, db, crypto)
 	});
 
-	    console.log("Connecté à la base de données '"+ DB_NAME +"'");
-	});
+});
 
 
 
