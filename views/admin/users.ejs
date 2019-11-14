@@ -1,0 +1,86 @@
+<% include ../include/header.ejs %>
+
+<div id="content-wrapper">
+
+<div class="container-fluid">
+    <!-- CODE HERE -->
+     <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="/">Accueil</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="/admin">Admin</a>
+      </li>
+      <li class="breadcrumb-item active">Gestion des élèves</li>
+    </ol>
+
+    <div class="card mb-3">
+      <div class="card-header">
+        <i class="fas fa-users"></i>
+        Gestion des élèves</div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Classe</th>
+                <th>Pseudonyme</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tfoot>
+              <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Classe</th>
+                <th>Pseudonyme</th>
+                <th>Actions</th>
+              </tr>
+            </tfoot>
+            <tbody>
+			<% for(var i=0; i < data.length; i++) { %>
+              <tr>
+                <td><%= data[i].nom %></td>
+                <td><%= data[i].prenom %></td>
+                <td><%= data[i].nomclasse %></td>
+                <td><%= data[i].pseudo %></td>
+                <td><button style="width:49%;" type="button" class="btn btn-primary">Editer</button> <button style="width:49%;" type="button" class="btn btn-danger">Supprimer</button></td>
+              </tr>
+             <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-footer small text-muted">Mis à jour : il y a quelques secondes...</div>
+    </div>
+    <div class="card mb-3">
+      <div class="card-header">
+        <i class="fas fa-user"></i>
+        Ajouter un élève</div>
+      <div class="card-body">
+        <form method="post" action="/admin/users/add">
+		  <div class="form-group">
+		    <label for="nom">Nom</label>
+		    <input type="text" id="nom" name="nom" class="form-control" placeholder="Nom..."><br/>
+		    <label for="prenom">Prénom</label>
+		    <input type="text" id="prenom" name="prenom" class="form-control" placeholder="Prénom...">
+		  </div><hr>
+		  <div class="form-group">
+		    <label for="classe">Sélectionner la classe de l'élève</label>
+		    <select class="form-control" name="classe" id="classe">
+		   		<% for(var i=0; i < classe.length; i++) { %>
+			    <option value=<%= classe[i].idclasse %>  ><%= classe[i].nomclasse %></option>
+			    <% } %>
+		    </select>
+		  </div><hr>
+		  <button type="submit" class="btn btn-primary">Ajouter l'élève à la base de données</button>
+		</form>
+      </div>
+      
+    </div>
+
+</div>
+<!-- /.container-fluid -->
+<% include ../include/footer.ejs %>

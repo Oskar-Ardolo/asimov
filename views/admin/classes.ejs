@@ -1,0 +1,71 @@
+<% include ../include/header.ejs %>
+
+<div id="content-wrapper">
+
+<div class="container-fluid">
+    <!-- CODE HERE -->
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="/">Accueil</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="/admin">Admin</a>
+      </li>
+      <li class="breadcrumb-item active">Gestion des classes</li>
+    </ol>
+
+    <div class="card mb-3">
+      <div class="card-header">
+        <i class="fas fa-users"></i>
+        Gestion des classes</div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+            <thead>
+              <tr>
+                <th>Classe</th>
+                <th>Effectif</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tfoot>
+              <tr>
+                <th>Classe</th>
+                <th>Effectif</th>
+                <th>Actions</th>
+              </tr>
+            </tfoot>
+            <tbody>
+			<% for(var i=0; i < data.length; i++) { %>
+              <tr>
+                <td><%= data[i].nomclasse %></td>
+                <td><%= data[i].effectif %></td>
+                <td><button style="width:49%;" type="button" class="btn btn-primary">Editer</button> <button style="width:49%;" type="button" class="btn btn-danger">Supprimer</button></td>
+              </tr>
+             <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-footer small text-muted">Mis à jour : il y a quelques secondes...</div>
+    </div>
+    <div class="card mb-3">
+      <div class="card-header">
+        <i class="fas fa-user"></i>
+        Ajouter une classe</div>
+      <div class="card-body">
+        <form method="post" action="/admin/classes/add">
+		  <div class="form-group">
+		    <label for="nom">Nom de la classe</label>
+		    <input type="text" id="nom" name="nomclasse" class="form-control" placeholder="Nom..."><br/>
+		  </div><hr>
+		  <button type="submit" class="btn btn-primary">Ajouter la classe à la base de données</button>
+		</form>
+      </div>
+      
+    </div>
+
+
+</div>
+<!-- /.container-fluid -->
+<% include ../include/footer.ejs %>

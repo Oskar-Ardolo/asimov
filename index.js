@@ -16,7 +16,8 @@ var db = mysql.createConnection({
   host: DB_HOST,
   user: DB_USER,
   password: DB_PASS,
-  database: DB_NAME
+  database: DB_NAME,
+  multipleStatements: true
 });
 
 var app = express();
@@ -30,7 +31,7 @@ db.connect(function(err) {
   if (err) throw err;
   console.log("Connecté à la base de données '"+ DB_NAME +"'");
 
-    //ROUTES
+    /* GLOBAT GET ROUTES */
 	app.get("/", (req, res) => {
 		asimov.doLogStuff(req, res);
 	});
@@ -44,6 +45,35 @@ db.connect(function(err) {
 		req.session.login = false;
 		res.redirect("/");
 	});
+	/* END GLOBAT GET ROUTES */
+
+
+	/* ADMIN ROUTES */
+	app.get("/admin", (req, res) => {
+		if(req.session.login && req.session.rang >= 5) {
+			asimov.getAdminInfo(req, res, db);
+		} else {
+			res.redirect("/home")
+		}
+	});
+	app.get("/admin/users", (req, res) => {
+		asimov.getUsers(req, res, db);
+	});
+	app.get("/admin/classes", (req, res) => {
+		asimov.getClasses(req, res, db);
+	});
+
+	app.post("/admin/users/add", (req, res) => {
+		asimov.addUser(req, res, db, crypto);
+	});
+	app.post("/admin/classes/add", (req, res) => {
+		asimov.addClasse(req, res, db);
+	});
+
+	/* END ADMIN ROUTES */ 
+
+
+	/* GLOBAL POST ROUTES */
 	app.post("/login", (req, res) => {
 		asimov.login(req, res, db, crypto)
 	});
@@ -55,8 +85,3 @@ db.connect(function(err) {
 
 app.listen(PORT);
 console.log("Server running : http://localhost:"+PORT+"/");
-
-
-console.log(crypto.createHmac('sha256', "oldfield.graham")
-                   .update('jojofags suck')
-                   .digest('hex'));
