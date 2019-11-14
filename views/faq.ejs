@@ -1,0 +1,70 @@
+<% include include/header.ejs %>
+
+<div id="content-wrapper">
+
+<div class="container-fluid">
+    <!-- CODE HERE -->
+
+<div class="container">
+    <div class="alert alert-warning alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Fermer</span></button>
+        Vous trouverez sur cette page toutes les questions fréquemment posées concernant l'utilisation d'<strong>AsimovGestion1</strong> et de ses fonctionnalités ; tant sur la partie élève que professeur & administration. <br/>
+        Veuillez vous en référer à la catégorie correspondante. En cas de problème non résolu, vous pouvez nous contacter <a href="#">ici</a>. 
+    </div>
+
+    <br />
+
+    <div class="" id="accordion">
+        <div class="faqHeader">Questions fréquemment posées par les élèves </div>
+        <div class="card mb-3">
+            <div class="card-header">
+                <h4 class="card-header">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">Comment puis-je voir mes notes ?</a>
+                </h4>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse in">
+                <div class="card-block ml-3 mt-3 mb-3">
+                    Bah tu niques ta mère 
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<style>
+    .faqHeader {
+        font-size: 27px;
+        margin: 20px;
+    }
+
+    .panel-heading [data-toggle="collapse"]:after {
+        font-family: 'Glyphicons Halflings';
+        content: "e072"; /* "play" icon */
+        float: right;
+        color: #F58723;
+        font-size: 18px;
+        line-height: 22px;
+        /* rotate "play" icon from > (right arrow) to down arrow */
+        -webkit-transform: rotate(-90deg);
+        -moz-transform: rotate(-90deg);
+        -ms-transform: rotate(-90deg);
+        -o-transform: rotate(-90deg);
+        transform: rotate(-90deg);
+    }
+
+    .panel-heading [data-toggle="collapse"].collapsed:after {
+        /* rotate "play" icon from > (right arrow) to ^ (up arrow) */
+        -webkit-transform: rotate(90deg);
+        -moz-transform: rotate(90deg);
+        -ms-transform: rotate(90deg);
+        -o-transform: rotate(90deg);
+        transform: rotate(90deg);
+        color: #454444;
+    }
+</style>
+
+
+</div>
+<!-- /.container-fluid -->
+<% include include/footer.ejs %>

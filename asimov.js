@@ -1,7 +1,37 @@
+/*
+======================
+MISC FUNCTIONS
+====================== 
+
+Liste fonctions :
+
+cap(string) : renvoie un string avec la première lettre en majuscule et le reste en minuscule
+*/
+
+
+
 const cap = (s) => {
   if (typeof s !== 'string') return ''
-  return s.charAt(0).toUpperCase() + s.slice(1)
+  return s.toLowerCase().charAt(0).toUpperCase() + s.slice(1)
 }
+
+
+
+
+
+
+/*
+======================
+MODULES GENERAUX
+====================== 
+
+Liste modules :
+
+getAdminInfo : 
+doLogStuff : 
+login :
+*/
+
 
 exports.doLogStuff = (req, res) => {
 	if(req.session.login) {
@@ -34,6 +64,14 @@ exports.login = (req, res, db, crypto) => {
 	});
 }
 
+
+
+
+
+
+
+
+
 /* 
 ======================
 MODULES ADMINISTRATION
@@ -47,7 +85,7 @@ getUsers : affiche admin/users.ejs avec la liste des élèves
 
 */
 
-
+// ADMINISTRATION GENERALE PROFS + PERSONNEL
 exports.getAdminInfo = (req, res, db) => {
 	if(req.session.rang >= 5) {
 		let queries = "SELECT Count(*) as nbre FROM asimov_users WHERE rang = 1;SELECT Count(*) as nbre FROM asimov_users WHERE rang = 5;SELECT Count(*) as nbre FROM asimov_classes;SELECT Count(*) as nbre FROM asimov_matieres;";
@@ -63,6 +101,8 @@ exports.getAdminInfo = (req, res, db) => {
 }
 
 
+
+// GESTION DES UTILISATEURS (ELEVES)
 exports.getUsers = (req, res, db) => {
 	if(req.session.rang >= 5) {
 		let query = "SELECT asimov_users.id, asimov_users.nom, asimov_users.prenom, asimov_users.pseudo, asimov_classes.nomclasse FROM asimov_users, asimov_classes, asimov_dansclasse WHERE rang = '1' AND asimov_users.id = asimov_dansclasse.iduser AND asimov_dansclasse.idclasse = asimov_classes.idclasse ORDER BY nom ASC"
@@ -84,7 +124,6 @@ exports.getUsers = (req, res, db) => {
 	}
 	
 }
-
 
 exports.addUser = (req, res, db, crypto) => {
 	if(req.session.rang >= 5) {
@@ -116,11 +155,21 @@ exports.addUser = (req, res, db, crypto) => {
 	}
 }
 
+
+
+// GESTION DES UTILISATEURS (PROFESSEURS + ADMINISTRATION)
+exports.getProfs = (req, res, db) => {
+
+}
+
+
+
+// GESTION DES CLASSES
 exports.getClasses = (req, res, db) => {
 	if(req.session.rang >= 5) {
 		let query = "SELECT nomclasse, count(iduser) as effectif FROM asimov_classes LEFT JOIN asimov_dansclasse ON asimov_classes.idclasse = asimov_dansclasse.idclasse GROUP BY nomclasse";
-	    db.query(query, function (err2, result) {
-		    if (err2) throw err2;
+	    db.query(query, function (err, result) {
+		    if (err) throw err;
 		    res.render("admin/classes.ejs", {data : result});
 		});
 	} else {
@@ -146,5 +195,33 @@ exports.addClasse = (req, res, db) => {
 }
 
 
+// GESTION DES MATIERES
+exports.getMatieres = (req, res, db) => {
+	if(req.session.rang == 10) {
+		let query = "SELECT nommatiere, count(idprof) as effectif FROM asimov_matieres LEFT JOIN asimov_enseignematiere ON asimov_matieres.id = asimov_enseignematiere.idmatiere GROUP BY nommatiere";
+	    db.query(query, function (err, result) {
+		    if (err) throw err;
+		    res.render("admin/matieres.ejs", {data : result});
+		});
+	} else {
+		req.session.login = false;
+		req.session.rang = 0;
+		res.redirect("/home")
+	}
+}
+
+exports.addClasse = (req, res, db) => {
+	if(req.session.rang == 10) {
+	    let query = "INSERT INTO asimov_matieres(id, nommatiere) VALUES ('', '"+ req.body.nommatiere +"')"
+	    db.query(query, function (err, result) {
+		    if (err) throw err;
+		    res.redirect("/admin/matieres");
+		});
+	} else {
+		req.session.login = false;
+		req.session.rang = 0;
+		res.redirect("/home")
+	}
+}
 
 

@@ -38,6 +38,9 @@ db.connect(function(err) {
 	app.get("/home", (req, res) => {
 		asimov.doLogStuff(req, res);
 	});
+	app.get("/faq", (req, res) => {
+		res.render("faq.ejs");	
+	});
 	app.get("/login", (req, res) => {
 		asimov.doLogStuff(req, res);
 	});
@@ -62,7 +65,9 @@ db.connect(function(err) {
 	app.get("/admin/classes", (req, res) => {
 		asimov.getClasses(req, res, db);
 	});
-
+	app.get("/admin/matieres", (req, res) => {
+		asimov.getMatieres(req, res, db);
+	});
 	app.post("/admin/users/add", (req, res) => {
 		asimov.addUser(req, res, db, crypto);
 	});
