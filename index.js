@@ -4,7 +4,7 @@ const DB_NAME = "asimov"
 const DB_USER = "root"
 const DB_PASS = ""
 
-var asimov = require("./asimov.js");
+var asimov = require("./core/asimov.js");
 var express = require('express');
 var session = require('express-session')
 var bodyParser = require("body-parser");
