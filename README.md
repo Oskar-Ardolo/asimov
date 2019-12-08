@@ -25,11 +25,9 @@ node index.js
 Les pull requests sont les bienvenues ! Pour les gros changements (majeurs), merci d'ouvrir un ticket dans *Issues* afin de discuter de ce dont vous souhaiter ajouter.
 
 ## Credits
-[StartBootstrap](https://startbootstrap.com/) - Thème
-
-ROUILLARD Meltz Vincent - **Main Developper**
-
-FONTANA Enzo - **Main Developper** / **Graphist**
+[StartBootstrap](https://startbootstrap.com/) - Thème  
+ROUILLARD Meltz Vincent - **Main Developper**  
+FONTANA Enzo - **Main Developper** / **Graphist**    
 
 
 ## License
