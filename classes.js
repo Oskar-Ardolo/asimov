@@ -88,8 +88,9 @@ class DB {
 
 
   	// VERIFICATIONS
-  	async login(loginArray) {
-
+  	async login(pseudo, password) {
+  		let query = "SELECT * FROM asimov_users WHERE pseudo = '" + pseudo + "' AND password = '" + password + "'";
+  		return this.doQuery(query);
   	}
 
 

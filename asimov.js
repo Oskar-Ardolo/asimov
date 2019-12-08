@@ -48,21 +48,22 @@ exports.login = (req, res, db, crypto) => {
 	let password = crypto.createHmac('sha256', req.body.password)
 	               .update('jojofags suck')
 	               .digest('hex');
-	let query = "SELECT * FROM asimov_users WHERE pseudo = '" + pseudo + "' AND password = '" + password + "'";
-	db.query(query, function (err, result) {
-	    if (err) throw err;
-	    if(result.length != 0) {
-	    	req.session.login = true;
-	    	req.session.rang = result[0].rang;
-	    	if(result[0].rang >= 5) {
+
+	let DBModel = new DB(db);
+	(async function() {
+		let userLogin = await DBModel.login(pseudo, password);
+		if(userLogin.length != 0) {
+			req.session.login = true;
+	    	req.session.rang = userLogin[0].rang;
+	    	if(userLogin[0].rang >= 5) {
 	    		res.redirect("/admin");
 	    	} else {
 	    		res.redirect("/home");
 	    	}
-	    } else {
+		} else {
 	    	res.redirect("/home");
 	    }
-	});
+	})();
 }
 
 
