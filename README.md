@@ -26,8 +26,11 @@ Les pull requests sont les bienvenues ! Pour les gros changements (majeurs), mer
 
 ## Credits
 [StartBootstrap](https://startbootstrap.com/) - Thème
+
 ROUILLARD Meltz Vincent - **Main Developper**
+
 FONTANA Enzo - **Main Developper** / **Graphist**
+
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
