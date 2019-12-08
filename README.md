@@ -22,7 +22,7 @@ node index.js
 ```
 
 ## Contributions
-Les pull requests sont les bienvenues ! Pour les gros changements (majeurs), merci d'ouvrir un ticket dans *Issues* afin de discuter de ce dont vous souhaiter ajouter.
+Les pull requests sont les bienvenues ! Pour les gros changements (majeurs), merci d'ouvrir un ticket dans *Issues* afin de discuter des ajouts que vous souhaitez apporter.
 
 ## Credits
 [StartBootstrap](https://startbootstrap.com/) - Thème  
