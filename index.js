@@ -4,7 +4,6 @@ const DB_NAME = "asimov"
 const DB_USER = "root"
 const DB_PASS = ""
 
-
 var asimov = require("./asimov.js");
 var express = require('express');
 var session = require('express-session')
@@ -62,17 +61,36 @@ db.connect(function(err) {
 	app.get("/admin/users", (req, res) => {
 		asimov.getUsers(req, res, db);
 	});
+
+	app.get("/admin/profs", (req, res) => {
+		asimov.getProfs(req, res, db);
+	});
+	app.get("/admin/profs/edit/:pseudo", (req, res) => {
+		asimov.editProfView(req, res, db);
+	});
+
 	app.get("/admin/classes", (req, res) => {
 		asimov.getClasses(req, res, db);
 	});
+
+	app.get("/admin/classes", (req, res) => {
+		asimov.getNotes(req, res, db);
+	});
+
 	app.get("/admin/matieres", (req, res) => {
 		asimov.getMatieres(req, res, db);
 	});
 	app.post("/admin/users/add", (req, res) => {
 		asimov.addUser(req, res, db, crypto);
 	});
+	app.post("/admin/profs/add", (req, res) => {
+		asimov.addProf(req, res, db, crypto);
+	});
 	app.post("/admin/classes/add", (req, res) => {
 		asimov.addClasse(req, res, db);
+	});
+	app.post("/admin/matieres/add", (req, res) => {
+		asimov.addMatiere(req, res, db);
 	});
 
 	/* END ADMIN ROUTES */ 

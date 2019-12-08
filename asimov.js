@@ -8,7 +8,7 @@ Liste fonctions :
 cap(string) : renvoie un string avec la première lettre en majuscule et le reste en minuscule
 */
 
-
+const DB = require('./classes.js');
 
 const cap = (s) => {
   if (typeof s !== 'string') return ''
@@ -30,6 +30,7 @@ Liste modules :
 getAdminInfo : 
 doLogStuff : 
 login :
+
 */
 
 
@@ -66,12 +67,6 @@ exports.login = (req, res, db, crypto) => {
 
 
 
-
-
-
-
-
-
 /* 
 ======================
 MODULES ADMINISTRATION
@@ -85,18 +80,19 @@ getUsers : affiche admin/users.ejs avec la liste des élèves
 
 */
 
+
+
 // ADMINISTRATION GENERALE PROFS + PERSONNEL
 exports.getAdminInfo = (req, res, db) => {
 	if(req.session.rang >= 5) {
-		let queries = "SELECT Count(*) as nbre FROM asimov_users WHERE rang = 1;SELECT Count(*) as nbre FROM asimov_users WHERE rang = 5;SELECT Count(*) as nbre FROM asimov_classes;SELECT Count(*) as nbre FROM asimov_matieres;";
-
-		db.query(queries, function (err, results, fields) {
-			let counts = JSON.stringify(results);
-			counts =  JSON.parse(counts);
-		    res.render("admin/admin.ejs", {counts : counts});
-		});
-
-
+		let DBModel = new DB(db);
+		(async function() {
+			let userCount = await DBModel.userCount();
+			let profCount = await DBModel.profCount();
+			let classeCount = await DBModel.classeCount();
+			let matiereCount = await DBModel.matiereCount();
+			res.render("admin/admin.ejs", {counts : [userCount, profCount, classeCount, matiereCount]});
+		})()
 	}
 }
 
@@ -105,25 +101,19 @@ exports.getAdminInfo = (req, res, db) => {
 // GESTION DES UTILISATEURS (ELEVES)
 exports.getUsers = (req, res, db) => {
 	if(req.session.rang >= 5) {
-		let query = "SELECT asimov_users.id, asimov_users.nom, asimov_users.prenom, asimov_users.pseudo, asimov_classes.nomclasse FROM asimov_users, asimov_classes, asimov_dansclasse WHERE rang = '1' AND asimov_users.id = asimov_dansclasse.iduser AND asimov_dansclasse.idclasse = asimov_classes.idclasse ORDER BY nom ASC"
-	    db.query(query, function (err, result) {
-		    if (err) throw err;
-		    let query2 = "SELECT * FROM asimov_classes ORDER BY nomclasse";
-		    db.query(query2, function (err, result2) {
-			    if (err) throw err;
-			    res.render("admin/users.ejs", {data : result, classe : result2});
-			});
-		    
-		});
-
-
+		let DBModel = new DB(db);
+		(async function() {
+			let users = await DBModel.getUsers();
+			let classes = await DBModel.getClasses();
+			res.render("admin/users.ejs", {data : users, classe : classes});
+		})()
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
 		res.redirect("/home")
 	}
-	
 }
+
 
 exports.addUser = (req, res, db, crypto) => {
 	if(req.session.rang >= 5) {
@@ -137,17 +127,15 @@ exports.addUser = (req, res, db, crypto) => {
 	    let rang = 1
 	    let titre = "Élève";
 
+	    let userInputs = [nom, prenom, pseudo, password, rang, titre];
 
-	    let query = "INSERT INTO asimov_users(id, nom, prenom, pseudo, password, rang, titre) VALUES ('', '" + nom + "', '" + prenom + "', '" + pseudo + "', '" + password + "', '" + rang + "', '" + titre + "')";
-	    db.query(query, function (err, result) {
-		    if (err) throw err;
-		    let iduser = result.insertId;
-		    let queryClasse = "INSERT INTO asimov_dansclasse(iduser, idclasse) VALUES ('"+ iduser +"', '"+ classe +"')"
-		    db.query(queryClasse, function (err, result2) {
-			    if (err) throw err;
-			    res.redirect("/admin/users");
-			});
-		});
+	    let DBModel = new DB(db);
+		(async function() {
+			await DBModel.addUser(userInputs, classe);
+			res.redirect("/admin/users");
+		})()
+
+
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
@@ -159,68 +147,118 @@ exports.addUser = (req, res, db, crypto) => {
 
 // GESTION DES UTILISATEURS (PROFESSEURS + ADMINISTRATION)
 exports.getProfs = (req, res, db) => {
+	if(req.session.rang == 10) {
+		let DBModel = new DB(db);
+		(async function() {
+			let profs = await DBModel.getProfs();
+			res.render("admin/profs.ejs", {data : profs});
+		})()
+	} else {
+		req.session.login = false;
+		req.session.rang = 0;
+		res.redirect("/admin")
+	}
+	
+}
 
+exports.addProf = (req, res, db, crypto) => {
+	if(req.session.rang == 10) {
+	    let nom = req.body.nom.toUpperCase();
+	    let prenom = cap(req.body.prenom.toLowerCase());
+	    let pseudo = nom.substr(0, 7).toLowerCase().replace(" ", "").replace("-", "") + prenom.substr(0,2).toLowerCase().replace(" ", "").replace("-", "");
+	    let password = crypto.createHmac('sha256', nom + "-" + prenom)
+	               .update('jojofags suck')
+	               .digest('hex');
+	    let rang = 5
+	    let titre = "Professeur";
+	    let DBModel = new DB(db);
+	    (async function() {
+			let insertedProf = await DBModel.addProf([nom, prenom, pseudo, password, rang, titre]);
+			res.redirect("/admin/profs")
+		})()	    
+	} else {
+		req.session.login = false;
+		req.session.rang = 0;
+		res.redirect("/admin")
+	}
+}
+
+exports.editProfView = (req, res, db) => {
+	if(req.session.rang == 10) {
+		let pseudo = req.params.pseudo;
+		let DBModel = new DB(db);
+	    (async function() {
+			let utilisateur = await DBModel.getUserByPseudo(pseudo);
+			let matieres = await DBModel.getMatieres();
+			res.render('admin/editprof.ejs', {user : utilisateur, matiere : matieres});
+
+		})()
+	} else {
+		res.redirect("/admin");
+	}
 }
 
 
 
 // GESTION DES CLASSES
 exports.getClasses = (req, res, db) => {
-	if(req.session.rang >= 5) {
-		let query = "SELECT nomclasse, count(iduser) as effectif FROM asimov_classes LEFT JOIN asimov_dansclasse ON asimov_classes.idclasse = asimov_dansclasse.idclasse GROUP BY nomclasse";
-	    db.query(query, function (err, result) {
-		    if (err) throw err;
-		    res.render("admin/classes.ejs", {data : result});
-		});
+	if(req.session.rang == 10) {
+
+		let DBModel = new DB(db);
+	    (async function() {
+			let classes = await DBModel.getClassesAndUserCount();
+			res.render("admin/classes.ejs", {data : classes});
+		})()	
+
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
-		res.redirect("/home")
+		res.redirect("/admin")
 	}
 }
 
 exports.addClasse = (req, res, db) => {
-	if(req.session.rang >= 5) {
-	    
-	    let query = "INSERT INTO asimov_classes(idclasse, nomclasse) VALUES ('', '"+ req.body.nomclasse +"')"
-	    db.query(query, function (err, result) {
-		    if (err) throw err;
-		    res.redirect("/admin/classes");
-		});
+	if(req.session.rang == 10) {
+		let DBModel = new DB(db);
+	    (async function() {
+			let classes = await DBModel.addClasse(req.body.nomclasse);
+			res.redirect("/admin/classes");
+		})()	
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
-		res.redirect("/home")
+		res.redirect("/admin")
 	}
 }
+
 
 
 // GESTION DES MATIERES
 exports.getMatieres = (req, res, db) => {
 	if(req.session.rang == 10) {
-		let query = "SELECT nommatiere, count(idprof) as effectif FROM asimov_matieres LEFT JOIN asimov_enseignematiere ON asimov_matieres.id = asimov_enseignematiere.idmatiere GROUP BY nommatiere";
-	    db.query(query, function (err, result) {
-		    if (err) throw err;
-		    res.render("admin/matieres.ejs", {data : result});
-		});
+		let DBModel = new DB(db);
+		(async function() {
+			let matieres = await DBModel.getMatieresAndProfCount();
+			res.render("admin/matieres.ejs", {data : matieres});
+		})()	
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
-		res.redirect("/home")
+		res.redirect("/admin")
 	}
 }
 
-exports.addClasse = (req, res, db) => {
+exports.addMatiere = (req, res, db) => {
 	if(req.session.rang == 10) {
-	    let query = "INSERT INTO asimov_matieres(id, nommatiere) VALUES ('', '"+ req.body.nommatiere +"')"
-	    db.query(query, function (err, result) {
-		    if (err) throw err;
-		    res.redirect("/admin/matieres");
-		});
+		let DBModel = new DB(db);
+	    (async function() {
+			let matieres = await DBModel.addMatiere(req.body.nommatiere);
+			res.redirect("/admin/matieres");
+		})()	
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
-		res.redirect("/home")
+		res.redirect("/admin")
 	}
 }
 
