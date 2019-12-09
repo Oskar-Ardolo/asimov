@@ -1,0 +1,30 @@
+================================
+########## TO DO LIST ##########
+================================
+
+Profs : 
+	- édition de la fiche prof
+	- retirer matière enseignée
+
+
+Matieres :
+	- suppression matières 
+
+
+Eleves :
+	- notes mdr
+
+
+Classes : 
+	- matières étudiées par classes
+		- prof correspondant (nouvelle table ?)
+
+
+
+Gestion users
+	- suppression/edition users 
+	- réinitialiser password
+
+
+
+note à moi même : faire évoluer au fur et à mesure le document quand nouvelle idée

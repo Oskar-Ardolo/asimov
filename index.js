@@ -86,6 +86,9 @@ db.connect(function(err) {
 	app.post("/admin/profs/add", (req, res) => {
 		asimov.addProf(req, res, db, crypto);
 	});
+	app.post("/admin/profs/edit/doprof", (req, res) => {
+		asimov.matiereToProf(req, res, db);
+	});
 	app.post("/admin/classes/add", (req, res) => {
 		asimov.addClasse(req, res, db);
 	});

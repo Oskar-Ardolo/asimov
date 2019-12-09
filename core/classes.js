@@ -14,9 +14,12 @@ class DB {
   	}
   	async getUserByPseudo(pseudo) {
   		let query = "SELECT id, nom, prenom, pseudo FROM asimov_users WHERE asimov_users.pseudo = '"+ pseudo +"'"
-		return this.doQuery(query)
+		  return this.doQuery(query)
   	}
-
+    async getUserById(id) {
+      let query = "SELECT id, nom, prenom, pseudo FROM asimov_users WHERE asimov_users.id = '"+ id +"'"
+      return this.doQuery(query)
+    }
   		// CLASSES
   	async getClasses() {
   		let query = "SELECT * FROM asimov_classes ORDER BY nomclasse"
@@ -43,6 +46,14 @@ class DB {
   		let query = "SELECT nommatiere, count(idprof) as effectif FROM asimov_matieres LEFT JOIN asimov_enseignematiere ON asimov_matieres.id = asimov_enseignematiere.idmatiere GROUP BY nommatiere";
   		return this.doQuery(query)
   	}
+    async getMatieresForOneProf(id) {
+      let query = "SELECT idmatiere FROM asimov_enseignematiere WHERE asimov_enseignematiere.idprof = '"+id+"'"
+      return this.doQuery(query)
+    }
+    async addMatiereToProf(idprof, idmatiere) {
+      let query = "INSERT INTO asimov_enseignematiere(idprof, idmatiere) VALUES (?, ?)";
+      return this.doInsert(query, [idprof, idmatiere]);
+    }
 
   	
   	// COUNTS 

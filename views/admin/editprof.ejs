@@ -14,82 +14,91 @@
       <li class="breadcrumb-item">
         <a href="/admin/profs">Gestion des professeurs</a>
       </li>
-      <li class="breadcrumb-item active">ROUMANET David</li>
+      <li class="breadcrumb-item active"><%= user.fullName() %></li>
     </ol>
 
-    <form method="post" action="">
-      <div class="card mb-3">
-        <div class="card-header">
-          <i class="fas fa-users"></i>
-          Gestion des professeurs : <i>Edition de l'utilisateur</i></div>
-        <div class="card-body">
-            <div class="row">
-              <div class="col-lg-3">
-                <img src="/img/user.png" alt="ROUMANET DAVID" width=300 />
+    <div class="card mb-3">
+      <div class="card-header">
+        <i class="fas fa-users"></i>
+        Gestion des professeurs : <i>Edition de l'utilisateur</i></div>
+      <div class="card-body">
+          <div class="row">
+            <div class="col-lg-3">
+              <img src="/img/prof.png" alt="ROUMANET DAVID" width=300 />
+            </div>
+            <div class="col-lg-9">
+              
+                <div class="form-group">
+                  <label for="nom">Nom</label>
+                  <input type="text" id="nom" name="nom" class="form-control" placeholder="Nom..." value="<%= user.nom %>"><br/>
+                  <label for="prenom">Prénom</label>
+                  <input type="text" id="prenom" name="prenom" class="form-control" value="<%= user.prenom %>" placeholder="Prénom...">
+                </div><br/><hr>
+                <div class="row">
+                  <div class="col-lg-6 mt-3"><b>Pseudonyme : </b> <%= user.pseudo %></div>
+                  <div class="col-lg-6 mt-3">
+                    <input type="button" class="btn btn-danger" value="Réinitialiser le mot de passe">
+                </div>  
               </div>
-              <div class="col-lg-9">
-                
-                  <div class="form-group">
-                    <label for="nom">Nom</label>
-                    <input type="text" id="nom" name="nom" class="form-control" placeholder="Nom..." value="<%= user[0].nom %>"><br/>
-                    <label for="prenom">Prénom</label>
-                    <input type="text" id="prenom" name="prenom" class="form-control" value="<%= user[0].prenom %>" placeholder="Prénom...">
-                  </div><br/><hr>
-                  <div class="row">
-                    <div class="col-lg-6 mt-3"><b>Pseudonyme : </b> <%= user[0].pseudo %></div>
-                    <div class="col-lg-6 mt-3">
-                      <input type="button" class="btn btn-danger" value="Réinitialiser le mot de passe">
-                  </div>  
-                </div>
-              </div>
-            </div><hr>
-        </div>
-        <div class="card-footer small text-muted">Mis à jour : il y a quelques secondes...</div>
+            </div>
+          </div><hr>
       </div>
-      <div class="card mb-3">
-        <div class="card-header">
-          <i class="fas fa-users"></i>
-          Gestion des matières</div>
-        <div class="card-body">
-          <div class="table-responsive">
+      <div class="card-footer small text-muted">Mis à jour : il y a quelques secondes...</div>
+    </div>
+    <div class="card mb-3">
+      <div class="card-header">
+        <i class="fas fa-users"></i>
+        Gestion des matières</div>
+      <div class="card-body"> 
+        <div class="table-responsive">
+          <form method="post" action="/admin/profs/edit/doprof" style="overflow:hidden;">
+            <input type="hidden" name="idprof" value="<%= user.id %>">
             <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
               <thead>
                 <tr>
-                  <th style="width:60%;">Matière</th>
+                  <th style="width:40%;">Matière</th>
                   <th style="width:20%;">Professeur ?</th>
+                  <th style="width:20%;">Actions</th>
                 </tr>
               </thead>
               <tfoot>
                 <tr>
                   <th>Matière</th>
                   <th>Professeur ?</th>
+                  <th>Actions</th>
                 </tr>
               </tfoot>
               <tbody>
-        
+                <% 
+                for(i = 0; i < matiere.length; i++) {%>
                 <tr>
-                  <td>Mathématiques</td>
+                  <td><%= matiere[i].nommatiere %></td>
                   <td>
                     <div class="custom-control custom-checkbox">
                       <center>
-                        <input type="checkbox" class="form-check-input"  name="matiere[]" value="1" style="transform : scale(2);">
+                        <input type="checkbox" class="form-check-input" disabled="disabled" <% if(enseigne.some(elem => elem.idmatiere == matiere[i].id)) {%> checked <%} %>  style="transform : scale(2);">
                       </center>
-                      
-                  </div>
+
+                    </div>
+
+                  </td>
+                  <td>
+                    <center>
+                      <% if(enseigne.some(elem => elem.idmatiere == matiere[i].id)) {%> <button type="submit" name="delprof" value="<%= matiere[i].id %>" class="btn btn-danger">Ne plus enseigner</button><%} else { %>
+                      <button type="submit" name="doprof" value="<%= matiere[i].id %>" class="btn btn-success">Désigner comme professeur</button><% } %>
+                    </center>
                   </td>
                 </tr>
-           
+                <%
+                }
+                %>
               </tbody>
             </table>
-          </div>
+          </form>
         </div>
-        <div class="card-footer small text-muted">Mis à jour : il y a quelques secondes...</div>
       </div>
-      <center>
-        <button type="submit" class="btn btn-success">Confirmer les modifications</button>
-      </center>
-      
-    </form>
+      <div class="card-footer small text-muted">Mis à jour : il y a quelques secondes...</div>
+    </div>
     <hr>
 
 </div>

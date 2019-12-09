@@ -191,7 +191,9 @@ exports.editProfView = (req, res, db) => {
 	    (async function() {
 			let utilisateur = await DBModel.getUserByPseudo(pseudo);
 			let matieres = await DBModel.getMatieres();
-			res.render('admin/editprof.ejs', {user : utilisateur, matiere : matieres});
+			let enseignematiere = await DBModel.getMatieresForOneProf(utilisateur[0].id);
+			utilisateur[0].fullName = function() {return this.nom + " " + this.prenom }
+			res.render('admin/editprof.ejs', {user : utilisateur[0], matiere : matieres, enseigne : enseignematiere});
 
 		})()
 	} else {
@@ -199,6 +201,20 @@ exports.editProfView = (req, res, db) => {
 	}
 }
 
+exports.matiereToProf = (req, res, db) => {
+	if(req.session.rang == 10) {
+		let idmatiere = req.body.doprof;
+		let idprof = req.body.idprof;
+		let DBModel = new DB(db);
+	    (async function() {
+	    	let insertEnseigne = await DBModel.addMatiereToProf(idprof, idmatiere);
+	    	let prof = await DBModel.getUserById(idprof);
+	    	res.redirect("/admin/profs/edit/"+prof[0].pseudo);
+		})()
+	} else {
+		res.redirect("/admin");
+	}
+}
 
 
 // GESTION DES CLASSES
