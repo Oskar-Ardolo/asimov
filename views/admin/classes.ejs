@@ -40,7 +40,7 @@
               <tr>
                 <td><%= data[i].nomclasse %></td>
                 <td><%= data[i].effectif %></td>
-                <td><button style="width:49%;" type="button" class="btn btn-primary">Configurer</button> <button style="width:49%;" type="button" class="btn btn-danger">Supprimer</button></td>
+                <td><a style="width:49%;" href="/admin/classes/edit/<%= data[i].idclasse %>" style="color:white; " class="btn btn-primary">Gérer</a> <button style="width:49%;" type="button" href="#" class="btn btn-danger">Supprimer</button></td>
               </tr>
              <% } %>
             </tbody>

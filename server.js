@@ -72,9 +72,8 @@ db.connect(function(err) {
 	app.get("/admin/classes", (req, res) => {
 		asimov.getClasses(req, res, db);
 	});
-
-	app.get("/admin/classes", (req, res) => {
-		asimov.getNotes(req, res, db);
+	app.get("/admin/classes/edit/:idclasse", (req, res) => {
+		asimov.editClasse(req, res, db);
 	});
 
 	app.get("/admin/matieres", (req, res) => {
@@ -92,6 +91,10 @@ db.connect(function(err) {
 	app.post("/admin/classes/add", (req, res) => {
 		asimov.addClasse(req, res, db);
 	});
+	app.post("/admin/classes/edit/adduser", (req, res) => {
+		asimov.addUserToClasse(req, res, db, crypto);
+	});
+	
 	app.post("/admin/matieres/add", (req, res) => {
 		asimov.addMatiere(req, res, db);
 	});

@@ -216,6 +216,34 @@ exports.matiereToProf = (req, res, db) => {
 	}
 }
 
+exports.addUserToClasse = (req, res, db, crypto) => {
+	if(req.session.rang >= 5) {
+	    let nom = req.body.nom.toUpperCase();
+	    let prenom = cap(req.body.prenom.toLowerCase());
+	    let classe = req.body.classe;
+	    let pseudo = nom.substr(0, 7).toLowerCase().replace(" ", "").replace("-", "") + prenom.substr(0,2).toLowerCase().replace(" ", "").replace("-", "");
+	    let password = crypto.createHmac('sha256', nom + "-" + prenom)
+	               .update('jojofags suck')
+	               .digest('hex');
+	    let rang = 1
+	    let titre = "Élève";
+
+	    let userInputs = [nom, prenom, pseudo, password, rang, titre];
+
+	    let DBModel = new DB(db);
+		(async function() {
+			await DBModel.addUser(userInputs, classe);
+			res.redirect("/admin/classes/edit/"+classe);
+		})()
+
+
+	} else {
+		req.session.login = false;
+		req.session.rang = 0;
+		res.redirect("/home")
+	}
+}
+
 
 // GESTION DES CLASSES
 exports.getClasses = (req, res, db) => {
@@ -225,6 +253,22 @@ exports.getClasses = (req, res, db) => {
 	    (async function() {
 			let classes = await DBModel.getClassesAndUserCount();
 			res.render("admin/classes.ejs", {data : classes});
+		})()	
+
+	} else {
+		req.session.login = false;
+		req.session.rang = 0;
+		res.redirect("/admin")
+	}
+}
+
+exports.editClasse = (req, res, db) => {
+	if(req.session.rang == 10) {
+		let DBModel = new DB(db);
+	    (async function() {
+			let classe = await DBModel.getClasseById(req.params.idclasse);
+			let users = await DBModel.getUsersFromClasse(req.params.idclasse);
+			res.render("admin/editclasse.ejs", {users : users, classe : classe[0]});
 		})()	
 
 	} else {

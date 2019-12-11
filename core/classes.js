@@ -20,15 +20,24 @@ class DB {
       let query = "SELECT id, nom, prenom, pseudo FROM asimov_users WHERE asimov_users.id = '"+ id +"'"
       return this.doQuery(query)
     }
+    async getUsersFromClasse(idclasse) {
+      let query = "SELECT asimov_users.* FROM asimov_users, asimov_dansclasse WHERE asimov_dansclasse.iduser = asimov_users.id AND asimov_dansclasse.idclasse = '"+ idclasse +"' ORDER BY asimov_users.nom"
+      return this.doQuery(query)
+    }
+
   		// CLASSES
   	async getClasses() {
   		let query = "SELECT * FROM asimov_classes ORDER BY nomclasse"
 	    return this.doQuery(query)
   	}
   	async getClassesAndUserCount() {
-  		let query = "SELECT nomclasse, count(iduser) as effectif FROM asimov_classes LEFT JOIN asimov_dansclasse ON asimov_classes.idclasse = asimov_dansclasse.idclasse GROUP BY nomclasse";
+  		let query = "SELECT asimov_classes.idclasse, nomclasse, count(iduser) as effectif FROM asimov_classes LEFT JOIN asimov_dansclasse ON asimov_classes.idclasse = asimov_dansclasse.idclasse GROUP BY nomclasse";
 	    return this.doQuery(query)
   	}
+    async getClasseById(idclasse) {
+      let query = "SELECT * FROM asimov_classes WHERE idclasse = '"+idclasse+"'"
+      return this.doQuery(query)
+    }
 
   		// PROFS
   	async getProfs() {
