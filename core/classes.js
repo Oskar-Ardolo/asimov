@@ -6,7 +6,7 @@ class DB {
 
 
 
-  	// GET 
+  	// GET
   		// USERS
   	async getUsers() {
   		let query = "SELECT asimov_users.id, asimov_users.nom, asimov_users.prenom, asimov_users.pseudo, asimov_classes.nomclasse FROM asimov_users, asimov_classes, asimov_dansclasse WHERE rang = '1' AND asimov_users.id = asimov_dansclasse.iduser AND asimov_dansclasse.idclasse = asimov_classes.idclasse ORDER BY nom ASC"
@@ -44,7 +44,7 @@ class DB {
   		let query = "SELECT asimov_users.id, asimov_users.nom, asimov_users.prenom, asimov_users.pseudo FROM asimov_users WHERE rang = 5 ORDER BY nom";
 	    return this.doQuery(query)
   	}
-  	
+
 
   		// MATIERES
   	async getMatieres() {
@@ -64,8 +64,8 @@ class DB {
       return this.doInsert(query, [idprof, idmatiere]);
     }
 
-  	
-  	// COUNTS 
+
+  	// COUNTS
   	async userCount() {
   		let query = "SELECT Count(*) as nbre FROM asimov_users WHERE rang = 1;";
 	    return this.doQuery(query)
@@ -85,7 +85,7 @@ class DB {
 
   	// INSERTS
   	async addUser(userInfos, classe) {
-  		let query = "INSERT INTO asimov_users(id, nom, prenom, pseudo, password, rang, titre) VALUES ('', ?, ?, ?, ?, ?, ?)";
+  		let query = "INSERT INTO asimov_users(id, nom, prenom, pseudo, password, rang, titre) VALUES (NULL, ?, ?, ?, ?, ?, ?)";
   		let insertedQuery = this.doInsert(query, userInfos);
   		return insertedQuery.then((r, e) => {
   			let iduser = r.insertId;
@@ -94,15 +94,15 @@ class DB {
   		})
   	}
   	async addProf(profInfos) {
-  		let query = "INSERT INTO asimov_users(id, nom, prenom, pseudo, password, rang, titre) VALUES ('', ?, ?, ?, ?, ?, ?)";
+  		let query = "INSERT INTO asimov_users(id, nom, prenom, pseudo, password, rang, titre) VALUES (NULL, ?, ?, ?, ?, ?, ?)";
   		return this.doInsert(query, profInfos);
   	}
   	async addClasse(classe) {
-  		let query = "INSERT INTO asimov_classes(idclasse, nomclasse) VALUES ('', ?)"
+  		let query = "INSERT INTO asimov_classes(idclasse, nomclasse) VALUES (NULL, ?)"
   		return this.doInsert(query, [classe])
   	}
   	async addMatiere(matiere) {
-  		let query = "INSERT INTO asimov_matieres(id, nommatiere) VALUES ('', ?)"
+  		let query = "INSERT INTO asimov_matieres(id, nommatiere) VALUES (NULL, ?)"
   		return this.doInsert(query, [matiere])
   	}
 
@@ -159,4 +159,3 @@ class DB {
 }
 
 module.exports = DB;
-
