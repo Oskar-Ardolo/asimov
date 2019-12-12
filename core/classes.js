@@ -102,7 +102,7 @@ class DB {
   		return this.doInsert(query, [classe])
   	}
   	async addMatiere(matiere) {
-  		let query = "INSERT INTO asimov_matieres(id, nommatiere) VALUES (NULL, ?)"
+  		let query = "INSERT INTO asimov_matieres(id, nommatiere) VALUES ('', ?)"
   		return this.doInsert(query, [matiere])
   	}
 
