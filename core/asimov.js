@@ -151,6 +151,7 @@ exports.getProfs = (req, res, db) => {
 	if(req.session.rang == 10) {
 		let DBModel = new DB(db);
 		(async function() {
+			let users = await DBModel.getUsers();
 			let profs = await DBModel.getProfs();
 			res.render("admin/profs.ejs", {data : profs});
 		})()
@@ -217,7 +218,7 @@ exports.matiereToProf = (req, res, db) => {
 }
 
 exports.addUserToClasse = (req, res, db, crypto) => {
-	if(req.session.rang >= 5) {
+	if(req.session.rang >= 10) {
 	    let nom = req.body.nom.toUpperCase();
 	    let prenom = cap(req.body.prenom.toLowerCase());
 	    let classe = req.body.classe;
@@ -244,6 +245,29 @@ exports.addUserToClasse = (req, res, db, crypto) => {
 	}
 }
 
+exports.doModifClasse = (req, res, db) => {
+	if(req.session.rang >= 10) {
+		let profprincipal = req.body.profprincipal;
+		let nomclasse = req.body.nomclasse;
+		let classeToEdit = req.body.idclasse;
+
+
+
+	    let DBModel = new DB(db);
+		(async function() {
+			await DBModel.editClasse(classeToEdit, nomclasse, profprincipal);
+			res.redirect("/admin/classes/edit/"+classeToEdit);
+		})()
+
+
+	} else {
+		req.session.login = false;
+		req.session.rang = 0;
+		res.redirect("/home")
+	}
+}
+
+
 
 // GESTION DES CLASSES
 exports.getClasses = (req, res, db) => {
@@ -268,9 +292,9 @@ exports.editClasse = (req, res, db) => {
 	    (async function() {
 			let classe = await DBModel.getClasseById(req.params.idclasse);
 			let users = await DBModel.getUsersFromClasse(req.params.idclasse);
-			res.render("admin/editclasse.ejs", {users : users, classe : classe[0]});
+			let profs = await DBModel.getProfs();
+			res.render("admin/editclasse.ejs", {users : users, classe : classe[0], profs : profs} );
 		})()	
-
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;

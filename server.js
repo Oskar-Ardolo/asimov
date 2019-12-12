@@ -33,6 +33,7 @@ db.connect(function(err) {
     /* GLOBAT GET ROUTES */
 	app.get("/", (req, res) => {
 		asimov.doLogStuff(req, res);
+		
 	});
 	app.get("/home", (req, res) => {
 		asimov.doLogStuff(req, res);
@@ -93,6 +94,9 @@ db.connect(function(err) {
 	});
 	app.post("/admin/classes/edit/adduser", (req, res) => {
 		asimov.addUserToClasse(req, res, db, crypto);
+	});
+	app.post("/admin/classes/edit/editclasse", (req, res) => {
+		asimov.doModifClasse(req, res, db);
 	});
 	
 	app.post("/admin/matieres/add", (req, res) => {

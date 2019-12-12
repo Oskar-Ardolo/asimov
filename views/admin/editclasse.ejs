@@ -27,10 +27,27 @@
               <img src="/img/classe.png" alt="<%= classe.nomclasse %>" width=300 />
             </div>
             <div class="col-lg-9">
+              <form method="post" action="/admin/classes/edit/editclasse">
+                <input type="hidden" name="idclasse" value="<%= classe.idclasse %>">
               <div class="form-group">
                 <label for="nom">Nom de la classe</label>
-                <input type="text" id="nom" name="nom" class="form-control" placeholder="Nom de la classe..." value="<%= classe.nomclasse %>"><br/>
-              </div><br/><hr><b>Moyenne générale :</b> <i>13.42</i>
+                <input type="text" id="nom" name="nomclasse" class="form-control" placeholder="Nom de la classe..." value="<%= classe.nomclasse %>"><br/>
+              </div>
+              <hr>
+              <div class="form-group">
+                <label for="profprincipal">Professeur principal</label>
+                <select class="form-control" name="profprincipal" id="profprincipal">
+                  <% if(classe.profprincipal == 0)  {%>
+                    <option disabled selected value="0"> -- Selectionnez un prof principal -- </option>
+                  <% } %>
+                  <% for(var i=0; i < profs.length; i++) { %>
+                    <option value="<%= profs[i].id %>" <% if(classe.profprincipal == profs[i].id) {%> selected="selected" <%} %>><%= profs[i].nom + " " + profs[i].prenom %></option>
+                  <% } %>
+                </select>
+              </div>
+              <br/><hr><b>Moyenne générale :</b> <i>13.42</i><br/><hr>
+              <center><button class="btn btn-success">Enregistrer les modifications</button></center>
+            </form>
             </div>
           </div><hr>
       </div>
