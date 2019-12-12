@@ -6,6 +6,7 @@ AsimovGestion est un logiciel directement dans le navigateur qui permet de facil
 
 Vous pouvez installer AsimovGestion directement depuis votre terminal, sont nécessaires à son fonctionnement : 
    - Un serveur MySQL **allumé**
+      - Note : le type de serveur requis est MariaDB, en version 10.3.\*, des erreurs peuvent survenir en cas de nous respect de cette condition.
    - Le gestionnaire de paquets **NPM**
    - **Node.js**
 
