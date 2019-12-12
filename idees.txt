@@ -1,0 +1,3 @@
+http://timetablejs.grible.co/ - ajouter des emplois du temps
+
+offrir la possibilité de gérer les salles : inscrire toutes les salles de classe disponibles dans l'établissement, gestion mise en relation avec les emplois du temps des différentes classes, objectif : savoir en permanence qui est où etc. Potentiellement, y intégrer par la suite un système de mapage de l'établissement pour afficher les salles en temps réel, fournir ensuite une livemap.

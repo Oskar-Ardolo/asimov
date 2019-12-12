@@ -1,0 +1,118 @@
+<% include ../include/header.ejs %>
+
+<div id="content-wrapper">
+
+<div class="container-fluid">
+    <!-- CODE HERE -->
+     <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="/">Accueil</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="/admin">Admin</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="/admin/classes">Gestion des classes</a>
+      </li>
+      <li class="breadcrumb-item active"><%= classe.nomclasse %></li>
+    </ol>
+
+    <div class="card mb-3">
+      <div class="card-header">
+        <i class="fas fa-users"></i>
+        Gestion des classes : <i>Edition de la classe</i></div>
+      <div class="card-body">
+          <div class="row">
+            <div class="col-lg-3">
+              <img src="/img/classe.png" alt="<%= classe.nomclasse %>" width=300 />
+            </div>
+            <div class="col-lg-9">
+              <form method="post" action="/admin/classes/edit/editclasse">
+                <input type="hidden" name="idclasse" value="<%= classe.idclasse %>">
+              <div class="form-group">
+                <label for="nom">Nom de la classe</label>
+                <input type="text" id="nom" name="nomclasse" class="form-control" placeholder="Nom de la classe..." value="<%= classe.nomclasse %>"><br/>
+              </div>
+              <hr>
+              <div class="form-group">
+                <label for="profprincipal">Professeur principal</label>
+                <select class="form-control" name="profprincipal" id="profprincipal">
+                  <% if(classe.profprincipal == 0)  {%>
+                    <option disabled selected value="0"> -- Selectionnez un prof principal -- </option>
+                  <% } %>
+                  <% for(var i=0; i < profs.length; i++) { %>
+                    <option value="<%= profs[i].id %>" <% if(classe.profprincipal == profs[i].id) {%> selected="selected" <%} %>><%= profs[i].nom + " " + profs[i].prenom %></option>
+                  <% } %>
+                </select>
+              </div>
+              <br/><hr><b>Moyenne générale :</b> <i>13.42</i><br/><hr>
+              <center><button class="btn btn-success">Enregistrer les modifications</button></center>
+            </form>
+            </div>
+          </div><hr>
+      </div>
+      <div class="card-footer small text-muted">Mis à jour : il y a quelques secondes...</div>
+    </div>
+    <div class="card mb-3">
+      <div class="card-header">
+        <i class="fas fa-users"></i>
+        Gestion des élèves</div>
+      <div class="card-body"> 
+        <div class="table-responsive">
+          <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Pseudonyme</th>
+                <th>Moyenne générale</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tfoot>
+              <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Pseudonyme</th>
+                <th>Moyenne générale</th>
+                <th>Actions</th>
+              </tr>
+            </tfoot>
+            <tbody>
+      <% for(var i=0; i < users.length; i++) { %>
+              <tr>
+                <td><%= users[i].nom %></td>
+                <td><%= users[i].prenom %></td>
+                <td><%= users[i].pseudo %></td>
+                <td>12/20</td>
+                <td><button style="width:49%;" type="button" class="btn btn-primary">Editer</button> <button style="width:49%;" type="button" class="btn btn-danger">Supprimer</button></td>
+              </tr>
+             <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-footer small text-muted">Mis à jour : il y a quelques secondes...</div>
+    </div>
+    <hr>
+    <div class="card mb-3">
+      <div class="card-header">
+        <i class="fas fa-user"></i>
+        Ajouter un élève à la classe</div>
+      <div class="card-body">
+        <form method="post" action="/admin/classes/edit/adduser">
+      <div class="form-group">
+        <label for="nom">Nom</label>
+        <input type="text" id="nom" name="nom" class="form-control" placeholder="Nom..."><br/>
+        <label for="prenom">Prénom</label>
+        <input type="text" id="prenom" name="prenom" class="form-control" placeholder="Prénom...">
+      </div><hr>
+      <input type="hidden" name="classe" value="<%= classe.idclasse %>">
+      <button type="submit" class="btn btn-primary">Ajouter l'élève à la classe</button>
+    </form>
+      </div>
+    </div>
+
+</div>
+<!-- /.container-fluid -->
+<% include ../include/footer.ejs %>

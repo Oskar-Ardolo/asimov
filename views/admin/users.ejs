@@ -71,15 +71,15 @@
 		    <label for="classe">Sélectionner la classe de l'élève</label>
 		    <select class="form-control" name="classe" id="classe">
 		   		<% for(var i=0; i < classe.length; i++) { %>
-			    <option value=<%= classe[i].idclasse %>  ><%= classe[i].nomclasse %></option>
+			    <option value="<%= classe[i].idclasse %>"  ><%= classe[i].nomclasse %></option>
 			    <% } %>
 		    </select>
 		  </div><hr>
 		  <button type="submit" class="btn btn-primary">Ajouter l'élève à la base de données</button>
 		</form>
       </div>
-      
     </div>
+    
 
 </div>
 <!-- /.container-fluid -->

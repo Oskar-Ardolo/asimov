@@ -151,6 +151,7 @@ exports.getProfs = (req, res, db) => {
 	if(req.session.rang == 10) {
 		let DBModel = new DB(db);
 		(async function() {
+			let users = await DBModel.getUsers();
 			let profs = await DBModel.getProfs();
 			res.render("admin/profs.ejs", {data : profs});
 		})()
@@ -216,6 +217,57 @@ exports.matiereToProf = (req, res, db) => {
 	}
 }
 
+exports.addUserToClasse = (req, res, db, crypto) => {
+	if(req.session.rang >= 10) {
+	    let nom = req.body.nom.toUpperCase();
+	    let prenom = cap(req.body.prenom.toLowerCase());
+	    let classe = req.body.classe;
+	    let pseudo = nom.substr(0, 7).toLowerCase().replace(" ", "").replace("-", "") + prenom.substr(0,2).toLowerCase().replace(" ", "").replace("-", "");
+	    let password = crypto.createHmac('sha256', nom + "-" + prenom)
+	               .update('jojofags suck')
+	               .digest('hex');
+	    let rang = 1
+	    let titre = "Élève";
+
+	    let userInputs = [nom, prenom, pseudo, password, rang, titre];
+
+	    let DBModel = new DB(db);
+		(async function() {
+			await DBModel.addUser(userInputs, classe);
+			res.redirect("/admin/classes/edit/"+classe);
+		})()
+
+
+	} else {
+		req.session.login = false;
+		req.session.rang = 0;
+		res.redirect("/home")
+	}
+}
+
+exports.doModifClasse = (req, res, db) => {
+	if(req.session.rang >= 10) {
+		let profprincipal = req.body.profprincipal;
+		let nomclasse = req.body.nomclasse;
+		let classeToEdit = req.body.idclasse;
+
+
+
+	    let DBModel = new DB(db);
+		(async function() {
+			await DBModel.editClasse(classeToEdit, nomclasse, profprincipal);
+			res.redirect("/admin/classes/edit/"+classeToEdit);
+		})()
+
+
+	} else {
+		req.session.login = false;
+		req.session.rang = 0;
+		res.redirect("/home")
+	}
+}
+
+
 
 // GESTION DES CLASSES
 exports.getClasses = (req, res, db) => {
@@ -227,6 +279,22 @@ exports.getClasses = (req, res, db) => {
 			res.render("admin/classes.ejs", {data : classes});
 		})()	
 
+	} else {
+		req.session.login = false;
+		req.session.rang = 0;
+		res.redirect("/admin")
+	}
+}
+
+exports.editClasse = (req, res, db) => {
+	if(req.session.rang == 10) {
+		let DBModel = new DB(db);
+	    (async function() {
+			let classe = await DBModel.getClasseById(req.params.idclasse);
+			let users = await DBModel.getUsersFromClasse(req.params.idclasse);
+			let profs = await DBModel.getProfs();
+			res.render("admin/editclasse.ejs", {users : users, classe : classe[0], profs : profs} );
+		})()	
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
