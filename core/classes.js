@@ -10,7 +10,7 @@ class DB {
   		// USERS
   	async getUsers() {
   		let query = "SELECT asimov_users.id, asimov_users.nom, asimov_users.prenom, asimov_users.pseudo, asimov_classes.nomclasse FROM asimov_users, asimov_classes, asimov_dansclasse WHERE rang = '1' AND asimov_users.id = asimov_dansclasse.iduser AND asimov_dansclasse.idclasse = asimov_classes.idclasse ORDER BY nom ASC"
-		return this.doQuery(query)
+		  return this.doQuery(query)
   	}
   	async getUserByPseudo(pseudo) {
   		let query = "SELECT id, nom, prenom, pseudo FROM asimov_users WHERE asimov_users.pseudo = '"+ pseudo +"'"
