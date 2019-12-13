@@ -33,7 +33,6 @@ db.connect(function(err) {
     /* GLOBAT GET ROUTES */
 	app.get("/", (req, res) => {
 		asimov.doLogStuff(req, res);
-		
 	});
 	app.get("/home", (req, res) => {
 		asimov.doLogStuff(req, res);
