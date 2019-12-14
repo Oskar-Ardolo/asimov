@@ -33,13 +33,13 @@ db.connect(function(err) {
     /* GLOBAT GET ROUTES */
 	app.get("/", (req, res) => {
 		asimov.doLogStuff(req, res);
-		
+
 	});
 	app.get("/home", (req, res) => {
 		asimov.doLogStuff(req, res);
 	});
 	app.get("/faq", (req, res) => {
-		res.render("faq.ejs");	
+		res.render("faq.ejs");
 	});
 	app.get("/login", (req, res) => {
 		asimov.doLogStuff(req, res);
@@ -83,6 +83,9 @@ db.connect(function(err) {
 	app.post("/admin/users/add", (req, res) => {
 		asimov.addUser(req, res, db, crypto);
 	});
+  app.post("/admin/user/delete", (req, res) => {
+    asimov.deleteUser(req, res, db);
+  });
 	app.post("/admin/profs/add", (req, res) => {
 		asimov.addProf(req, res, db, crypto);
 	});
@@ -98,25 +101,17 @@ db.connect(function(err) {
 	app.post("/admin/classes/edit/editclasse", (req, res) => {
 		asimov.doModifClasse(req, res, db);
 	});
-	
+
 	app.post("/admin/matieres/add", (req, res) => {
 		asimov.addMatiere(req, res, db);
 	});
 
-	/* END ADMIN ROUTES */ 
+	/* END ADMIN ROUTES */
 
 
 	/* GLOBAL POST ROUTES */
 	app.post("/login", (req, res) => {
 		asimov.login(req, res, db, crypto)
-	});
-
-
-
-
-	// 404, PAS DE ROUTES APRES CA
-	app.get('*', function(req, res){
-	  res.render("404.ejs");
 	});
 
 });

@@ -43,7 +43,14 @@
                 <td><%= data[i].nom %></td>
                 <td><%= data[i].prenom %></td>
                 <td><%= data[i].pseudo %></td>
-                <td><a href="/admin/profs/edit/<%= data[i].pseudo %>"><button style="width:49%;" type="button" class="btn btn-primary">Configurer</button> <button style="width:49%;" type="button" class="btn btn-danger">Supprimer</button></a></td>
+                <td>
+                  <form style="width:100%;padding:0;margin:0;" action="/admin/user/delete" method="post">
+                    <button style="width:49%;" type="button" class="btn btn-primary" onclick="location.href='/admin/profs/edit/<%= data[i].pseudo %>';" value="edit-prof">Editer</button>
+                    <input type="hidden" name="delete" value="<%= data[i].id %>">
+                    <button id="deleteProf" style="width:49%;" type="submit" class="btn btn-danger">Supprimer</button>
+                  </form>
+                  <!--<a href="/admin/profs/edit/<%= data[i].pseudo %>"><button style="width:49%;" type="button" class="btn btn-primary">Configurer</button> <button style="width:49%;" type="button" class="btn btn-danger">Supprimer</button></a>-->
+                </td>
               </tr>
              <% } %>
             </tbody>
@@ -67,7 +74,7 @@
     		  <button type="submit" class="btn btn-primary">Ajouter le professeur à la base de données</button>
     		</form>
       </div>
-      
+
     </div>
 
 </div>

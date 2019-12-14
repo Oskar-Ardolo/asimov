@@ -1,7 +1,7 @@
 /*
 ======================
 MISC FUNCTIONS
-====================== 
+======================
 
 Liste fonctions :
 
@@ -23,18 +23,19 @@ const cap = (s) => {
 /*
 ======================
 MODULES GENERAUX
-====================== 
+======================
 
 Liste modules :
 
-getAdminInfo : 
-doLogStuff : 
+getAdminInfo :
+doLogStuff :
 login :
 
 */
 
 
 exports.doLogStuff = (req, res) => {
+	console.log(req.session.login)
 	if(req.session.login) {
 		res.render("index.ejs");
 	} else {
@@ -48,7 +49,6 @@ exports.login = (req, res, db, crypto) => {
 	let password = crypto.createHmac('sha256', req.body.password)
 	               .update('jojofags suck')
 	               .digest('hex');
-
 	let DBModel = new DB(db);
 	(async function() {
 		let userLogin = await DBModel.login(pseudo, password);
@@ -68,14 +68,14 @@ exports.login = (req, res, db, crypto) => {
 
 
 
-/* 
+/*
 ======================
 MODULES ADMINISTRATION
-====================== 
+======================
 
 Liste modules :
 
-getAdminInfo : 
+getAdminInfo :
 getUsers : affiche admin/users.ejs avec la liste des élèves
 
 
@@ -144,7 +144,26 @@ exports.addUser = (req, res, db, crypto) => {
 	}
 }
 
-
+exports.deleteUser = (req, res, db ) => {
+  if(req.session.rang >= 10) {
+    let DBModel = new DB(db);
+    (async function() {
+      let user = await req.body.delete;
+      if (user != undefined) {
+        await DBModel.deleteUser(user) // DELETE USER
+        if(user < 5) {
+        res.redirect('/admin/users')
+        } else {
+          res.redirect('/admin/profs')
+        }
+      } else { res.redirect('/admin/users') }
+    })()
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/home")
+  }
+}
 
 // GESTION DES UTILISATEURS (PROFESSEURS + ADMINISTRATION)
 exports.getProfs = (req, res, db) => {
@@ -160,7 +179,7 @@ exports.getProfs = (req, res, db) => {
 		req.session.rang = 0;
 		res.redirect("/admin")
 	}
-	
+
 }
 
 exports.addProf = (req, res, db, crypto) => {
@@ -177,7 +196,7 @@ exports.addProf = (req, res, db, crypto) => {
 	    (async function() {
 			let insertedProf = await DBModel.addProf([nom, prenom, pseudo, password, rang, titre]);
 			res.redirect("/admin/profs")
-		})()	    
+		})()
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
@@ -277,7 +296,7 @@ exports.getClasses = (req, res, db) => {
 	    (async function() {
 			let classes = await DBModel.getClassesAndUserCount();
 			res.render("admin/classes.ejs", {data : classes});
-		})()	
+		})()
 
 	} else {
 		req.session.login = false;
@@ -294,7 +313,7 @@ exports.editClasse = (req, res, db) => {
 			let users = await DBModel.getUsersFromClasse(req.params.idclasse);
 			let profs = await DBModel.getProfs();
 			res.render("admin/editclasse.ejs", {users : users, classe : classe[0], profs : profs} );
-		})()	
+		})()
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
@@ -308,7 +327,7 @@ exports.addClasse = (req, res, db) => {
 	    (async function() {
 			let classes = await DBModel.addClasse(req.body.nomclasse);
 			res.redirect("/admin/classes");
-		})()	
+		})()
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
@@ -325,7 +344,7 @@ exports.getMatieres = (req, res, db) => {
 		(async function() {
 			let matieres = await DBModel.getMatieresAndProfCount();
 			res.render("admin/matieres.ejs", {data : matieres});
-		})()	
+		})()
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
@@ -339,12 +358,10 @@ exports.addMatiere = (req, res, db) => {
 	    (async function() {
 			let matieres = await DBModel.addMatiere(req.body.nommatiere);
 			res.redirect("/admin/matieres");
-		})()	
+		})()
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
 		res.redirect("/admin")
 	}
 }
-
-
