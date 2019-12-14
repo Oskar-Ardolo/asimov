@@ -35,7 +35,6 @@ login :
 
 
 exports.doLogStuff = (req, res) => {
-	console.log(req.session.login)
 	if(req.session.login) {
 		res.render("index.ejs");
 	} else {
@@ -121,20 +120,22 @@ exports.addUser = (req, res, db, crypto) => {
 	    let nom = req.body.nom.toUpperCase();
 	    let prenom = cap(req.body.prenom.toLowerCase());
 	    let classe = req.body.classe;
-	    let pseudo = nom.substr(0, 7).toLowerCase().replace(" ", "").replace("-", "") + prenom.substr(0,2).toLowerCase().replace(" ", "").replace("-", "");
-	    let password = crypto.createHmac('sha256', nom + "-" + prenom)
-	               .update('jojofags suck')
-	               .digest('hex');
-	    let rang = 1
-	    let titre = "Élève";
+      if (nom != '' & prenom != '' & classe != undefined) {
+  	    let pseudo = nom.substr(0, 7).toLowerCase().replace(" ", "").replace("-", "") + prenom.substr(0,2).toLowerCase().replace(" ", "").replace("-", "");
+  	    let password = crypto.createHmac('sha256', nom + "-" + prenom)
+  	               .update('jojofags suck')
+  	               .digest('hex');
+  	    let rang = 1
+  	    let titre = "Élève";
 
-	    let userInputs = [nom, prenom, pseudo, password, rang, titre];
+  	    let userInputs = [nom, prenom, pseudo, password, rang, titre];
 
-	    let DBModel = new DB(db);
-		(async function() {
-			await DBModel.addUser(userInputs, classe);
-			res.redirect("/admin/users");
-		})()
+  	    let DBModel = new DB(db);
+  		(async function() {
+  			await DBModel.addUser(userInputs, classe);
+  			res.redirect("/admin/users");
+  		})()
+    } else { res.redirect("/admin/users"); }
 
 
 	} else {
@@ -149,9 +150,10 @@ exports.deleteUser = (req, res, db ) => {
     let DBModel = new DB(db);
     (async function() {
       let user = await req.body.delete;
+      let rangUser = await DBModel.getRangUserWithId(user);
       if (user != undefined) {
         await DBModel.deleteUser(user) // DELETE USER
-        if(user < 5) {
+        if(rangUser[0].rang < 5) {
         res.redirect('/admin/users')
         } else {
           res.redirect('/admin/profs')
@@ -161,7 +163,7 @@ exports.deleteUser = (req, res, db ) => {
   } else {
     req.session.login = false;
     req.session.rang = 0;
-    res.redirect("/home")
+    res.redirect("/home");
   }
 }
 
@@ -177,7 +179,7 @@ exports.getProfs = (req, res, db) => {
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
-		res.redirect("/admin")
+		res.redirect("/admin");
 	}
 
 }

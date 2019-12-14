@@ -24,6 +24,10 @@ class DB {
       let query = "SELECT asimov_users.* FROM asimov_users, asimov_dansclasse WHERE asimov_dansclasse.iduser = asimov_users.id AND asimov_dansclasse.idclasse = '"+ idclasse +"' ORDER BY asimov_users.nom"
       return this.doQuery(query)
     }
+    async getRangUserWithId(user) {
+      let query = "SELECT rang FROM asimov_users WHERE asimov_users.id = '"+ user +"'"
+      return this.doQuery(query)
+    }
 
   		// CLASSES
   	async getClasses() {

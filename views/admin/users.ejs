@@ -69,13 +69,13 @@
         <form method="post" action="/admin/users/add">
 		  <div class="form-group">
 		    <label for="nom">Nom</label>
-		    <input type="text" id="nom" name="nom" class="form-control" placeholder="Nom..."><br/>
+		    <input type="text" id="nom" name="nom" class="form-control" placeholder="Nom..." required><br/>
 		    <label for="prenom">Prénom</label>
-		    <input type="text" id="prenom" name="prenom" class="form-control" placeholder="Prénom...">
+		    <input type="text" id="prenom" name="prenom" class="form-control" placeholder="Prénom..." required>
 		  </div><hr>
 		  <div class="form-group">
 		    <label for="classe">Sélectionner la classe de l'élève</label>
-		    <select class="form-control" name="classe" id="classe">
+		    <select class="form-control" name="classe" id="classe" required>
 		   		<% for(var i=0; i < classe.length; i++) { %>
 			    <option value="<%= classe[i].idclasse %>"  ><%= classe[i].nomclasse %></option>
 			    <% } %>
