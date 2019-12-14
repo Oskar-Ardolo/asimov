@@ -117,8 +117,8 @@ exports.getUsers = (req, res, db) => {
 
 exports.addUser = (req, res, db, crypto) => {
 	if(req.session.rang >= 5) {
-	    let nom = req.body.nom.toUpperCase();
-	    let prenom = cap(req.body.prenom.toLowerCase());
+	    let nom = (req.body.nom.toUpperCase()).replace(/ /g, "");
+	    let prenom = (cap(req.body.prenom.toLowerCase())).replace(/ /g, "");
 	    let classe = req.body.classe;
       if (nom != '' & prenom != '' & classe != undefined) {
   	    let pseudo = nom.substr(0, 7).toLowerCase().replace(" ", "").replace("-", "") + prenom.substr(0,2).toLowerCase().replace(" ", "").replace("-", "");
@@ -150,9 +150,9 @@ exports.deleteUser = (req, res, db ) => {
     let DBModel = new DB(db);
     (async function() {
       let user = await req.body.delete;
-      let rangUser = await DBModel.getRangUserWithId(user);
+      let rangUser = await DBModel.getRangUserWithId(user); // GET RANG OF USER TO REDIRECT TO THE CORRECT PAGE
       if (user != undefined) {
-        await DBModel.deleteUser(user) // DELETE USER
+        await DBModel.deleteUser(user) // DELETE USERS AND PROFS
         if(rangUser[0].rang < 5) {
         res.redirect('/admin/users')
         } else {
@@ -186,19 +186,21 @@ exports.getProfs = (req, res, db) => {
 
 exports.addProf = (req, res, db, crypto) => {
 	if(req.session.rang == 10) {
-	    let nom = req.body.nom.toUpperCase();
-	    let prenom = cap(req.body.prenom.toLowerCase());
-	    let pseudo = nom.substr(0, 7).toLowerCase().replace(" ", "").replace("-", "") + prenom.substr(0,2).toLowerCase().replace(" ", "").replace("-", "");
-	    let password = crypto.createHmac('sha256', nom + "-" + prenom)
-	               .update('jojofags suck')
-	               .digest('hex');
-	    let rang = 5
-	    let titre = "Professeur";
-	    let DBModel = new DB(db);
-	    (async function() {
-			let insertedProf = await DBModel.addProf([nom, prenom, pseudo, password, rang, titre]);
-			res.redirect("/admin/profs")
-		})()
+	    let nom = (req.body.nom.toUpperCase()).replace(/ /g, "");
+	    let prenom = (cap(req.body.prenom.toLowerCase())).replace(/ /g, "");
+      if (nom != '' & prenom != '') {
+  	    let pseudo = nom.substr(0, 7).toLowerCase().replace(" ", "").replace("-", "") + prenom.substr(0,2).toLowerCase().replace(" ", "").replace("-", "");
+  	    let password = crypto.createHmac('sha256', nom + "-" + prenom)
+  	               .update('jojofags suck')
+  	               .digest('hex');
+  	    let rang = 5
+  	    let titre = "Professeur";
+  	    let DBModel = new DB(db);
+  	    (async function() {
+  			let insertedProf = await DBModel.addProf([nom, prenom, pseudo, password, rang, titre]);
+  			res.redirect("/admin/profs")
+  		})()
+    } else { res.redirect("/admin/profs") }
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
