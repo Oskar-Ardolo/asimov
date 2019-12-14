@@ -388,3 +388,20 @@ exports.addMatiere = (req, res, db) => {
 		res.redirect("/admin")
 	}
 }
+
+exports.deleteMatiere = (req, res, db) => {
+  if(req.session.rang >= 10) {
+    let DBModel = new DB(db);
+    (async function() {
+      let matiere = await req.body.delete;
+      if (matiere != undefined) {
+        await DBModel.deleteMatiere(matiere)
+        res.redirect('/admin/matieres')
+      } else { res.redirect('/admin/matieres') }
+    })()
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/admin")
+  }
+}

@@ -56,7 +56,7 @@ class DB {
   		return this.doQuery(query)
   	}
   	async getMatieresAndProfCount() {
-  		let query = "SELECT nommatiere, count(idprof) as effectif FROM asimov_matieres LEFT JOIN asimov_enseignematiere ON asimov_matieres.id = asimov_enseignematiere.idmatiere GROUP BY nommatiere";
+  		let query = "SELECT id, nommatiere, count(idprof) as effectif FROM asimov_matieres LEFT JOIN asimov_enseignematiere ON asimov_matieres.id = asimov_enseignematiere.idmatiere GROUP BY nommatiere";
   		return this.doQuery(query)
   	}
     async getMatieresForOneProf(id) {
@@ -134,9 +134,17 @@ class DB {
 
     async deleteClasse(classe) {
       let query = "DELETE FROM asimov_classes WHERE idclasse='"+classe+"'"
-      console.log(query);
       return this.doQuery(query)
     }
+
+    //MATIERE
+
+    async deleteMatiere(matiere) {
+      let query = "DELETE FROM asimov_matieres WHERE id='"+matiere+"'"
+      return this.doQuery(query)
+    }
+
+
   	// VERIFICATIONS
   	async login(pseudo, password) {
   		let query = "SELECT * FROM asimov_users WHERE pseudo = '" + pseudo + "' AND password = '" + password + "'";

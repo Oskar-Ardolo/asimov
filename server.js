@@ -62,14 +62,12 @@ db.connect(function(err) {
 	app.get("/admin/users", (req, res) => {
 		asimov.getUsers(req, res, db);
 	});
-
 	app.get("/admin/profs", (req, res) => {
 		asimov.getProfs(req, res, db);
 	});
 	app.get("/admin/profs/edit/:pseudo", (req, res) => {
 		asimov.editProfView(req, res, db);
 	});
-
 	app.get("/admin/classes", (req, res) => {
 		asimov.getClasses(req, res, db);
 	});
@@ -107,6 +105,10 @@ db.connect(function(err) {
 	app.post("/admin/matieres/add", (req, res) => {
 		asimov.addMatiere(req, res, db);
 	});
+
+  app.post("/admin/matieres/delete", (req, res) => {
+    asimov.deleteMatiere(req, res, db);
+  });
 
 	/* END ADMIN ROUTES */
 

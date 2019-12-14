@@ -40,7 +40,14 @@
               <tr>
                 <td><%= data[i].nommatiere %></td>
                 <td><%= data[i].effectif %></td>
-                <td><button style="width:49%;" type="button" class="btn btn-primary">Configurer</button> <button style="width:49%;" type="button" class="btn btn-danger">Supprimer</button></td>
+                <td>
+                  <form style="width:100%;padding:0;margin:0;" action="/admin/matieres/delete" method="post">
+                    <button style="width:49%;" type="button" class="btn btn-primary" onclick="location.href='/admin/classes/edit/<%= data[i].idclasse %>';" value="edit-prof">Editer</button>
+                    <input type="hidden" name="delete" value="<%= data[i].id %>">
+                    <button id="deleteProf" style="width:49%;" type="submit" class="btn btn-danger">Supprimer</button>
+                  </form>
+                  <!--<button style="width:49%;" type="button" class="btn btn-primary">Configurer</button> <button style="width:49%;" type="button" class="btn btn-danger">Supprimer</button>-->
+                </td>
               </tr>
              <% } %>
             </tbody>
@@ -62,7 +69,7 @@
 		  <button type="submit" class="btn btn-primary">Ajouter la matière à la base de données</button>
 		</form>
       </div>
-      
+
     </div>
 
 
