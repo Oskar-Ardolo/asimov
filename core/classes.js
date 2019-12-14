@@ -120,7 +120,7 @@ class DB {
       return this.doQuery(query)
     }
 
-// En cours de modification
+
 
    //SUPPRESSION
 
@@ -130,6 +130,13 @@ class DB {
       return this.doQuery(query)
     }
 
+    //CLASSES
+
+    async deleteClasse(classe) {
+      let query = "DELETE FROM asimov_classes WHERE idclasse='"+classe+"'"
+      console.log(query);
+      return this.doQuery(query)
+    }
   	// VERIFICATIONS
   	async login(pseudo, password) {
   		let query = "SELECT * FROM asimov_users WHERE pseudo = '" + pseudo + "' AND password = '" + password + "'";

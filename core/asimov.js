@@ -328,10 +328,13 @@ exports.editClasse = (req, res, db) => {
 exports.addClasse = (req, res, db) => {
 	if(req.session.rang == 10) {
 		let DBModel = new DB(db);
-	    (async function() {
-			let classes = await DBModel.addClasse(req.body.nomclasse);
-			res.redirect("/admin/classes");
-		})()
+    let classenom = (req.body.nomclasse).replace(/ /g, "");
+    if(classenom != '') {
+  	    (async function() {
+  			let classes = await DBModel.addClasse(classenom);
+  			res.redirect("/admin/classes");
+  		})()
+    } else { res.redirect("/admin/classes"); }
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
@@ -339,6 +342,22 @@ exports.addClasse = (req, res, db) => {
 	}
 }
 
+exports.deleteClasse = (req, res, db) => {
+  if(req.session.rang >= 10) {
+    let DBModel = new DB(db);
+    (async function() {
+      let classe = await req.body.delete;
+      if (classe != undefined) {
+        await DBModel.deleteClasse(classe)
+        res.redirect('/admin/classes')
+      } else { res.redirect('/admin/classes') }
+    })()
+  } else {
+		req.session.login = false;
+		req.session.rang = 0;
+		res.redirect("/admin")
+	}
+}
 
 
 // GESTION DES MATIERES

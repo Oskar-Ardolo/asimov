@@ -76,7 +76,9 @@ db.connect(function(err) {
 	app.get("/admin/classes/edit/:idclasse", (req, res) => {
 		asimov.editClasse(req, res, db);
 	});
-
+  app.post("/admin/classes/delete", (req, res) => {
+    asimov.deleteClasse(req, res, db);
+  });
 	app.get("/admin/matieres", (req, res) => {
 		asimov.getMatieres(req, res, db);
 	});
