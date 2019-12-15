@@ -119,9 +119,9 @@ db.connect(function(err) {
 	});
 
   // 404, PAS DE ROUTES APRES CA
-app.get('*', function(req, res){
-  res.render("404.ejs");
-});
+  app.get('*', function(req, res){
+    res.render("404.ejs");
+  });
 
 });
 
