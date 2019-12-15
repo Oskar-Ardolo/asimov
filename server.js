@@ -33,12 +33,16 @@ db.connect(function(err) {
     /* GLOBAT GET ROUTES */
 	app.get("/", (req, res) => {
 		asimov.doLogStuff(req, res);
+<<<<<<< HEAD
+=======
+
+>>>>>>> Edit-and-DELETE-user
 	});
 	app.get("/home", (req, res) => {
 		asimov.doLogStuff(req, res);
 	});
 	app.get("/faq", (req, res) => {
-		res.render("faq.ejs");	
+		res.render("faq.ejs");
 	});
 	app.get("/login", (req, res) => {
 		asimov.doLogStuff(req, res);
@@ -61,27 +65,30 @@ db.connect(function(err) {
 	app.get("/admin/users", (req, res) => {
 		asimov.getUsers(req, res, db);
 	});
-
 	app.get("/admin/profs", (req, res) => {
 		asimov.getProfs(req, res, db);
 	});
 	app.get("/admin/profs/edit/:pseudo", (req, res) => {
 		asimov.editProfView(req, res, db);
 	});
-
 	app.get("/admin/classes", (req, res) => {
 		asimov.getClasses(req, res, db);
 	});
 	app.get("/admin/classes/edit/:idclasse", (req, res) => {
 		asimov.editClasse(req, res, db);
 	});
-
+  app.post("/admin/classes/delete", (req, res) => {
+    asimov.deleteClasse(req, res, db);
+  });
 	app.get("/admin/matieres", (req, res) => {
 		asimov.getMatieres(req, res, db);
 	});
 	app.post("/admin/users/add", (req, res) => {
 		asimov.addUser(req, res, db, crypto);
 	});
+  app.post("/admin/user/delete", (req, res) => {
+    asimov.deleteUser(req, res, db);
+  });
 	app.post("/admin/profs/add", (req, res) => {
 		asimov.addProf(req, res, db, crypto);
 	});
@@ -97,12 +104,16 @@ db.connect(function(err) {
 	app.post("/admin/classes/edit/editclasse", (req, res) => {
 		asimov.doModifClasse(req, res, db);
 	});
-	
+
 	app.post("/admin/matieres/add", (req, res) => {
 		asimov.addMatiere(req, res, db);
 	});
 
-	/* END ADMIN ROUTES */ 
+  app.post("/admin/matieres/delete", (req, res) => {
+    asimov.deleteMatiere(req, res, db);
+  });
+
+	/* END ADMIN ROUTES */
 
 
 	/* GLOBAL POST ROUTES */
@@ -110,13 +121,10 @@ db.connect(function(err) {
 		asimov.login(req, res, db, crypto)
 	});
 
-
-
-
-	// 404, PAS DE ROUTES APRES CA
-	app.get('*', function(req, res){
-	  res.render("404.ejs");
-	});
+  // 404, PAS DE ROUTES APRES CA
+  app.get('*', function(req, res){
+    res.render("404.ejs");
+  });
 
 });
 
