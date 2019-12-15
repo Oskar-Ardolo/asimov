@@ -46,7 +46,13 @@
                 <td><%= data[i].prenom %></td>
                 <td><%= data[i].nomclasse %></td>
                 <td><%= data[i].pseudo %></td>
-                <td><button style="width:49%;" type="button" class="btn btn-primary">Editer</button> <button style="width:49%;" type="button" class="btn btn-danger">Supprimer</button></td>
+                <td>
+                  <form style="width:100%;padding:0;margin:0;" action="/admin/user/delete" method="post">
+                    <button style="width:49%;" type="button" class="btn btn-primary" onclick="location.href='/admin/users/<%= data[i].id %>';" value="edit-user">Editer</button>
+                    <input type="hidden" name="delete" value="<%= data[i].id %>">
+                    <button id="deleteUser" style="width:49%;" type="submit" class="btn btn-danger">Supprimer</button>
+                  </form>
+                </td>
               </tr>
              <% } %>
             </tbody>
@@ -63,13 +69,13 @@
         <form method="post" action="/admin/users/add">
 		  <div class="form-group">
 		    <label for="nom">Nom</label>
-		    <input type="text" id="nom" name="nom" class="form-control" placeholder="Nom..."><br/>
+		    <input type="text" id="nom" name="nom" class="form-control" placeholder="Nom..." required><br/>
 		    <label for="prenom">Prénom</label>
-		    <input type="text" id="prenom" name="prenom" class="form-control" placeholder="Prénom...">
+		    <input type="text" id="prenom" name="prenom" class="form-control" placeholder="Prénom..." required>
 		  </div><hr>
 		  <div class="form-group">
 		    <label for="classe">Sélectionner la classe de l'élève</label>
-		    <select class="form-control" name="classe" id="classe">
+		    <select class="form-control" name="classe" id="classe" required>
 		   		<% for(var i=0; i < classe.length; i++) { %>
 			    <option value="<%= classe[i].idclasse %>"  ><%= classe[i].nomclasse %></option>
 			    <% } %>
@@ -79,7 +85,7 @@
 		</form>
       </div>
     </div>
-    
+
 
 </div>
 <!-- /.container-fluid -->

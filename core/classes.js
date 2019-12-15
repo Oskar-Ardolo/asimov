@@ -10,7 +10,7 @@ class DB {
   		// USERS
   	async getUsers() {
   		let query = "SELECT asimov_users.id, asimov_users.nom, asimov_users.prenom, asimov_users.pseudo, asimov_classes.nomclasse FROM asimov_users, asimov_classes, asimov_dansclasse WHERE rang = '1' AND asimov_users.id = asimov_dansclasse.iduser AND asimov_dansclasse.idclasse = asimov_classes.idclasse ORDER BY nom ASC"
-		  return this.doQuery(query)
+		return this.doQuery(query)
   	}
   	async getUserByPseudo(pseudo) {
   		let query = "SELECT id, nom, prenom, pseudo FROM asimov_users WHERE asimov_users.pseudo = '"+ pseudo +"'"
@@ -22,6 +22,10 @@ class DB {
     }
     async getUsersFromClasse(idclasse) {
       let query = "SELECT asimov_users.* FROM asimov_users, asimov_dansclasse WHERE asimov_dansclasse.iduser = asimov_users.id AND asimov_dansclasse.idclasse = '"+ idclasse +"' ORDER BY asimov_users.nom"
+      return this.doQuery(query)
+    }
+    async getRangUserWithId(user) {
+      let query = "SELECT rang FROM asimov_users WHERE asimov_users.id = '"+ user +"'"
       return this.doQuery(query)
     }
 
@@ -52,7 +56,7 @@ class DB {
   		return this.doQuery(query)
   	}
   	async getMatieresAndProfCount() {
-  		let query = "SELECT nommatiere, count(idprof) as effectif FROM asimov_matieres LEFT JOIN asimov_enseignematiere ON asimov_matieres.id = asimov_enseignematiere.idmatiere GROUP BY nommatiere";
+  		let query = "SELECT id, nommatiere, count(idprof) as effectif FROM asimov_matieres LEFT JOIN asimov_enseignematiere ON asimov_matieres.id = asimov_enseignematiere.idmatiere GROUP BY nommatiere";
   		return this.doQuery(query)
   	}
     async getMatieresForOneProf(id) {
@@ -118,6 +122,29 @@ class DB {
 
 
 
+   //SUPPRESSION
+
+    //USERS
+    async deleteUser(user) {
+      let query = "DELETE FROM asimov_users WHERE id='"+user+"'"
+      return this.doQuery(query)
+    }
+
+    //CLASSES
+
+    async deleteClasse(classe) {
+      let query = "DELETE FROM asimov_classes WHERE idclasse='"+classe+"'"
+      return this.doQuery(query)
+    }
+
+    //MATIERE
+
+    async deleteMatiere(matiere) {
+      let query = "DELETE FROM asimov_matieres WHERE id='"+matiere+"'"
+      return this.doQuery(query)
+    }
+
+
   	// VERIFICATIONS
   	async login(pseudo, password) {
   		let query = "SELECT * FROM asimov_users WHERE pseudo = '" + pseudo + "' AND password = '" + password + "'";
@@ -156,6 +183,8 @@ class DB {
 			return val;
 		})
   	}
+
+
 }
 
 module.exports = DB;

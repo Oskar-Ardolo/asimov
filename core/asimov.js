@@ -1,7 +1,7 @@
 /*
 ======================
 MISC FUNCTIONS
-====================== 
+======================
 
 Liste fonctions :
 
@@ -23,12 +23,12 @@ const cap = (s) => {
 /*
 ======================
 MODULES GENERAUX
-====================== 
+======================
 
 Liste modules :
 
-getAdminInfo : 
-doLogStuff : 
+getAdminInfo :
+doLogStuff :
 login :
 
 */
@@ -48,7 +48,6 @@ exports.login = (req, res, db, crypto) => {
 	let password = crypto.createHmac('sha256', req.body.password)
 	               .update('jojofags suck')
 	               .digest('hex');
-
 	let DBModel = new DB(db);
 	(async function() {
 		let userLogin = await DBModel.login(pseudo, password);
@@ -68,14 +67,14 @@ exports.login = (req, res, db, crypto) => {
 
 
 
-/* 
+/*
 ======================
 MODULES ADMINISTRATION
-====================== 
+======================
 
 Liste modules :
 
-getAdminInfo : 
+getAdminInfo :
 getUsers : affiche admin/users.ejs avec la liste des élèves
 
 
@@ -118,23 +117,25 @@ exports.getUsers = (req, res, db) => {
 
 exports.addUser = (req, res, db, crypto) => {
 	if(req.session.rang >= 5) {
-	    let nom = req.body.nom.toUpperCase();
-	    let prenom = cap(req.body.prenom.toLowerCase());
+	    let nom = (req.body.nom.toUpperCase()).replace(/ /g, "");
+	    let prenom = (cap(req.body.prenom.toLowerCase())).replace(/ /g, "");
 	    let classe = req.body.classe;
-	    let pseudo = nom.substr(0, 7).toLowerCase().replace(" ", "").replace("-", "") + prenom.substr(0,2).toLowerCase().replace(" ", "").replace("-", "");
-	    let password = crypto.createHmac('sha256', nom + "-" + prenom)
-	               .update('jojofags suck')
-	               .digest('hex');
-	    let rang = 1
-	    let titre = "Élève";
+      if (nom != '' & prenom != '' & classe != undefined) {
+  	    let pseudo = nom.substr(0, 7).toLowerCase().replace(" ", "").replace("-", "") + prenom.substr(0,2).toLowerCase().replace(" ", "").replace("-", "");
+  	    let password = crypto.createHmac('sha256', nom + "-" + prenom)
+  	               .update('jojofags suck')
+  	               .digest('hex');
+  	    let rang = 1
+  	    let titre = "Élève";
 
-	    let userInputs = [nom, prenom, pseudo, password, rang, titre];
+  	    let userInputs = [nom, prenom, pseudo, password, rang, titre];
 
-	    let DBModel = new DB(db);
-		(async function() {
-			await DBModel.addUser(userInputs, classe);
-			res.redirect("/admin/users");
-		})()
+  	    let DBModel = new DB(db);
+  		(async function() {
+  			await DBModel.addUser(userInputs, classe);
+  			res.redirect("/admin/users");
+  		})()
+    } else { res.redirect("/admin/users"); }
 
 
 	} else {
@@ -144,7 +145,27 @@ exports.addUser = (req, res, db, crypto) => {
 	}
 }
 
-
+exports.deleteUser = (req, res, db ) => {
+  if(req.session.rang >= 10) {
+    let DBModel = new DB(db);
+    (async function() {
+      let user = await req.body.delete;
+      let rangUser = await DBModel.getRangUserWithId(user); // GET RANG OF USER TO REDIRECT TO THE CORRECT PAGE
+      if (user != undefined) {
+        await DBModel.deleteUser(user) // DELETE USERS AND PROFS
+        if(rangUser[0].rang < 5) {
+        res.redirect('/admin/users')
+        } else {
+          res.redirect('/admin/profs')
+        }
+      } else { res.redirect('/admin/users') }
+    })()
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/home");
+  }
+}
 
 // GESTION DES UTILISATEURS (PROFESSEURS + ADMINISTRATION)
 exports.getProfs = (req, res, db) => {
@@ -158,26 +179,28 @@ exports.getProfs = (req, res, db) => {
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
-		res.redirect("/admin")
+		res.redirect("/admin");
 	}
-	
+
 }
 
 exports.addProf = (req, res, db, crypto) => {
 	if(req.session.rang == 10) {
-	    let nom = req.body.nom.toUpperCase();
-	    let prenom = cap(req.body.prenom.toLowerCase());
-	    let pseudo = nom.substr(0, 7).toLowerCase().replace(" ", "").replace("-", "") + prenom.substr(0,2).toLowerCase().replace(" ", "").replace("-", "");
-	    let password = crypto.createHmac('sha256', nom + "-" + prenom)
-	               .update('jojofags suck')
-	               .digest('hex');
-	    let rang = 5
-	    let titre = "Professeur";
-	    let DBModel = new DB(db);
-	    (async function() {
-			let insertedProf = await DBModel.addProf([nom, prenom, pseudo, password, rang, titre]);
-			res.redirect("/admin/profs")
-		})()	    
+	    let nom = (req.body.nom.toUpperCase()).replace(/ /g, "");
+	    let prenom = (cap(req.body.prenom.toLowerCase())).replace(/ /g, "");
+      if (nom != '' & prenom != '') {
+  	    let pseudo = nom.substr(0, 7).toLowerCase().replace(" ", "").replace("-", "") + prenom.substr(0,2).toLowerCase().replace(" ", "").replace("-", "");
+  	    let password = crypto.createHmac('sha256', nom + "-" + prenom)
+  	               .update('jojofags suck')
+  	               .digest('hex');
+  	    let rang = 5
+  	    let titre = "Professeur";
+  	    let DBModel = new DB(db);
+  	    (async function() {
+  			let insertedProf = await DBModel.addProf([nom, prenom, pseudo, password, rang, titre]);
+  			res.redirect("/admin/profs")
+  		})()
+    } else { res.redirect("/admin/profs") }
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
@@ -277,7 +300,7 @@ exports.getClasses = (req, res, db) => {
 	    (async function() {
 			let classes = await DBModel.getClassesAndUserCount();
 			res.render("admin/classes.ejs", {data : classes});
-		})()	
+		})()
 
 	} else {
 		req.session.login = false;
@@ -294,7 +317,7 @@ exports.editClasse = (req, res, db) => {
 			let users = await DBModel.getUsersFromClasse(req.params.idclasse);
 			let profs = await DBModel.getProfs();
 			res.render("admin/editclasse.ejs", {users : users, classe : classe[0], profs : profs} );
-		})()	
+		})()
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
@@ -305,10 +328,13 @@ exports.editClasse = (req, res, db) => {
 exports.addClasse = (req, res, db) => {
 	if(req.session.rang == 10) {
 		let DBModel = new DB(db);
-	    (async function() {
-			let classes = await DBModel.addClasse(req.body.nomclasse);
-			res.redirect("/admin/classes");
-		})()	
+    let classenom = (req.body.nomclasse).replace(/ /g, "");
+    if(classenom != '') {
+  	    (async function() {
+  			let classes = await DBModel.addClasse(classenom);
+  			res.redirect("/admin/classes");
+  		})()
+    } else { res.redirect("/admin/classes"); }
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
@@ -316,6 +342,22 @@ exports.addClasse = (req, res, db) => {
 	}
 }
 
+exports.deleteClasse = (req, res, db) => {
+  if(req.session.rang >= 10) {
+    let DBModel = new DB(db);
+    (async function() {
+      let classe = await req.body.delete;
+      if (classe != undefined) {
+        await DBModel.deleteClasse(classe)
+        res.redirect('/admin/classes')
+      } else { res.redirect('/admin/classes') }
+    })()
+  } else {
+		req.session.login = false;
+		req.session.rang = 0;
+		res.redirect("/admin")
+	}
+}
 
 
 // GESTION DES MATIERES
@@ -325,7 +367,7 @@ exports.getMatieres = (req, res, db) => {
 		(async function() {
 			let matieres = await DBModel.getMatieresAndProfCount();
 			res.render("admin/matieres.ejs", {data : matieres});
-		})()	
+		})()
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
@@ -336,10 +378,13 @@ exports.getMatieres = (req, res, db) => {
 exports.addMatiere = (req, res, db) => {
 	if(req.session.rang == 10) {
 		let DBModel = new DB(db);
-	    (async function() {
-			let matieres = await DBModel.addMatiere(req.body.nommatiere);
-			res.redirect("/admin/matieres");
-		})()	
+    let nomMatiere = (req.body.nommatiere).replace(/ /g, "");
+	  (async function() {
+      if (nomMatiere != "") {
+  			let matieres = await DBModel.addMatiere(nomMatiere);
+  			res.redirect("/admin/matieres");
+      } else { res.redirect("/admin/matieres"); }
+		})()
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
@@ -347,4 +392,19 @@ exports.addMatiere = (req, res, db) => {
 	}
 }
 
-
+exports.deleteMatiere = (req, res, db) => {
+  if(req.session.rang >= 10) {
+    let DBModel = new DB(db);
+    (async function() {
+      let matiere = await req.body.delete;
+      if (matiere != undefined) {
+        await DBModel.deleteMatiere(matiere)
+        res.redirect('/admin/matieres')
+      } else { res.redirect('/admin/matieres') }
+    })()
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/admin")
+  }
+}
