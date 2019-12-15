@@ -118,6 +118,11 @@ db.connect(function(err) {
 		asimov.login(req, res, db, crypto)
 	});
 
+  // 404, PAS DE ROUTES APRES CA
+app.get('*', function(req, res){
+  res.render("404.ejs");
+});
+
 });
 
 
