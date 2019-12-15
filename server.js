@@ -33,10 +33,10 @@ db.connect(function(err) {
     /* GLOBAT GET ROUTES */
 	app.get("/", (req, res) => {
 		asimov.doLogStuff(req, res);
-<<<<<<< HEAD
+/*<<<<<<< HEAD
 =======
 
->>>>>>> Edit-and-DELETE-user
+>>>>>>> Edit-and-DELETE-user*/
 	});
 	app.get("/home", (req, res) => {
 		asimov.doLogStuff(req, res);
