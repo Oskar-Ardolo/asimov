@@ -378,9 +378,12 @@ exports.getMatieres = (req, res, db) => {
 exports.addMatiere = (req, res, db) => {
 	if(req.session.rang == 10) {
 		let DBModel = new DB(db);
-	    (async function() {
-			let matieres = await DBModel.addMatiere(req.body.nommatiere);
-			res.redirect("/admin/matieres");
+    let nomMatiere = (req.body.nommatiere).replace(/ /g, "");
+	  (async function() {
+      if (nomMatiere != "") {
+  			let matieres = await DBModel.addMatiere(nomMatiere);
+  			res.redirect("/admin/matieres");
+      } else { res.redirect("/admin/matieres"); }
 		})()
 	} else {
 		req.session.login = false;
