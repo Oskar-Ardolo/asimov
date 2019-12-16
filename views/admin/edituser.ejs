@@ -31,9 +31,9 @@
                 <input type="hidden" name="idclasse" value="<%= classe.idclasse %>">
               <div class="form-group">
                 <label for="nom">Nom de l'élève</label>
-                <input type="text" id="nom" name="nomeleve" class="form-control" placeholder="<%= data[0].nom %>"><br/>
+                <input type="text" id="nom" name="nomeleve" class="form-control" value="<%= data[0].nom %>"><br/>
                 <label for="nom">Prénom de l'élève</label>
-                <input type="text" id="nom" name="nomeleve" class="form-control" placeholder="<%= data[0].prenom %>"><br/>
+                <input type="text" id="nom" name="nomeleve" class="form-control" value="<%= data[0].prenom %>"><br/>
                 <label for="profprincipal">Classe de l'élève</label>
                 <select class="form-control" name="profprincipal" id="profprincipal">
                   <% for(var i=0; i < classe.length; i++) { %>
@@ -44,8 +44,7 @@
               <br><center><button class="btn btn-success">Enregistrer les modifications</button></center><br><hr><br>
               <div class="form-group">
                 <b>Pseudonyme : </b> <%= data[0].pseudo %>
-                <center><button type="button" class="btn btn-danger">Réinitialiser le mot de passe</button></center>
-
+                <center><button type="submit" class="btn btn-danger">Réinitialiser le mot de passe</button></center>
               </div>
               <hr><b>Moyenne générale :</b> <i>13.42</i><br/><hr>
             </form>
