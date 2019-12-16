@@ -45,7 +45,7 @@
                 <td><%= data[i].pseudo %></td>
                 <td>
                   <form style="width:100%;padding:0;margin:0;" action="/admin/user/delete" method="post">
-                    <button style="width:49%;" type="button" class="btn btn-primary" onclick="location.href='/admin/profs/edit/<%= data[i].pseudo %>';" value="edit-prof">Editer</button>
+                    <button style="width:49%;" type="button" class="btn btn-primary" onclick="location.href='/admin/profs/edit/<%= data[i].id %>';" value="edit-prof">Editer</button>
                     <input type="hidden" name="delete" value="<%= data[i].id %>">
                     <button id="deleteProf" style="width:49%;" type="submit" class="btn btn-danger">Supprimer</button>
                   </form>

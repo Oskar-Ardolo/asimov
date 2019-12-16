@@ -188,7 +188,7 @@ exports.editUserData = (req, res, db) => {
   }
 }
 
-exports.defaultPassword = (req, res, db, crypto) => {
+exports.defaultPasswordForUser = (req, res, db, crypto) => {
   if(req.session.rang == 10) {
     let DBModel = new DB(db);
     (async () => {
@@ -273,10 +273,10 @@ exports.addProf = (req, res, db, crypto) => {
 
 exports.editProfView = (req, res, db) => {
 	if(req.session.rang == 10) {
-		let pseudo = req.params.pseudo;
+		let idprof = req.params.idprof;
 		let DBModel = new DB(db);
 	    (async function() {
-			let utilisateur = await DBModel.getUserByPseudo(pseudo);
+			let utilisateur = await DBModel.getUserById(idprof);
 			let matieres = await DBModel.getMatieres();
 			let enseignematiere = await DBModel.getMatieresForOneProf(utilisateur[0].id);
 			utilisateur[0].fullName = function() {return this.nom + " " + this.prenom }
@@ -286,6 +286,49 @@ exports.editProfView = (req, res, db) => {
 	} else {
 		res.redirect("/admin");
 	}
+}
+
+exports.editProfData = (req, res, db) => {
+  if(req.session.rang == 10) {
+    let DBModel = new DB(db);
+    let idprof =  req.params.idprof;
+    let lastname = (req.body.nomprof.toUpperCase()).replace(/ /g, "");
+    let firstname = (cap(req.body.prenomprof.toLowerCase())).replace(/ /g, "");
+    (async function () {
+      if((firstname != ('' & undefined)) & (lastname != ('' & undefined))) {
+        let pseudo = lastname.substr(0, 7).toLowerCase().replace(" ", "").replace("-", "") + firstname.substr(0,2).toLowerCase().replace(" ", "").replace("-", "");
+        await DBModel.editUser(idprof, firstname, lastname, pseudo);
+        res.redirect("/admin/profs/edit/" + idprof)
+      } else {
+        res.redirect("/admin/profs/edit/" + idprof)
+      }
+
+    })()
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/home")
+  }
+}
+
+exports.defaultPasswordForProf = (req, res, db, crypto) => {
+  if(req.session.rang == 10) {
+    let DBModel = new DB(db);
+    (async () => {
+      let id = req.params.idprof;
+      let data = await DBModel.getUserById(id);
+      console.log( data[0].nom.toUpperCase() + "-" + cap(data[0].prenom.toLowerCase()))
+      let password = crypto.createHmac('sha256', data[0].nom.toUpperCase() + "-" + cap(data[0].prenom.toLowerCase()))
+                 .update('jojofags suck')
+                 .digest('hex');
+      await DBModel.defaultPassword(id, password);
+      res.redirect("/admin/profs/edit/" + id)
+    })()
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/home")
+  }
 }
 
 exports.matiereToProf = (req, res, db) => {

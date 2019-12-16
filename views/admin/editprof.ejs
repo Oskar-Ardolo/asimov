@@ -30,9 +30,9 @@
               <form action="/admin/profs/edit/<%= user.id %>" method="post">
                 <div class="form-group">
                   <label for="nom">Nom</label>
-                  <input type="text" id="nom" name="nom" class="form-control" placeholder="Nom..." value="<%= user.nom %>"><br/>
+                  <input type="text" id="nom" name="nomprof" class="form-control" placeholder="Nom..." value="<%= user.nom %>"><br/>
                   <label for="prenom">Prénom</label>
-                  <input type="text" id="prenom" name="prenom" class="form-control" value="<%= user.prenom %>" placeholder="Prénom...">
+                  <input type="text" id="prenom" name="prenomprof" class="form-control" value="<%= user.prenom %>" placeholder="Prénom...">
                 </div>
                 <br><center><button class="btn btn-success">Enregistrer les modifications</button></center><br><hr><br>
               </form>

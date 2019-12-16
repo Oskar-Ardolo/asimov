@@ -71,7 +71,7 @@ db.connect(function(err) {
 	app.get("/admin/profs", (req, res) => {
 		asimov.getProfs(req, res, db);
 	});
-	app.get("/admin/profs/edit/:pseudo", (req, res) => {
+	app.get("/admin/profs/edit/:idprof", (req, res) => {
 		asimov.editProfView(req, res, db);
 	});
 	app.get("/admin/classes", (req, res) => {
@@ -93,7 +93,7 @@ db.connect(function(err) {
     asimov.editUserData(req, res, db);
   });
   app.post("/admin/users/defaultpassword/:ideleve", (req, res) => {
-    asimov.defaultPassword(req, res, db, crypto);
+    asimov.defaultPasswordForUser(req, res, db, crypto);
   })
   app.post("/admin/user/delete", (req, res) => {
     asimov.deleteUser(req, res, db);
@@ -101,6 +101,12 @@ db.connect(function(err) {
 	app.post("/admin/profs/add", (req, res) => {
 		asimov.addProf(req, res, db, crypto);
 	});
+  app.post("/admin/profs/edit/:idprof", (req, res) => {
+    asimov.editProfData(req, res, db);
+  });
+  app.post("/admin/profs/defaultpassword/:idprof", (req, res) => {
+    asimov.defaultPasswordForProf(req, res, db, crypto);
+  });
 	app.post("/admin/profs/edit/doprof", (req, res) => {
 		asimov.matiereToProf(req, res, db);
 	});
