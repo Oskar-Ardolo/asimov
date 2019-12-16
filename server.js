@@ -89,9 +89,12 @@ db.connect(function(err) {
 	app.post("/admin/users/add", (req, res) => {
 		asimov.addUser(req, res, db, crypto);
 	});
-  app.post("/admin/users/edit/changedata", (req, res) => {
+  app.post("/admin/users/edit/:ideleve", (req, res) => {
     asimov.editUserData(req, res, db);
   });
+  app.post("/admin/users/defaultpassword/:ideleve", (req, res) => {
+    asimov.defaultPassword(req, res, db, crypto);
+  })
   app.post("/admin/user/delete", (req, res) => {
     asimov.deleteUser(req, res, db);
   });

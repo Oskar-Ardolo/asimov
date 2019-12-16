@@ -120,6 +120,7 @@ exports.addUser = (req, res, db, crypto) => {
 	    let nom = (req.body.nom.toUpperCase()).replace(/ /g, "");
 	    let prenom = (cap(req.body.prenom.toLowerCase())).replace(/ /g, "");
 	    let classe = req.body.classe;
+      console.log(nom + "-" + prenom)
       if (nom != '' & prenom != '' & classe != undefined) {
   	    let pseudo = nom.substr(0, 7).toLowerCase().replace(" ", "").replace("-", "") + prenom.substr(0,2).toLowerCase().replace(" ", "").replace("-", "");
   	    let password = crypto.createHmac('sha256', nom + "-" + prenom)
@@ -165,8 +166,40 @@ exports.editUsersView = (req, res, db) => {
 exports.editUserData = (req, res, db) => {
   if(req.session.rang == 10) {
     let DBModel = new DB(db);
+    let iduser =  req.params.ideleve;
+    let firstname = req.body.prenomeleve;
+    let lastname = req.body.nomeleve;
+    let classe = req.body.classe;
     (async function () {
-      res.redirect("/admin/users/edit/" + req.params.ideleve)
+      if((firstname != ('' & undefined)) & (lastname != ('' & undefined)) & classe != undefined) {
+        let pseudo = lastname.substr(0, 7).toLowerCase().replace(" ", "").replace("-", "") + firstname.substr(0,2).toLowerCase().replace(" ", "").replace("-", "");
+        await DBModel.editUser(iduser, firstname, lastname, pseudo);
+        await DBModel.updateClasseOfUser(iduser, classe)
+        res.redirect("/admin/users/edit/" + iduser)
+      } else {
+        res.redirect("/admin/users/edit/" + iduser)
+      }
+
+    })()
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/home")
+  }
+}
+
+exports.defaultPassword = (req, res, db, crypto) => {
+  if(req.session.rang == 10) {
+    let DBModel = new DB(db);
+    (async () => {
+      let id = req.params.ideleve;
+      let data = await DBModel.getUserById(id);
+      console.log( data[0].nom.toUpperCase() + "-" + cap(data[0].prenom.toLowerCase()))
+      let password = crypto.createHmac('sha256', data[0].nom.toUpperCase() + "-" + cap(data[0].prenom.toLowerCase()))
+                 .update('jojofags suck')
+                 .digest('hex');
+      await DBModel.defaultPassword(id, password);
+      res.redirect("/admin/users/edit/" + id)
     })()
   } else {
     req.session.login = false;

@@ -117,13 +117,28 @@ class DB {
 
     //MODIFICATIONS
 
-      // Classes
+    // Classes
     async editClasse(idclasse, nomclasse, profprincipal) {
       let query = "UPDATE asimov_classes SET nomclasse = '"+nomclasse+"', profprincipal = '"+profprincipal+"' WHERE idclasse = '"+idclasse+"' "
       return this.doQuery(query)
     }
 
+    async updateClasseOfUser(iduser, newclasse) {
+      let query = "UPDATE asimov_dansclasse SET idclasse = '"+newclasse+"' WHERE iduser = '"+iduser+"' "
+      return this.doQuery(query)
+    }
 
+    // User
+
+    async editUser(iduser, firstname, lastname, pseudo) {
+      let query = "UPDATE asimov_users SET nom = '"+lastname+"', prenom = '"+firstname+"', pseudo = '"+pseudo+"' WHERE id = '"+iduser+"'"
+      return this.doQuery(query)
+    }
+
+    async defaultPassword(id, password){
+      let query = "UPDATE asimov_users SET password = '"+password+"' WHERE id = '"+id+"'"
+      return this.doQuery(query)
+    }
 
    //SUPPRESSION
 

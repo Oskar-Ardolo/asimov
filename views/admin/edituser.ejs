@@ -27,21 +27,23 @@
               <img src="/img/user.png" alt="<%= classe.nomclasse %>" width=280 />
             </div>
             <div class="col-lg-9">
-              <form method="post" action="/admin/users/edit/changedata">
+              <form method="post" action="/admin/users/edit/<%= data[0].id %>">
                 <input type="hidden" name="idclasse" value="<%= classe.idclasse %>">
               <div class="form-group">
                 <label for="nom">Nom de l'élève</label>
                 <input type="text" id="nom" name="nomeleve" class="form-control" value="<%= data[0].nom %>"><br/>
-                <label for="nom">Prénom de l'élève</label>
-                <input type="text" id="nom" name="nomeleve" class="form-control" value="<%= data[0].prenom %>"><br/>
-                <label for="profprincipal">Classe de l'élève</label>
-                <select class="form-control" name="profprincipal" id="profprincipal">
+                <label for="prenom">Prénom de l'élève</label>
+                <input type="text" id="prenom" name="prenomeleve" class="form-control" value="<%= data[0].prenom %>"><br/>
+                <label for="classe">Classe de l'élève</label>
+                <select class="form-control" name="classe" id="classe">
                   <% for(var i=0; i < classe.length; i++) { %>
                       <option value="<%= classe[i].idclasse %>" <% if(classe[i].nomclasse == userClasse[0].nomclasse ) { %> selected="selected" <% } %>><%= classe[i].nomclasse %></option>
                   <% } %>
                 </select>
               </div>
               <br><center><button class="btn btn-success">Enregistrer les modifications</button></center><br><hr><br>
+            </form>
+            <form action="/admin/users/defaultpassword/<%= data[0].id %>" method="post">
               <div class="form-group">
                 <b>Pseudonyme : </b> <%= data[0].pseudo %>
                 <center><button type="submit" class="btn btn-danger">Réinitialiser le mot de passe</button></center>
