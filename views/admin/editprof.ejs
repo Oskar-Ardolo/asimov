@@ -27,18 +27,21 @@
               <img src="/img/prof.png" alt="ROUMANET DAVID" width=300 />
             </div>
             <div class="col-lg-9">
-              
+              <form action="/admin/profs/edit/<%= user.id %>" method="post">
                 <div class="form-group">
                   <label for="nom">Nom</label>
                   <input type="text" id="nom" name="nom" class="form-control" placeholder="Nom..." value="<%= user.nom %>"><br/>
                   <label for="prenom">Prénom</label>
                   <input type="text" id="prenom" name="prenom" class="form-control" value="<%= user.prenom %>" placeholder="Prénom...">
-                </div><br/><hr>
-                <div class="row">
-                  <div class="col-lg-6 mt-3"><b>Pseudonyme : </b> <%= user.pseudo %></div>
-                  <div class="col-lg-6 mt-3">
-                    <input type="button" class="btn btn-danger" value="Réinitialiser le mot de passe">
-                </div>  
+                </div>
+                <br><center><button class="btn btn-success">Enregistrer les modifications</button></center><br><hr><br>
+              </form>
+              <form action="/admin/profs/defaultpassword/<%= user.id %>" method="post">
+                <div class="form-group">
+                  <b>Pseudonyme : </b> <%= user.pseudo %>
+                  <center><button type="submit" class="btn btn-danger">Réinitialiser le mot de passe</button></center>
+                </div>
+              </form>
               </div>
             </div>
           </div><hr>
@@ -49,7 +52,7 @@
       <div class="card-header">
         <i class="fas fa-users"></i>
         Gestion des matières</div>
-      <div class="card-body"> 
+      <div class="card-body">
         <div class="table-responsive">
           <form method="post" action="/admin/profs/edit/doprof" style="overflow:hidden;">
             <input type="hidden" name="idprof" value="<%= user.id %>">
@@ -69,7 +72,7 @@
                 </tr>
               </tfoot>
               <tbody>
-                <% 
+                <%
                 for(i = 0; i < matiere.length; i++) {%>
                 <tr>
                   <td><%= matiere[i].nommatiere %></td>
