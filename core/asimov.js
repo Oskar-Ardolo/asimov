@@ -167,8 +167,8 @@ exports.editUserData = (req, res, db) => {
   if(req.session.rang == 10) {
     let DBModel = new DB(db);
     let iduser =  req.params.ideleve;
-    let firstname = req.body.prenomeleve;
-    let lastname = req.body.nomeleve;
+    let lastname = (req.body.nomeleve.toUpperCase()).replace(/ /g, "");
+    let firstname = (cap(req.body.prenomeleve.toLowerCase())).replace(/ /g, "");
     let classe = req.body.classe;
     (async function () {
       if((firstname != ('' & undefined)) & (lastname != ('' & undefined)) & classe != undefined) {
