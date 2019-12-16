@@ -145,6 +145,23 @@ exports.addUser = (req, res, db, crypto) => {
 	}
 }
 
+exports.editUsersView = (req, res, db) => {
+    if(req.session.rang == 10) {
+      let DBModel = new DB(db);
+      (async function() {
+        let users = await DBModel.getUserById(req.params.ideleve);
+        let classes = await DBModel.getClasses();
+        console.log(classes)
+        let classeofuser = await DBModel.getUserClasseFromId(req.params.ideleve);
+        res.render("admin/edituser.ejs", {data : users, classe : classes, userClasse : classeofuser});
+      })()
+    } else {
+  		req.session.login = false;
+  		req.session.rang = 0;
+  		res.redirect("/home")
+  	}
+}
+
 exports.deleteUser = (req, res, db ) => {
   if(req.session.rang >= 10) {
     let DBModel = new DB(db);

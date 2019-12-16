@@ -1,0 +1,61 @@
+<% include ../include/header.ejs %>
+
+<div id="content-wrapper">
+
+<div class="container-fluid">
+    <!-- CODE HERE -->
+     <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="/">Accueil</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="/admin">Admin</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="/admin/users">Gestion des élèves</a>
+      </li>
+      <li class="breadcrumb-item active"><%= data[0].nom + ' ' + data[0].prenom %></li>
+    </ol>
+
+    <div class="card mb-3">
+      <div class="card-header">
+        <i class="fas fa-users"></i>
+        Gestion des élèves : <i>Edition de l'élève</i></div>
+      <div class="card-body">
+          <div class="row">
+            <div class="col-lg-3">
+              <img src="/img/classe.png" alt="<%= classe.nomclasse %>" width=300 />
+            </div>
+            <div class="col-lg-9">
+              <form method="post" action="">
+                <input type="hidden" name="idclasse" value="<%= classe.idclasse %>">
+              <div class="form-group">
+                <label for="nom">Nom de l'élève</label>
+                <input type="text" id="nom" name="nomeleve" class="form-control" placeholder="<%= data[0].nom %>"><br/>
+                <label for="nom">Prénom de l'élève</label>
+                <input type="text" id="nom" name="nomeleve" class="form-control" placeholder="<%= data[0].prenom %>"><br/>
+                <label for="profprincipal">Classe de l'élève</label>
+                <select class="form-control" name="profprincipal" id="profprincipal">
+
+                  <% for(var i=0; i < classe.length; i++) { %>
+
+                      <option value="<%= classe[i].idclasse %>" <% if(classe[i].nomclasse == userClasse[0].nomclasse ) { %> selected="selected" <% } %>><%= classe[i].nomclasse %></option>
+
+                  <% } %>
+                </select>
+              </div>
+              <hr>
+              <div class="form-group">
+
+              </div>
+              <br/><hr><b>Moyenne générale :</b> <i>13.42</i><br/><hr>
+              <center><button class="btn btn-success">Réinitialiser le mot de passe</button></center>
+            </form>
+            </div>
+          </div><hr>
+      </div>
+      <div class="card-footer small text-muted">Mis à jour : il y a quelques secondes...</div>
+    </div>
+</div>
+<!-- /.container-fluid -->
+<% include ../include/footer.ejs %>

@@ -65,6 +65,9 @@ db.connect(function(err) {
 	app.get("/admin/users", (req, res) => {
 		asimov.getUsers(req, res, db);
 	});
+  app.get("/admin/users/edit/:ideleve", (req, res) => {
+    asimov.editUsersView(req, res, db);
+  });
 	app.get("/admin/profs", (req, res) => {
 		asimov.getProfs(req, res, db);
 	});

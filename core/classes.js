@@ -28,6 +28,10 @@ class DB {
       let query = "SELECT rang FROM asimov_users WHERE asimov_users.id = '"+ user +"'"
       return this.doQuery(query)
     }
+    async getUserClasseFromId(id) {
+      let query = "SELECT asimov_classes.nomclasse FROM asimov_classes LEFT JOIN asimov_dansclasse ON asimov_classes.idclasse = asimov_dansclasse.idclasse WHERE asimov_dansclasse.iduser ='"+id+"'"
+      return this.doQuery(query)
+    }
 
   		// CLASSES
   	async getClasses() {
@@ -42,7 +46,6 @@ class DB {
       let query = "SELECT * FROM asimov_classes WHERE idclasse = '"+idclasse+"'"
       return this.doQuery(query)
     }
-
   		// PROFS
   	async getProfs() {
   		let query = "SELECT asimov_users.id, asimov_users.nom, asimov_users.prenom, asimov_users.pseudo FROM asimov_users WHERE rang = 5 ORDER BY nom";
