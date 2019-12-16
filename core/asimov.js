@@ -162,6 +162,19 @@ exports.editUsersView = (req, res, db) => {
   	}
 }
 
+exports.editUserData = (req, res, db) => {
+  if(req.session.rang == 10) {
+    let DBModel = new DB(db);
+    (async function () {
+      res.redirect("/admin/users/edit/" + req.params.ideleve)
+    })()
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/home")
+  }
+}
+
 exports.deleteUser = (req, res, db ) => {
   if(req.session.rang >= 10) {
     let DBModel = new DB(db);

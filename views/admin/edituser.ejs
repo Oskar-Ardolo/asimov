@@ -24,10 +24,10 @@
       <div class="card-body">
           <div class="row">
             <div class="col-lg-3">
-              <img src="/img/classe.png" alt="<%= classe.nomclasse %>" width=300 />
+              <img src="/img/user.png" alt="<%= classe.nomclasse %>" width=280 />
             </div>
             <div class="col-lg-9">
-              <form method="post" action="">
+              <form method="post" action="/admin/users/edit/changedata">
                 <input type="hidden" name="idclasse" value="<%= classe.idclasse %>">
               <div class="form-group">
                 <label for="nom">Nom de l'élève</label>
@@ -36,26 +36,39 @@
                 <input type="text" id="nom" name="nomeleve" class="form-control" placeholder="<%= data[0].prenom %>"><br/>
                 <label for="profprincipal">Classe de l'élève</label>
                 <select class="form-control" name="profprincipal" id="profprincipal">
-
                   <% for(var i=0; i < classe.length; i++) { %>
-
                       <option value="<%= classe[i].idclasse %>" <% if(classe[i].nomclasse == userClasse[0].nomclasse ) { %> selected="selected" <% } %>><%= classe[i].nomclasse %></option>
-
                   <% } %>
                 </select>
               </div>
-              <hr>
+              <br><center><button class="btn btn-success">Enregistrer les modifications</button></center><br><hr><br>
               <div class="form-group">
+                <b>Pseudonyme : </b> <%= data[0].pseudo %>
+                <center><button type="button" class="btn btn-danger">Réinitialiser le mot de passe</button></center>
 
               </div>
-              <br/><hr><b>Moyenne générale :</b> <i>13.42</i><br/><hr>
-              <center><button class="btn btn-success">Réinitialiser le mot de passe</button></center>
+              <hr><b>Moyenne générale :</b> <i>13.42</i><br/><hr>
             </form>
             </div>
-          </div><hr>
+          </div>
       </div>
       <div class="card-footer small text-muted">Mis à jour : il y a quelques secondes...</div>
     </div>
+    <hr>
+</div>
+<!-- Gestion des notes de l'élève -->
+<div class="container-fluid">
+      <div class="card mb-3">
+        <div class="card-header">
+          <i class="fas fa-users"></i>
+          Gestion des notes : <i>Edition des notes</i>
+        </div>
+        <div class="card-body">
+        </div>
+      </div>
+</div>
+
+
 </div>
 <!-- /.container-fluid -->
 <% include ../include/footer.ejs %>
