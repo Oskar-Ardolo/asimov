@@ -385,9 +385,7 @@ exports.addUserToClasse = (req, res, db, crypto) => {
   			res.redirect("/admin/classes/edit/"+classe);
   		})()
 
-      } else {
-        console.log('ok')
-        res.redirect("/admin/classes/edit/"+classe); }
+      } else { res.redirect("/admin/classes/edit/"+classe); }
 
 	} else {
 		req.session.login = false;
