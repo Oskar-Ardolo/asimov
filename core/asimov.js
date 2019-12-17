@@ -452,16 +452,28 @@ exports.addClasse = (req, res, db) => {
 	if(req.session.rang == 10) {
 		let DBModel = new DB(db);
     let classenom = (req.body.nomclasse).replace(/ /g, "");
-    if(classenom != '') {
   	    (async function() {
-  			let classes = await DBModel.addClasse(classenom);
-  			res.redirect("/admin/classes");
-  		})()
-    } else { res.redirect("/admin/classes"); }
+          let classeExistantes = await DBModel.getClasses();
+          let bool = false;
+          let valeur = function verifier() {
+            for (i=0;i<classeExistantes.length; i++) {
+              if(classeExistantes[i].nomclasse == classenom) {
+                bool = true;
+                return bool
+              } else { bool = false }
+            }
+            return bool = false;
+          }
+          await valeur();
+          if(classenom != '' & bool == false) {
+      			let classes = await DBModel.addClasse(classenom);
+      			res.redirect("/admin/classes");
+          } else { res.redirect("/admin/classes"); }
+  		  })()
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
-		res.redirect("/admin")
+		res.redirect("/admin");
 	}
 }
 
@@ -519,7 +531,19 @@ exports.addMatiere = (req, res, db) => {
 		let DBModel = new DB(db);
     let nomMatiere = (req.body.nommatiere).replace(/ /g, "");
 	  (async function() {
-      if (nomMatiere != "") {
+      let matiereExistantes = await DBModel.getMatieres();
+      let bool = false;
+      let valeur = function verifier() {
+        for (i=0;i<matiereExistantes.length; i++) {
+          if(matiereExistantes[i].nommatiere == nomMatiere) {
+            bool = true;
+            return bool;
+          } else { bool = false; }
+        }
+        return bool = false;
+      }
+      await valeur();
+      if (nomMatiere != "" & bool == false) {
   			let matieres = await DBModel.addMatiere(nomMatiere);
   			res.redirect("/admin/matieres");
       } else { res.redirect("/admin/matieres"); }
@@ -537,8 +561,8 @@ exports.deleteMatiere = (req, res, db) => {
     (async function() {
       let matiere = await req.body.delete;
       if (matiere != undefined) {
-        await DBModel.deleteMatiere(matiere)
-        res.redirect('/admin/matieres')
+        await DBModel.deleteMatiere(matiere);
+        res.redirect('/admin/matieres');
       } else { res.redirect('/admin/matieres') }
     })()
   } else {
