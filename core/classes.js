@@ -154,6 +154,10 @@ class DB {
       let query = "DELETE FROM asimov_classes WHERE idclasse='"+classe+"'"
       return this.doQuery(query)
     }
+    async deleteEleveFromClasse(classe, user) {
+      let query = "DELETE FROM asimov_dansclasse WHERE (idclasse='"+classe+"' AND iduser='"+user+"')"
+      return this.doQuery(query)
+    }
 
     //MATIERE
 

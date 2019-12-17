@@ -483,6 +483,21 @@ exports.deleteClasse = (req, res, db) => {
 	}
 }
 
+exports.modifElevesInClasse = (req, res, db) => {
+    if(req.session.rang >= 10) {
+      let DBModel = new DB(db);
+      let iduser = req.body.iduser;
+      let idclasse = req.params.idclasse;
+      (async () => {
+        await DBModel.deleteEleveFromClasse(idclasse, iduser)
+        res.redirect("/admin/classes/edit/" + idclasse)
+      })()
+    } else {
+      req.session.login = false;
+      req.session.rang = 0;
+      res.redirect("/admin")
+    }
+}
 
 // GESTION DES MATIERES
 exports.getMatieres = (req, res, db) => {

@@ -119,6 +119,9 @@ db.connect(function(err) {
 	app.post("/admin/classes/edit/editclasse", (req, res) => {
 		asimov.doModifClasse(req, res, db);
 	});
+  app.post("/admin/classes/edit-eleve/:idclasse", (req, res) => {
+    asimov.modifElevesInClasse(req, res, db);
+  });
 
 	app.post("/admin/matieres/add", (req, res) => {
 		asimov.addMatiere(req, res, db);
