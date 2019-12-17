@@ -470,15 +470,16 @@ exports.deleteClasse = (req, res, db) => {
     let DBModel = new DB(db);
     (async function() {
       let classe = await req.body.delete;
-      if (classe != undefined) {
-        await DBModel.deleteClasse(classe)
-        res.redirect('/admin/classes')
-      } else { res.redirect('/admin/classes') }
+      let count = await DBModel.getCountForOneClasse(classe);
+      if (classe != undefined & count[0].effectif == 0) {
+        await DBModel.deleteClasse(classe);
+        res.redirect('/admin/classes');
+      } else { res.redirect('/admin/classes'); }
     })()
   } else {
 		req.session.login = false;
 		req.session.rang = 0;
-		res.redirect("/admin")
+		res.redirect("/admin");
 	}
 }
 

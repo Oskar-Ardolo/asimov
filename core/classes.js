@@ -46,6 +46,11 @@ class DB {
       let query = "SELECT * FROM asimov_classes WHERE idclasse = '"+idclasse+"'"
       return this.doQuery(query)
     }
+    async getCountForOneClasse(classe) {
+      let query = "SELECT asimov_classes.idclasse, nomclasse, count(iduser) as effectif FROM asimov_classes LEFT JOIN asimov_dansclasse ON asimov_classes.idclasse = asimov_dansclasse.idclasse WHERE asimov_classes.idclasse ='"+classe+"'";
+      return this.doQuery(query)
+    }
+
   		// PROFS
   	async getProfs() {
   		let query = "SELECT asimov_users.id, asimov_users.nom, asimov_users.prenom, asimov_users.pseudo FROM asimov_users WHERE rang = 5 ORDER BY nom";
