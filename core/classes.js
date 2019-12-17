@@ -63,7 +63,7 @@ class DB {
   		return this.doQuery(query)
   	}
     async getMatieresForOneProf(id) {
-      let query = "SELECT idmatiere FROM asimov_enseignematiere WHERE asimov_enseignematiere.idprof = '"+id+"'"
+      let query = "SELECT idmatiere FROM asimov_enseignematiere WHERE idprof = '"+id+"'"
       return this.doQuery(query)
     }
     async addMatiereToProf(idprof, idmatiere) {
@@ -159,6 +159,11 @@ class DB {
 
     async deleteMatiere(matiere) {
       let query = "DELETE FROM asimov_matieres WHERE id='"+matiere+"'"
+      return this.doQuery(query)
+    }
+
+    async deleteMatiereForOneProf(matiere, prof) {
+      let query = "DELETE FROM asimov_enseignematiere WHERE (idmatiere='"+matiere+"' AND idprof ='"+prof+"')"
       return this.doQuery(query)
     }
 

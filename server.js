@@ -107,7 +107,7 @@ db.connect(function(err) {
   app.post("/admin/profs/defaultpassword/:idprof", (req, res) => {
     asimov.defaultPasswordForProf(req, res, db, crypto);
   });
-	app.post("/admin/profs/edit/doprof", (req, res) => {
+	app.post("/admin/profs/edit-matiere/:idprof", (req, res) => {
 		asimov.matiereToProf(req, res, db);
 	});
 	app.post("/admin/classes/add", (req, res) => {

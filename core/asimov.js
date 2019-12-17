@@ -194,7 +194,6 @@ exports.defaultPasswordForUser = (req, res, db, crypto) => {
     (async () => {
       let id = req.params.ideleve;
       let data = await DBModel.getUserById(id);
-      console.log( data[0].nom.toUpperCase() + "-" + cap(data[0].prenom.toLowerCase()))
       let password = crypto.createHmac('sha256', data[0].nom.toUpperCase() + "-" + cap(data[0].prenom.toLowerCase()))
                  .update('jojofags suck')
                  .digest('hex');
@@ -278,7 +277,7 @@ exports.editProfView = (req, res, db) => {
 	    (async function() {
 			let utilisateur = await DBModel.getUserById(idprof);
 			let matieres = await DBModel.getMatieres();
-			let enseignematiere = await DBModel.getMatieresForOneProf(utilisateur[0].id);
+			let enseignematiere = await DBModel.getMatieresForOneProf(idprof);
 			utilisateur[0].fullName = function() {return this.nom + " " + this.prenom }
 			res.render('admin/editprof.ejs', {user : utilisateur[0], matiere : matieres, enseigne : enseignematiere});
 
@@ -334,12 +333,31 @@ exports.defaultPasswordForProf = (req, res, db, crypto) => {
 exports.matiereToProf = (req, res, db) => {
 	if(req.session.rang == 10) {
 		let idmatiere = req.body.doprof;
-		let idprof = req.body.idprof;
+		let idprof = req.params.idprof;
 		let DBModel = new DB(db);
 	    (async function() {
-	    	let insertEnseigne = await DBModel.addMatiereToProf(idprof, idmatiere);
-	    	let prof = await DBModel.getUserById(idprof);
-	    	res.redirect("/admin/profs/edit/"+prof[0].pseudo);
+        let verification = await DBModel.getMatieresForOneProf(idprof)
+        let bool;
+        let valeur = function verifier() {
+          for (i=0;i<verification.length;i++) {
+            if (parseInt(verification[i].idmatiere) == parseInt(idmatiere)) {
+              bool = true;
+              return bool;
+            } else {
+              bool = false;
+            }
+          }
+          return bool = false
+        }
+        await valeur();
+        if (bool) {
+          await DBModel.deleteMatiereForOneProf(idmatiere, idprof);
+          res.redirect("/admin/profs/edit/"+idprof);
+        } else {
+          await DBModel.addMatiereToProf(idprof, idmatiere);
+          await DBModel.getUserById(idprof);
+          res.redirect("/admin/profs/edit/"+idprof);
+        }
 		})()
 	} else {
 		res.redirect("/admin");
