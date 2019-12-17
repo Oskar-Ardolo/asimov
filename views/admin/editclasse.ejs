@@ -109,9 +109,9 @@
         <form method="post" action="/admin/classes/edit/adduser">
       <div class="form-group">
         <label for="nom">Nom</label>
-        <input type="text" id="nom" name="nom" class="form-control" placeholder="Nom..."><br/>
+        <input type="text" id="nom" name="nom" class="form-control" placeholder="Nom..." required><br/>
         <label for="prenom">Prénom</label>
-        <input type="text" id="prenom" name="prenom" class="form-control" placeholder="Prénom...">
+        <input type="text" id="prenom" name="prenom" class="form-control" placeholder="Prénom..." required>
       </div><hr>
       <input type="hidden" name="classe" value="<%= classe.idclasse %>">
       <button type="submit" class="btn btn-primary">Ajouter l'élève à la classe</button>
