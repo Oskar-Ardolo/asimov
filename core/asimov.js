@@ -120,7 +120,6 @@ exports.addUser = (req, res, db, crypto) => {
 	    let nom = (req.body.nom.toUpperCase()).replace(/ /g, "");
 	    let prenom = (cap(req.body.prenom.toLowerCase())).replace(/ /g, "");
 	    let classe = req.body.classe;
-      console.log(nom + "-" + prenom)
       if (nom != '' & prenom != '' & classe != undefined) {
   	    let pseudo = nom.substr(0, 7).toLowerCase().replace(" ", "").replace("-", "") + prenom.substr(0,2).toLowerCase().replace(" ", "").replace("-", "");
   	    let password = crypto.createHmac('sha256', nom + "-" + prenom)
@@ -152,7 +151,6 @@ exports.editUsersView = (req, res, db) => {
       (async function() {
         let users = await DBModel.getUserById(req.params.ideleve);
         let classes = await DBModel.getClasses();
-        console.log(classes)
         let classeofuser = await DBModel.getUserClasseFromId(req.params.ideleve);
         res.render("admin/edituser.ejs", {data : users, classe : classes, userClasse : classeofuser});
       })()
@@ -316,7 +314,6 @@ exports.defaultPasswordForProf = (req, res, db, crypto) => {
     (async () => {
       let id = req.params.idprof;
       let data = await DBModel.getUserById(id);
-      console.log( data[0].nom.toUpperCase() + "-" + cap(data[0].prenom.toLowerCase()))
       let password = crypto.createHmac('sha256', data[0].nom.toUpperCase() + "-" + cap(data[0].prenom.toLowerCase()))
                  .update('jojofags suck')
                  .digest('hex');
