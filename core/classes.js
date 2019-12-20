@@ -79,19 +79,19 @@ class DB {
 
   	// COUNTS
   	async userCount() {
-  		let query = "SELECT Count(*) as nbre FROM asimov_users WHERE rang = 1;";
+  		let query = "SELECT Count(*) as nbre FROM asimov_users WHERE rang = 1";
 	    return this.doQuery(query)
   	}
   	async profCount() {
-  		let query = "SELECT Count(*) as nbre FROM asimov_users WHERE rang = 5;";
+  		let query = "SELECT Count(*) as nbre FROM asimov_users WHERE rang = 5";
 	    return this.doQuery(query)
   	}
   	async classeCount() {
-  		let query = "SELECT Count(*) as nbre FROM asimov_classes;";
+  		let query = "SELECT Count(*) as nbre FROM asimov_classes";
 	    return this.doQuery(query)
   	}
   	async matiereCount() {
-  		let query = "SELECT Count(*) as nbre FROM asimov_matieres;";
+  		let query = "SELECT Count(*) as nbre FROM asimov_matieres";
 	    return this.doQuery(query)
   	}
 
@@ -161,6 +161,7 @@ class DB {
     }
     async deleteEleveFromClasse(classe, user) {
       let query = "DELETE FROM asimov_dansclasse WHERE (idclasse='"+classe+"' AND iduser='"+user+"')"
+      console.log(query)
       return this.doQuery(query)
     }
 
