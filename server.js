@@ -86,6 +86,9 @@ db.connect(function(err) {
 	app.get("/admin/matieres", (req, res) => {
 		asimov.getMatieres(req, res, db);
 	});
+  app.get("/admin/matieres/edit/:idmatiere", (req, res) => {
+    asimov.editmatiere(req, res, db);
+  })
 	app.post("/admin/users/add", (req, res) => {
 		asimov.addUser(req, res, db, crypto);
 	});

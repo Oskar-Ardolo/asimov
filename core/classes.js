@@ -75,6 +75,10 @@ class DB {
       let query = "INSERT INTO asimov_enseignematiere(idprof, idmatiere) VALUES (?, ?)";
       return this.doInsert(query, [idprof, idmatiere]);
     }
+    async getProfsForOneMatiere(id) {
+      let query = "SELECT asimov_users.id,  asimov_users.nom,  asimov_users.prenom,  asimov_users.pseudo FROM asimov_users LEFT JOIN  asimov_enseignematiere ON  asimov_users.id =  asimov_enseignematiere.idprof WHERE asimov_enseignematiere.idmatiere ='"+id+"'";
+      return this.doInsert(query);
+    }
 
 
   	// COUNTS

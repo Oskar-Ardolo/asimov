@@ -41,10 +41,14 @@
                 <td><%= data[i].nommatiere %></td>
                 <td><%= data[i].effectif %></td>
                 <td>
-                  <form style="width:100%;padding:0;margin:0;" action="/admin/matieres/delete" method="post">
-                    <button style="width:49%;" type="button" class="btn btn-primary" onclick="location.href='/admin/matiere/edit/<%= data[i].id %>';" value="edit-prof">Editer</button>
+                  <form id="deletematiere-<%= data[i].id %>" style="width:100%;padding:0;margin:0;" action="/admin/matieres/delete" method="post">
+                    <button style="width:49%;" type="button" class="btn btn-primary" onclick="location.href='/admin/matieres/edit/<%= data[i].id %>';" value="edit-prof">Editer</button>
                     <input type="hidden" name="delete" value="<%= data[i].id %>">
-                    <button id="deleteProf" style="width:49%;" type="submit" class="btn btn-danger">Supprimer</button>
+                    <% if (data[i].effectif > 0) {%>
+                      <button id="delete-matiere"  onclick="redirect(<%= data[i].id %>);" style="width:49%;" type="button" class="btn btn-danger" data-toggle="modal" data-target="#ClassContainModal">Supprimer</button>
+                    <% } else {%>
+                    <button id="delete-matiere" onclick="verifier(<%= data[i].id %>);" style="width:49%;" type="button" class="btn btn-danger" data-toggle="modal" data-target="#ClassDeleteModal">Supprimer</button>
+                    <% } %>
                   </form>
                 </td>
               </tr>
@@ -73,5 +77,47 @@
 
 
 </div>
+
+<!-- Matiere doesn't contain teacher Modal -->
+<div class="modal fade" id="ClassDeleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Êtes-vous sûr de vouloir supprimer cette matière?</h5>
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">Cliquer sur <b>Confirmer</b> pour bien la supprimer</div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-dismiss="modal">Annuler</button>
+        <button id="btn-delete" type="submit" form="deletematiere" class="btn btn-primary">Confirmer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Classe contain teacher Modal -->
+<div class="modal fade" id="ClassContainModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Impossible de supprimer cette matière, elle est affiliée à des professeurs</h5>
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">Supprimer les professeurs de cette matière pour continuer</div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-dismiss="modal">Annuler</button>
+        <button id="btn-redirect" type="button" onclick="location.href='/admin/classes'" class="btn btn-primary">Editer la matière</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Script delete matiere -->
+<script src="/js/delete-matiere.js"></script>
+
 <!-- /.container-fluid -->
 <% include ../include/footer.ejs %>

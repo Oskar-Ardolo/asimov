@@ -1,0 +1,109 @@
+<% include ../include/header.ejs %>
+
+<div id="content-wrapper">
+
+<div class="container-fluid">
+    <!-- CODE HERE -->
+     <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="/">Accueil</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="/admin">Admin</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="/admin/matieres">Gestion des matières</a>
+      </li>
+      <li class="breadcrumb-item active"><%= matiere.nommatiere %></li>
+    </ol>
+
+    <div class="card mb-3">
+      <div class="card-header">
+        <i class="fas fa-users"></i>
+        Gestion des matières : <i>Edition de la matière</i></div>
+      <div class="card-body">
+          <div class="row">
+            <div class="col-lg-3">
+              <img src="/img/classe.png" alt="<%= matiere.nommatiere %>" width=300 />
+            </div>
+            <div class="col-lg-9">
+              <form method="post" action="/admin/classes/edit/editclasse">
+                <input type="hidden" name="idmatiere" value="<%= matiere.id %>">
+              <div class="form-group">
+                <label for="nom">Nom de la matière</label>
+                <input type="text" id="nom" name="nommatiere" class="form-control" placeholder="Nom de la matière..." value="<%= matiere.nommatiere %>"><br/>
+              </div>
+              <hr>
+              <center><button class="btn btn-success">Enregistrer les modifications</button></center>
+            </form>
+            </div>
+          </div><hr>
+      </div>
+      <div class="card-footer small text-muted">Mis à jour : il y a quelques secondes...</div>
+    </div>
+    <div class="card mb-3">
+      <div class="card-header">
+        <i class="fas fa-users"></i>
+        Gestion des professeurs</div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Pseudonyme</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tfoot>
+              <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Pseudonyme</th>
+                <th>Actions</th>
+              </tr>
+            </tfoot>
+            <tbody>
+      <% for(var i=0; i < profs.length; i++) { %>
+              <tr>
+                <td><%= profs[i].nom %></td>
+                <td><%= profs[i].prenom %></td>
+                <td><%= profs[i].pseudo %></td>
+                <td>
+                  <form action="/admin/profs/edit-prof/<%= matiere.id %>" method="post">
+                    <input type="hidden" name="iduser" value="<%= profs[i].id %>">
+                    <button style="width:45%;" type="button" onclick="location.href='/admin/profs/edit/<%= profs[i].id %>';" class="btn btn-primary">Editer</button>
+                    <button style="width:53%;" type="submit" class="btn btn-danger">Supprimer de la matière</button>
+                  </form>
+                </td>
+              </tr>
+             <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-footer small text-muted">Mis à jour : il y a quelques secondes...</div>
+    </div>
+    <hr>
+    <div class="card mb-3">
+      <div class="card-header">
+        <i class="fas fa-user"></i>
+        Ajouter un professeur à la classe</div>
+      <div class="card-body">
+        <form method="post" action="/admin/matieres/edit/addmatiere">
+      <div class="form-group">
+        <label for="nom">Nom</label>
+        <input type="text" id="nom" name="nom" class="form-control" placeholder="Nom..." required><br/>
+        <label for="prenom">Prénom</label>
+        <input type="text" id="prenom" name="prenom" class="form-control" placeholder="Prénom..." required>
+      </div><hr>
+      <input type="hidden" name="matiere" value="<%= matiere.id %>">
+      <button type="submit" class="btn btn-primary">Ajouter le professeur à la matière</button>
+    </form>
+      </div>
+    </div>
+
+</div>
+<!-- /.container-fluid -->
+<% include ../include/footer.ejs %>

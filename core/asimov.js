@@ -571,3 +571,18 @@ exports.deleteMatiere = (req, res, db) => {
     res.redirect("/admin")
   }
 }
+
+exports.editmatiere = (req, res, db) => {
+    if(req.session.rang >= 10) {
+      let DBModel = new DB(db);
+        (async function() {
+        let matiere = await DBModel.getClasseById(req.params.idmatiere);
+        let profs = await DBModel.getProfsForOneMatiere(req.params.idmatiere);
+        res.render("admin/editmatiere.ejs", {matiere : matiere[0], profs : profs} );
+      })()
+    } else {
+      req.session.login = false;
+      req.session.rang = 0;
+      res.redirect("/admin")
+    }
+}
