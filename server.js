@@ -134,6 +134,10 @@ db.connect(function(err) {
     asimov.deleteMatiere(req, res, db);
   });
 
+  app.post("/admin/matiere/delete-prof-from-matiere/:idmatiere", (req,res) => {
+    asimov.deleteProfFromMatiere(req, res, db);
+  });
+
 	/* END ADMIN ROUTES */
 
 

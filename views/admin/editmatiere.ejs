@@ -71,8 +71,8 @@
                 <td><%= profs[i].prenom %></td>
                 <td><%= profs[i].pseudo %></td>
                 <td>
-                  <form action="/admin/profs/edit-prof/<%= matiere.id %>" method="post">
-                    <input type="hidden" name="iduser" value="<%= profs[i].id %>">
+                  <form action="/admin/matiere/delete-prof-from-matiere/<%= matiere.id %>" method="post">
+                    <input type="hidden" name="idprof" value="<%= profs[i].id %>">
                     <button style="width:45%;" type="button" onclick="location.href='/admin/profs/edit/<%= profs[i].id %>';" class="btn btn-primary">Editer</button>
                     <button style="width:53%;" type="submit" class="btn btn-danger">Supprimer de la matière</button>
                   </form>

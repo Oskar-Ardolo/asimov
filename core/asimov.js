@@ -576,7 +576,7 @@ exports.editmatiere = (req, res, db) => {
     if(req.session.rang >= 10) {
       let DBModel = new DB(db);
         (async function() {
-        let matiere = await DBModel.getClasseById(req.params.idmatiere);
+        let matiere = await DBModel.getMatieresById(req.params.idmatiere);
         let profs = await DBModel.getProfsForOneMatiere(req.params.idmatiere);
         res.render("admin/editmatiere.ejs", {matiere : matiere[0], profs : profs} );
       })()
@@ -585,4 +585,21 @@ exports.editmatiere = (req, res, db) => {
       req.session.rang = 0;
       res.redirect("/admin")
     }
+}
+
+exports.deleteProfFromMatiere = (req, res, db) => {
+  if(req.session.rang >= 10) {
+    let DBModel = new DB(db);
+    let idprof = req.body.idprof;
+    let idmatiere = req.params.idmatiere;
+    console.log(idprof, idmatiere);
+      (async function() {
+        await DBModel.deleteMatiereForOneProf(idmatiere, idprof);
+        res.redirect("/admin/matieres/edit/" + idmatiere);
+    })()
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/admin")
+  }
 }

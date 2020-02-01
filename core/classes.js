@@ -63,6 +63,10 @@ class DB {
   		let query = "SELECT * FROM asimov_matieres ORDER BY nommatiere";
   		return this.doQuery(query)
   	}
+  	async getMatieresById(id) {
+  		let query = "SELECT * FROM asimov_matieres WHERE id='"+ id +"' ORDER BY nommatiere";
+  		return this.doQuery(query)
+  	}
   	async getMatieresAndProfCount() {
   		let query = "SELECT id, nommatiere, count(idprof) as effectif FROM asimov_matieres LEFT JOIN asimov_enseignematiere ON asimov_matieres.id = asimov_enseignematiere.idmatiere GROUP BY nommatiere";
   		return this.doQuery(query)
