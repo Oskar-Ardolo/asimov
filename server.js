@@ -4,6 +4,7 @@ const DB_NAME = "asimov"
 const DB_USER = "root"
 const DB_PASS = ""
 
+var fs = require('fs');
 var asimov = require("./core/asimov.js");
 var express = require('express');
 var session = require('express-session')
@@ -81,7 +82,7 @@ db.connect(function(err) {
 		asimov.editClasse(req, res, db);
 	});
   app.post("/admin/classes/delete", (req, res) => {
-    asimov.deleteClasse(req, res, db);
+    asimov.deleteClasse(req, res, db, fs);
   });
 	app.get("/admin/matieres", (req, res) => {
 		asimov.getMatieres(req, res, db);
@@ -90,52 +91,54 @@ db.connect(function(err) {
     asimov.editmatiere(req, res, db);
   })
 	app.post("/admin/users/add", (req, res) => {
-		asimov.addUser(req, res, db, crypto);
+		asimov.addUser(req, res, db, crypto, fs);
 	});
   app.post("/admin/users/edit/:ideleve", (req, res) => {
-    asimov.editUserData(req, res, db);
+    asimov.editUserData(req, res, db, fs);
   });
   app.post("/admin/users/defaultpassword/:ideleve", (req, res) => {
-    asimov.defaultPasswordForUser(req, res, db, crypto);
+    asimov.defaultPasswordForUser(req, res, db, crypto, fs);
   })
   app.post("/admin/user/delete", (req, res) => {
-    asimov.deleteUser(req, res, db);
+    asimov.deleteUser(req, res, db, fs);
   });
 	app.post("/admin/profs/add", (req, res) => {
-		asimov.addProf(req, res, db, crypto);
+		asimov.addProf(req, res, db, crypto, fs);
 	});
   app.post("/admin/profs/edit/:idprof", (req, res) => {
-    asimov.editProfData(req, res, db);
+    asimov.editProfData(req, res, db, fs);
   });
   app.post("/admin/profs/defaultpassword/:idprof", (req, res) => {
-    asimov.defaultPasswordForProf(req, res, db, crypto);
+    asimov.defaultPasswordForProf(req, res, db, crypto, fs);
   });
 	app.post("/admin/profs/edit-matiere/:idprof", (req, res) => {
-		asimov.matiereToProf(req, res, db);
+		asimov.matiereToProf(req, res, db, fs);
 	});
 	app.post("/admin/classes/add", (req, res) => {
-		asimov.addClasse(req, res, db);
+		asimov.addClasse(req, res, db, fs);
 	});
+  // A modifier, un user ne peu être ajouté à une classe s'il n'existe pas : ILLOGIQUE
+  // Interface proposant une liste d'élèves non attribué
 	app.post("/admin/classes/edit/adduser", (req, res) => {
-		asimov.addUserToClasse(req, res, db, crypto);
+		asimov.addUserToClasse(req, res, db, crypto, fs);
 	});
 	app.post("/admin/classes/edit/editclasse", (req, res) => {
-		asimov.doModifClasse(req, res, db);
+		asimov.doModifClasse(req, res, db, fs);
 	});
   app.post("/admin/classes/edit-eleve/:idclasse", (req, res) => {
-    asimov.modifElevesInClasse(req, res, db);
+    asimov.modifElevesInClasse(req, res, db, fs);
   });
 
 	app.post("/admin/matieres/add", (req, res) => {
-		asimov.addMatiere(req, res, db);
+		asimov.addMatiere(req, res, db, fs);
 	});
 
   app.post("/admin/matieres/delete", (req, res) => {
-    asimov.deleteMatiere(req, res, db);
+    asimov.deleteMatiere(req, res, db, fs);
   });
 
   app.post("/admin/matiere/delete-prof-from-matiere/:idmatiere", (req,res) => {
-    asimov.deleteProfFromMatiere(req, res, db);
+    asimov.deleteProfFromMatiere(req, res, db, fs);
   });
 
 	/* END ADMIN ROUTES */
@@ -143,7 +146,7 @@ db.connect(function(err) {
 
 	/* GLOBAL POST ROUTES */
 	app.post("/login", (req, res) => {
-		asimov.login(req, res, db, crypto)
+		asimov.login(req, res, db, crypto, fs)
 	});
 
   // 404, PAS DE ROUTES APRES CA

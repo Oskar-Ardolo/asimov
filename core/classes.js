@@ -3,9 +3,6 @@ class DB {
    		this.db = db;
   	}
 
-
-
-
   	// GET
   		// USERS
   	async getUsers() {
@@ -30,6 +27,10 @@ class DB {
     }
     async getUserClasseFromId(id) {
       let query = "SELECT asimov_classes.nomclasse FROM asimov_classes LEFT JOIN asimov_dansclasse ON asimov_classes.idclasse = asimov_dansclasse.idclasse WHERE asimov_dansclasse.iduser ='"+id+"'"
+      return this.doQuery(query)
+    }
+    async getUserDuplicate(nom, prenom, pseudo) {
+      let query = "SELECT id, nom, prenom, pseudo, rang FROM asimov_users WHERE nom='"+nom+"' AND prenom='"+prenom+"' AND pseudo='"+pseudo+"'"
       return this.doQuery(query)
     }
 
@@ -169,7 +170,6 @@ class DB {
     }
     async deleteEleveFromClasse(classe, user) {
       let query = "DELETE FROM asimov_dansclasse WHERE (idclasse='"+classe+"' AND iduser='"+user+"')"
-      console.log(query)
       return this.doQuery(query)
     }
 

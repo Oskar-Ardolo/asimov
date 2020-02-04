@@ -32,3 +32,9 @@ Système de message
 
 note à moi même : faire évoluer au fur et à mesure le document quand nouvelle idée
 
+Ajouter des try catch => quand il y a plusieurs connexions simultanées les données ne se mettant pas a jour dynamiquement font planter 
+			le serveur, par exemple quand une personne veut supprimer une classe puis qu'une autre essaye de faire pareil.
+
+Logs uniquements présent sur les post 
+
+empêcher deux l'ajout de deux user avec le même nom
