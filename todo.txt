@@ -40,4 +40,6 @@ Ajouter des try catch => quand il y a plusieurs connexions simultanées les donn
 
 Logs uniquements présent sur les post 
 
-empêcher deux l'ajout de deux user avec le même nom
+empêcher l'ajout de deux user avec le même nom
+
+[13/02/2020] : Remplacer lors de l'ajout dans la base de donnée les caractères spéciaux (é, à ...) par des normaux
