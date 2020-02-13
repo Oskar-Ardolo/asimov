@@ -10,31 +10,44 @@ cap(string) : renvoie un string avec la première lettre en majuscule et le rest
 double(nom, prenom, pseudo, db) : renvoie true lorsque l'utilisateur se trouve déjà dans la BDD
                                   et false lorsqu'il ne s'y trouve pas (évite les duplicatas)
 verifier(dataOne, dataOneVar, dataTwo) : renvoie true lorsque la valeur 2 est présente dans la valeur 1 et false dans le cas contraire
-                                        dataOneVar est un string, avec la focntion eval() => transform str en fonction
+                                        dataOneVar est un string, avec la fonction eval() => transform str en fonction
                                         à personaliser en fonction des besoins.
                                         /!\ attention, remplacer dataOneVar par : "dataOne[i].attribut"
+
+getdate() : renvoie la date du jour au format dd/jj/yyyy
+gethours() : renvoie l'heure au format h:min
 */
 
 const DB = require('./classes.js');
-var logs = require('../Logs/log.js');
+const Logs = require('../Logs/js/log.js');
 
 const cap = (s) => {
   if (typeof s !== 'string') return ''
   return s.toLowerCase().charAt(0).toUpperCase() + s.slice(1)
 }
 
-
 const double = (nom, prenom, pseudo, db) => {
-  try {
-    let DBModel = new DB(db);
-    (async function() {
-      await DBModel.getUserDuplicate(nom, prenom, pseudo);
-      return true
-    })();
-  }
-  catch (err) {
-    return false
-  }
+  let promise = new Promise((resolve, reject) => {
+    try {
+      let DBModel = new DB(db);
+      (async function() {
+        let value = await DBModel.getUserDuplicate(nom, prenom, pseudo);
+        for (let items in value) {
+          if (value[items]) {
+            return resolve(true)
+          }
+        }
+        return resolve(false);
+      })();
+    }
+    catch (err) {
+      resolve(false)
+    }
+  });
+  return promise.then((val) => {
+    return val
+  });
+
 }
 
 const verifier = (dataOne, dataOneVar, dataTwo) => {
@@ -42,6 +55,24 @@ const verifier = (dataOne, dataOneVar, dataTwo) => {
     if (eval(dataOneVar) == dataTwo)  return true;
   }
   return false;
+}
+
+const getdate = () => {
+  let day = new Date();
+  return day.getDate() +"-"+ (day.getMonth() + 1) +"-"+ day.getFullYear()
+}
+
+const gethours = () => {
+  let day = new Date();
+  let h = day.getHours();
+  let min = day.getMinutes();
+  if (h < 10) {
+    h = "0"+h;
+  }
+  if (min < 10) {
+     min = "0" + min
+  }
+  return h +":"+ min ;
 }
 
 /*
@@ -72,9 +103,11 @@ exports.login = (req, res, db, crypto, fs) => {
 	               .update('jojofags suck')
 	               .digest('hex');
 	let DBModel = new DB(db);
-  let action = "Connexion"
+  let LogsModel = new Logs();
+  let day = new Date();
 	(async function() {
     try {
+      let action = "Connexion";
       let userLogin = await DBModel.login(pseudo, password);
   		if(userLogin.length != 0) {
   			req.session.login = true;
@@ -82,8 +115,9 @@ exports.login = (req, res, db, crypto, fs) => {
   	    	if(userLogin[0].rang >= 5) {
             req.session.pseudo = pseudo;
             // Write logs
-            let data = "       ======= "+ Date() +" =======  \n \n user : " +  pseudo +"\n action : "+action+" \n \n";
-            logs.writeLog(data, fs);
+            let idlog = await LogsModel.getIdLog(fs, pseudo, getdate());
+            let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours()};
+            LogsModel.writeLog(data, fs, getdate(), pseudo);
   	    		res.redirect("/admin");
   	    	} else {
   	    		res.redirect("/home");
@@ -93,15 +127,18 @@ exports.login = (req, res, db, crypto, fs) => {
   	    }
     }
     catch (err) {
+
+      let description = err.toString();
+      let action = "Connexion failed";
       // Write error logs
-      logs.writeErrorLog(fs, req, action, err);
+      let idlog = await LogsModel.getIdLog(fs, pseudo, getdate());
+      let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{ "err" : description }]};
+      LogsModel.writeLog(data, fs, getdate(), pseudo);
       res.redirect("/home");
     }
 
 	})();
 }
-
-
 
 /*
 ======================
@@ -150,7 +187,7 @@ exports.getUsers = (req, res, db) => {
 	}
 }
 
-
+// AJOUTER DES ELEVES
 exports.addUser = (req, res, db, crypto, fs) => {
 	if(req.session.rang >= 5) {
 	    let nom = (req.body.nom.toUpperCase()).replace(/ /g, "");
@@ -163,20 +200,38 @@ exports.addUser = (req, res, db, crypto, fs) => {
   	               .digest('hex');
   	    let rang = 1
   	    let titre = "Élève";
-
   	    let userInputs = [nom, prenom, pseudo, password, rang, titre];
-
+        let LogsModel = new Logs();
   	    let DBModel = new DB(db);
   		(async function() {
-        if(double(nom, prenom, pseudo, db)) {
-  			  await DBModel.addUser(userInputs, classe);
-          let data = "       ======= "+ Date() +" =======  \n \n user : " +  req.session.pseudo +"\n action : Add user \n objet : New user [nom="+nom+", prénom="+prenom+", classe="+classe+", pseudo="+pseudo+", rang="+rang+"]\n \n";
-          logs.writeLog(data, fs);
-  			  res.redirect("/admin/users");
-        } else {
+        try {
+          let action = "Create user";
+          // If user already exist
+          let duplicata = await double(nom, prenom, pseudo, db);
+          console.log(duplicata);
+          if(duplicata == undefined | duplicata == true) {
+            res.redirect("/admin/users");
+          }
+          else {
+            // Create user
+            await DBModel.addUser(userInputs, classe);
+            // Write log
+            let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+            let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{ "nom" : nom, "prenom" : prenom, "pseudo" : pseudo, "classe" : classe, "rang" : rang.toString(), "titre" : titre}]};
+            LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+            res.redirect("/admin/users");
+          }
+        }
+        catch (err) {
+          // Write error log
+          let action = "Create user failed";
+          let description = err.toString();
+          let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+          let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{ "Error message" : description }]};
+          LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
           res.redirect("/admin/users");
         }
-  		})()
+  		})();
     } else { res.redirect("/admin/users"); }
 
 
@@ -187,6 +242,7 @@ exports.addUser = (req, res, db, crypto, fs) => {
 	}
 }
 
+// AFFICHER LA LISTE DES ELEVES
 exports.editUsersView = (req, res, db) => {
     if(req.session.rang == 10) {
       let DBModel = new DB(db);
@@ -199,14 +255,15 @@ exports.editUsersView = (req, res, db) => {
     } else {
   		req.session.login = false;
   		req.session.rang = 0;
-  		res.redirect("/home")
+  		res.redirect("/home");
   	}
 }
 
+// METTRE A JOUR LES DONNEES D'UN ELEVE
 exports.editUserData = (req, res, db, fs) => {
   if(req.session.rang == 10) {
     let DBModel = new DB(db);
-    let action = "Edit User Data";
+    let LogsModel = new Logs();
     let iduser =  req.params.ideleve;
     let lastname = (req.body.nomeleve.toUpperCase()).replace(/ /g, "");
     let firstname = (cap(req.body.prenomeleve.toLowerCase())).replace(/ /g, "");
@@ -215,13 +272,20 @@ exports.editUserData = (req, res, db, fs) => {
       try {
         if((firstname != ('' & undefined)) & (lastname != ('' & undefined)) & classe != undefined) {
           let pseudo = lastname.substr(0, 7).toLowerCase().replace(" ", "").replace("-", "") + firstname.substr(0,2).toLowerCase().replace(" ", "").replace("-", "");
+          // Get last user data
+          let userdata = await DBModel.getUserById(iduser);
+          let userclasse = await DBModel.getUserClasseFromId(iduser);
           // Edit user data
           await DBModel.editUser(iduser, firstname, lastname, pseudo);
           // Update user class
           await DBModel.updateClasseOfUser(iduser, classe);
-          // Write logs
-          let data = "       ======= "+ Date() +" =======  \n \n user : " +  req.session.pseudo +"\n action : Edit user \n objet : User [id="+iduser+", nom="+lastname+", prenom="+firstname+", classe="+classe+", pseudo="+pseudo+"]\n \n";
-          logs.writeLog(data, fs);
+
+          // Write log
+          let action = "Modify user";
+          let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+          let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": iduser, "nom" : userdata[0].nom, "prenom" : userdata[0].prenom, "pseudo" : userdata[0].pseudo, "classe" : userclasse[0].nomclasse }, { "id": iduser, "nom" : lastname, "prenom" : firstname, "pseudo" : pseudo, "classe" : classe }]};
+          LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
           res.redirect("/admin/users/edit/" + iduser);
         } else {
           res.redirect("/admin/users/edit/" + iduser);
@@ -229,10 +293,14 @@ exports.editUserData = (req, res, db, fs) => {
       }
       catch (err) {
         // Write error logs
-        logs.writeErrorLog(fs, req, action, err);
+        let action = "Modify user failed";
+        let description = err.toString();
+        let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+        let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{ "Error message" : description }]};
+        LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
         res.redirect("/admin/users/edit/" + iduser);
       }
-    })()
+    })();
   } else {
     req.session.login = false;
     req.session.rang = 0;
@@ -240,31 +308,41 @@ exports.editUserData = (req, res, db, fs) => {
   }
 }
 
+// REINITIALISER LE MOT DE PASSE D'UN ELEVE
 exports.defaultPasswordForUser = (req, res, db, crypto, fs) => {
   if(req.session.rang == 10) {
     let DBModel = new DB(db);
-    let action = "Default password"
+    let LogsModel = new Logs();
     (async () => {
+      let id = req.params.ideleve;
       try {
-        let id = req.params.ideleve;
         // Get user data by Id
-        let data = await DBModel.getUserById(id);
+        let userdata = await DBModel.getUserById(id);
         // Encrypt password for BDD
-        let password = crypto.createHmac('sha256', data[0].nom.toUpperCase() + "-" + cap(data[0].prenom.toLowerCase()))
+        let password = crypto.createHmac('sha256', userdata[0].nom.toUpperCase() + "-" + cap(userdata[0].prenom.toLowerCase()))
                    .update('jojofags suck')
                    .digest('hex');
         await DBModel.defaultPassword(id, password);
+
         // Write logs
-        let log = "       ======= "+ Date() +" =======  \n \n user : " +  req.session.pseudo +"\n action : Edit password \n objet : User [id="+id+"]\n \n";
-        logs.writeLog(log, fs);
+        let action = "Modify user password";
+        let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+        let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": id, "nom" : userdata[0].nom, "prenom" : userdata[0].prenom, "pseudo" : userdata[0].pseudo}]};
+        LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
         res.redirect("/admin/users/edit/" + id)
       }
       catch (err) {
         // Write error logs
-        logs.writeErrorLog(fs, req, action, err);
-        res.redirect("/admin/users/edit/" + id)
+        let description = err.toString();
+        let action = "Modify user password failed";
+        let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+        let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description }]};
+        LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+        res.redirect("/admin/users/edit/" + id);
       }
-    })()
+    })();
   } else {
     req.session.login = false;
     req.session.rang = 0;
@@ -272,35 +350,49 @@ exports.defaultPasswordForUser = (req, res, db, crypto, fs) => {
   }
 }
 
+// SUPPRIMER UN ELEVE
 exports.deleteUser = (req, res, db, fs) => {
   if(req.session.rang >= 10) {
     let DBModel = new DB(db);
-    let action = "Delete User"
+    let LogsModel = new Logs();
     (async function() {
       try {
         let user = await req.body.delete;
         let dataUser = await DBModel.getUserById(user);
+
         // GET RANG OF USER TO REDIRECT TO THE CORRECT PAGE
         let rangUser = await DBModel.getRangUserWithId(user);
         if (user != undefined) {
+
           // DELETE USERS AND PROFS
-          await DBModel.deleteUser(user)
+          await DBModel.deleteUser(user);
+
           // Write logs
-          let log = "       ======= "+ Date() +" =======  \n \n user : " +  req.session.pseudo +"\n action : Delete \n objet : User [id="+dataUser[0].id+", Nom="+dataUser[0].nom+", prénom="+dataUser[0].prenom+"]\n \n";
-          logs.writeLog(log, fs);
+          let action = "Delete user";
+          let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+          let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": dataUser[0].id, "nom" : dataUser[0].nom, "prenom" : dataUser[0].prenom, "pseudo" : dataUser[0].pseudo}]};
+          LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
           // Redirect to the corresponding page
           if(rangUser[0].rang < 5) {
-          res.redirect('/admin/users');
+            res.redirect('/admin/users');
           } else {
             res.redirect('/admin/profs');
           }
+
         } else { res.redirect('/admin/users') }
       }
       catch (err) {
-        logs.writeErrorLog(fs, req, action, err)
+        let user = await req.body.delete;
+        // Write error logs
+        let description = err.toString();
+        let action = "Delete user failed";
+        let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+        let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": user}]};
+        LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
         res.redirect('/admin/users');
       }
-    })()
+    })();
   } else {
     req.session.login = false;
     req.session.rang = 0;
@@ -325,9 +417,10 @@ exports.getProfs = (req, res, db) => {
 
 }
 
+// AJOUTER UN PROFESSEURS
 exports.addProf = (req, res, db, crypto, fs) => {
 	if(req.session.rang == 10) {
-    let action = "Add Prof";
+    let LogsModel = new Logs();
     try {
       let nom = (req.body.nom.toUpperCase()).replace(/ /g, "");
       let prenom = (cap(req.body.prenom.toLowerCase())).replace(/ /g, "");
@@ -344,9 +437,13 @@ exports.addProf = (req, res, db, crypto, fs) => {
           if(double(nom, prenom, pseudo, db)) {
             // Add the user
             await DBModel.addProf([nom, prenom, pseudo, password, rang, titre]);
+            let dataUser = await DBModel.getUserByPseudo(pseudo);
             //Write logs
-            let log = "       ======= "+ Date() +" =======  \n \n user : " +  req.session.pseudo +"\n action : Add Prof \n objet : User [nom="+nom+", prénom="+prenom+", pseudo="+pseudo+", rang="+rang+", titre="+titre+"]\n \n";
-            logs.writeLog(log, fs);
+            let action = "Create teacher";
+            let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+            let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": dataUser[0].id, "nom" : dataUser[0].nom, "prenom" : dataUser[0].prenom, "pseudo" : dataUser[0].pseudo, "rang" : rang.toString(), "titre" : titre}]};
+            LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
             // Redirect to last page
             res.redirect("/admin/profs");
           }
@@ -355,9 +452,17 @@ exports.addProf = (req, res, db, crypto, fs) => {
       } else { res.redirect("/admin/profs") }
     }
     catch (err) {
-      // Write error logs
-      logs.writeErrorLog(fs, req, action, err);
-      res.redirect("/admin/profs");
+      (async function() {
+        // Write error logs
+        let description = err.toString();
+        let action = "Create teacher failed";
+        let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+        let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description }]};
+        LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+        res.redirect("/admin/profs");
+      })();
+
     }
 
 	} else {
@@ -367,6 +472,7 @@ exports.addProf = (req, res, db, crypto, fs) => {
 	}
 }
 
+// AFFICHER LA LISTE DES PROFESSEURS
 exports.editProfView = (req, res, db) => {
 	if(req.session.rang == 10) {
 		let idprof = req.params.idprof;
@@ -384,10 +490,11 @@ exports.editProfView = (req, res, db) => {
 	}
 }
 
+// METTRE A JOUR LES DONNEES D'UN PROFESSEURS
 exports.editProfData = (req, res, db, fs) => {
   if(req.session.rang == 10) {
     let DBModel = new DB(db);
-    let action = "Edit Prof Data"
+    let LogsModel = new Logs();
     let idprof =  req.params.idprof;
     let lastname = (req.body.nomprof.toUpperCase()).replace(/ /g, "");
     let firstname = (cap(req.body.prenomprof.toLowerCase())).replace(/ /g, "");
@@ -398,17 +505,25 @@ exports.editProfData = (req, res, db, fs) => {
           // Edit prof data
           await DBModel.editUser(idprof, firstname, lastname, pseudo);
           //Write logs
-          let log = "       ======= "+ Date() +" =======  \n \n user : " +  req.session.pseudo +"\n action : Add Prof \n objet : Prof [id="+idprof+",nom="+lastname+", prénom="+firstname+", pseudo="+pseudo+"]\n \n";
-          logs.writeLog(log, fs);
+          let action = "Modify teacher";
+          let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+          let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": idprof, "nom" : lastname, "prenom" : firstname, "pseudo" : pseudo}]};
+          LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
           res.redirect("/admin/profs/edit/" + idprof);
         } else { res.redirect("/admin/profs/edit/" + idprof) }
       }
       catch (err) {
         // Write error logs
-        logs.writeErrorLog(fs, req, action, err);
+        let description = err.toString();
+        let action = "Modify teacher failed";
+        let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+        let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description}]};
+        LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
         res.redirect("/admin/profs/edit/" + idprof);
       }
-    })()
+    })();
   } else {
     req.session.login = false;
     req.session.rang = 0;
@@ -416,27 +531,37 @@ exports.editProfData = (req, res, db, fs) => {
   }
 }
 
+// REINITIALISER LE MOT DE PASSE D'UN PROFESSEUR
 exports.defaultPasswordForProf = (req, res, db, crypto, fs) => {
   if(req.session.rang == 10) {
     let DBModel = new DB(db);
-    let action = "Default password (prof)"
+    let LogsModel = new Logs();
+    let action = "Default password (prof)";
     (async () => {
       try {
         let id = req.params.idprof;
-        let data = await DBModel.getUserById(id);
-        let password = crypto.createHmac('sha256', data[0].nom.toUpperCase() + "-" + cap(data[0].prenom.toLowerCase()))
+        let userdata = await DBModel.getUserById(id);
+        let password = crypto.createHmac('sha256', userdata[0].nom.toUpperCase() + "-" + cap(userdata[0].prenom.toLowerCase()))
                    .update('jojofags suck')
                    .digest('hex');
         // Add default password
         await DBModel.defaultPassword(id, password);
         // Write logs
-        let log = "       ======= "+ Date() +" =======  \n \n user : " +  req.session.pseudo +"\n action : Add Prof \n objet : Prof [id="+data[0].id+",nom="+data[0].nom+", prénom="+data[0].prenom+", pseudo="+data[0].pseudo+"]\n \n";
-        logs.writeLog(log, fs);
+        let action = "Modify teacher password";
+        let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+        let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": id, "nom" : userdata[0].nom, "prenom" : userdata[0].prenom, "pseudo" : userdata[0].pseudo}]};
+        LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
         res.redirect("/admin/profs/edit/" + id);
       }
       catch (err) {
         // Write error logs
-        logs.writeErrorLog(fs, req, action, err);
+        let description = err.toString();
+        let action = "Modify teacher password failed";
+        let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+        let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description}]};
+        LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
         res.redirect("/admin/profs/edit/" + id);
       }
     })()
@@ -447,12 +572,13 @@ exports.defaultPasswordForProf = (req, res, db, crypto, fs) => {
   }
 }
 
+// MODIFIER L'ATTRIBUTION DES MATIERE A UN PROFESSEUR
 exports.matiereToProf = (req, res, db, fs) => {
 	if(req.session.rang == 10) {
 		let idmatiere = req.body.doprof;
 		let idprof = req.params.idprof;
 		let DBModel = new DB(db);
-    let action = "Edit Matière Prof";
+    let LogsModel = new Logs();
 	    (async function() {
         try {
           let data = await DBModel.getMatieresForOneProf(idprof);
@@ -462,24 +588,34 @@ exports.matiereToProf = (req, res, db, fs) => {
             // Delete this teacher from this subject
             await DBModel.deleteMatiereForOneProf(idmatiere, idprof);
             // Write logs
-            let log = "       ======= "+ Date() +" =======  \n \n user : "+ req.session.pseudo +"\n action : "+ action +" \n objet : Matière [idprof="+idprof+" ,idmatiere="+idmatiere+"], From [true], To [false] \n \n";
-            logs.writeLog(log, fs);
+            let action = "Delete subject for teacher";
+            let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+            let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"idteacher": idprof, "idsubject" : idmatiere}]};
+            LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
             res.redirect("/admin/profs/edit/"+idprof);
           } else {
             // Add this teacher to this subject
             await DBModel.addMatiereToProf(idprof, idmatiere);
-            // Write log
-            let log = "       ======= "+ Date() +" =======  \n \n user : "+ req.session.pseudo +"\n action : "+ action +" \n objet : Matière [idprof="+idprof+" ,idmatiere="+idmatiere+"], From [False], To [True] \n \n";
-            logs.writeLog(log, fs);
+            // Write logs
+            let action = "Add subject for teacher";
+            let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+            let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"idteacher": idprof, "idsubject" : idmatiere}]};
+            LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
             res.redirect("/admin/profs/edit/"+idprof);
           }
         }
         catch (err) {
           // Write errors logs
-          logs.writeErrorLog(fs, req, action, err);
+          let description = err.toString();
+          let action = "Modify subject for teacher failed";
+          let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+          let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description}]};
+          LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
           res.redirect("/admin/profs/edit/"+idprof);
         }
-
 		})()
 	} else {
     req.session.login = false;
@@ -503,19 +639,26 @@ exports.addUserToClasse = (req, res, db, crypto, fs) => {
   	    let titre = "Élève";
   	    let userInputs = [nom, prenom, pseudo, password, rang, titre];
   	    let DBModel = new DB(db);
+        let LogsModel = new Logs();
         let action = "Add User";
   		  (async function() {
           try {
             // Add an user
-            await DBModel.addUser(userInputs, classe);
+            //await DBModel.addUser(userInputs, classe);
             // Write log
+            /*
+            let action = "Add user to class";
+            let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+            let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{}]};
+            LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
             let log = "       ======= "+ Date() +" =======  \n \n user : "+ req.session.pseudo +"\n action : "+ action +" \n objet : Matière [nom="+nom+" ,prenom="+prenom+", pseudo="+pseudo+", classe="+classe+", rang="+rang+", titre="+titre+"] \n \n";
-            logs.writeLog(log, fs);
+            logs.writeLog(log, fs, req);*/
       			res.redirect("/admin/classes/edit/"+classe);
           }
           catch (err) {
             // Write logs
-            logs.writeErrorLog(fs, req, action, err)
+            //logs.writeErrorLog(fs, req, action, err)
             res.redirect("/admin/classes/edit/"+classe);
           }
   		})()
@@ -527,25 +670,36 @@ exports.addUserToClasse = (req, res, db, crypto, fs) => {
 	}
 }
 
+// METTRE A JOUR LES DONNEES D'UNE CLASSE
 exports.doModifClasse = (req, res, db, fs) => {
 	if(req.session.rang >= 10) {
 		let profprincipal = req.body.profprincipal;
 		let nomclasse = req.body.nomclasse;
 		let classeToEdit = req.body.idclasse;
 	  let DBModel = new DB(db);
-    let action = "Edit Classe";
+    let LogsModel = new Logs();
     (async function() {
       try {
         // Edit the following class
         let lastdata = await DBModel.getClasseById(classeToEdit);
         await DBModel.editClasse(classeToEdit, nomclasse, profprincipal);
-        let log = "       ======= "+ Date() +" =======  \n \n user : "+ req.session.pseudo +"\n action : "+ action +" \n objet : From [id="+classeToEdit+", nom="+lastdata[0].nomclasse+", prof principal="+lastdata[0].profprincipal+"] \n         To [id="+classeToEdit+", nom="+nomclasse+", prof principal="+profprincipal+"] \n \n";
-        logs.writeLog(log, fs);
+        // Write logs
+        let action = "Modify class";
+        let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+        let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": classeToEdit, "nom" : lastdata[0].nomclasse, "main teacher" : lastdata[0].profprincipal}, {"id": classeToEdit, "nom" : nomclasse, "main teacher" : profprincipal}]};
+        LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
         res.redirect("/admin/classes/edit/"+classeToEdit);
       }
       catch (err) {
-        // Write logs
-        logs.writeErrorLog(fs, req, action, err)
+        // Write error logs
+        let description = err.toString();
+        let action = "Modify class failed";
+        let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+        let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description}]};
+        LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+
         res.redirect("/admin/classes/edit/"+classeToEdit);
       }
 		})();
@@ -575,6 +729,7 @@ exports.getClasses = (req, res, db) => {
 	}
 }
 
+// AFFICHER LA LISTE DES CLASSES
 exports.editClasse = (req, res, db) => {
 	if(req.session.rang == 10) {
 		let DBModel = new DB(db);
@@ -591,10 +746,11 @@ exports.editClasse = (req, res, db) => {
 	}
 }
 
+// AJOUTER UNE CLASSE
 exports.addClasse = (req, res, db, fs) => {
 	if(req.session.rang == 10) {
 		let DBModel = new DB(db);
-    let action = "Add Classe"
+    let LogsModel = new Logs();
     let classenom = (req.body.nomclasse).replace(/ /g, "");
   	    (async function() {
           try {
@@ -603,19 +759,29 @@ exports.addClasse = (req, res, db, fs) => {
             let bool = await verifier(classeExistantes, "dataOne[i].nomclasse", classenom);
             if(classenom != '' & bool == false) {
               // Add class to BDD
-        			let classes = await DBModel.addClasse(classenom);
+        			await DBModel.addClasse(classenom);
+              // Get id of new class
+              let newclasse = await DBModel.getClasseByNom(classenom);
               // Write log
-              let log = "       ======= "+ Date() +" =======  \n \n user : "+ req.session.pseudo +"\n action : "+ action +" \n objet : Classe [nom="+classenom+"] \n \n";
-              logs.writeLog(log, fs);
+              let action = "Create class";
+              let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+              let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": newclasse[0].idclasse, "nom" : newclasse[0].nomclasse, "main teacher" : newclasse[0].profprincipal}]};
+              LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
         			res.redirect("/admin/classes");
             } else res.redirect("/admin/classes");
           }
           catch (err) {
             // Write error logs
-            logs.writeErrorLog(fs, req, action, err)
+            let description = err.toString();
+            let action = "Create class failed";
+            let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+            let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description}]};
+            LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
             res.redirect("/admin/classes");
           }
-  		  })()
+  		  })();
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
@@ -623,10 +789,11 @@ exports.addClasse = (req, res, db, fs) => {
 	}
 }
 
+// SUPPRIMER UNE CLASSE
 exports.deleteClasse = (req, res, db, fs) => {
   if(req.session.rang >= 10) {
     let DBModel = new DB(db);
-    let action = "Delete Classe"
+    let LogsModel = new Logs();
     (async function() {
       let classe = await req.body.delete;
       try {
@@ -636,14 +803,22 @@ exports.deleteClasse = (req, res, db, fs) => {
           // Delete the folowing class
           await DBModel.deleteClasse(classe);
           // Write logs
-          let data = "       ======= "+ Date() +" =======  \n \n user : " + req.session.pseudo +"\n action : "+action+" \n objet : Classe [id="+classe+", nom="+nomclasse[0].nomclasse+"]\n \n";
-          logs.writeLog(data, fs);
+          let action = "Delete class";
+          let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+          let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": nomclasse[0].idclasse, "nom" : nomclasse[0].nomclasse}]};
+          LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
           res.redirect('/admin/classes');
         } else { res.redirect('/admin/classes'); }
       }
       catch (err) {
         // Write erros logs
-        logs.writeErrorLog(fs, req, action, err);
+        let description = err.toString();
+        let action = "Delete class failed";
+        let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+        let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error Message" : description + " (id : "+classe +")"}]};
+        LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
         res.redirect('/admin/classes');
       }
     })()
@@ -654,10 +829,11 @@ exports.deleteClasse = (req, res, db, fs) => {
 	}
 }
 
+// SUPPRIMER DES ELEVES DE LA CLASSE
 exports.modifElevesInClasse = (req, res, db, fs) => {
     if(req.session.rang >= 10) {
       let DBModel = new DB(db);
-      let action = "Delete Eleve From Classe";
+      let LogsModel = new Logs();
       let iduser = req.body.iduser;
       let idclasse = req.params.idclasse;
       (async () => {
@@ -665,13 +841,21 @@ exports.modifElevesInClasse = (req, res, db, fs) => {
           // Delete eleve from the following class
           await DBModel.deleteEleveFromClasse(idclasse, iduser);
           // Write logs
-          let data = "       ======= "+ Date() +" =======  \n \n user : " + req.session.pseudo +"\n action : "+action+" \n objet :  [idclasse="+idclasse+", iduser="+iduser+"]\n \n";
-          logs.writeLog(data, fs);
+          let action = "Modify user class";
+          let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+          let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"idclass": idclasse, "iduser" : iduser}]};
+          LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
           res.redirect("/admin/classes/edit/" + idclasse);
         }
         catch (err) {
-          // Write erros logs
-          logs.writeErrorLog(fs, req, action, err);
+          // Write error logs
+          let description = err.toString();
+          let action = "Modify user class failed";
+          let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+          let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description}]};
+          LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
           res.redirect("/admin/classes/edit/" + idclasse);
         }
       })()
@@ -697,10 +881,11 @@ exports.getMatieres = (req, res, db) => {
 	}
 }
 
+// AJOUTER DES MATIERES
 exports.addMatiere = (req, res, db, fs) => {
 	if(req.session.rang == 10) {
 		let DBModel = new DB(db);
-    let action = "Add Matière"
+    let LogsModel = new Logs();
     let nomMatiere = (req.body.nommatiere).replace(/ /g, "");
 	  (async function() {
       try {
@@ -710,15 +895,25 @@ exports.addMatiere = (req, res, db, fs) => {
         if (nomMatiere != "" & bool == false) {
           // Add Matière
           await DBModel.addMatiere(nomMatiere);
+          // Get id of new subject
+          let matiere = await DBModel.getMatiereByNom(nomMatiere);
           // Write logs
-          let data = "       ======= "+ Date() +" =======  \n \n user : " + req.session.pseudo +"\n action : "+action+" \n objet :  Matière [nom="+nomMatiere+"]\n \n";
-          logs.writeLog(data, fs);
+          let action = "Create subject";
+          let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+          let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": matiere[0].id, "nom" : matiere[0].nommatiere}]};
+          LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
           res.redirect("/admin/matieres");
         } else res.redirect("/admin/matieres");
       }
       catch (err) {
         // Write error logs
-        logs.writeErrorLog(fs, req, action, err);
+        let description = err.toString();
+        let action = "Create subject";
+        let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+        let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description, "nom" : nomMatiere}]};
+        LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
         res.redirect("/admin/matieres");
       }
 		})();
@@ -729,24 +924,34 @@ exports.addMatiere = (req, res, db, fs) => {
 	}
 }
 
+// SUPPRIMER DES MATIERES
 exports.deleteMatiere = (req, res, db, fs) => {
   if(req.session.rang >= 10) {
     let DBModel = new DB(db);
-    let action = "Delete Matière"
+    let LogsModel = new Logs();
     (async function() {
       let matiere = await req.body.delete;
       if (matiere != undefined) {
         try {
+          let matieredata = await DBModel.getMatieresById(matiere);
           // Delete the following subject
           await DBModel.deleteMatiere(matiere);
           // Write logs
-          let data = "       ======= "+ Date() +" =======  \n \n user : " + req.session.pseudo +"\n action : "+action+" \n objet :  Matière [id="+matiere+"]\n \n";
-          logs.writeLog(data, fs);
+          let action = "Delete subject";
+          let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+          let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": matieredata[0].id, "nom" : matieredata[0].nommatiere}]};
+          LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
           res.redirect('/admin/matieres');
         }
         catch (err) {
           // Write error logs
-          logs.writeErrorLog(fs, req, action, err);
+          let description = err.toString();
+          let action = "Delete subject failed";
+          let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+          let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message": description,"id": matieredata[0].id}]};
+          LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
           res.redirect('/admin/matieres');
         }
 
@@ -759,6 +964,7 @@ exports.deleteMatiere = (req, res, db, fs) => {
   }
 }
 
+// AFFICHER LA LISTE DES MATIERES
 exports.editmatiere = (req, res, db) => {
     if(req.session.rang >= 10) {
       let DBModel = new DB(db);
@@ -770,14 +976,15 @@ exports.editmatiere = (req, res, db) => {
     } else {
       req.session.login = false;
       req.session.rang = 0;
-      res.redirect("/admin")
+      res.redirect("/admin");
     }
 }
 
-exports.deleteProfFromMatiere = (req, res, db) => {
+// SUPPRIMER UN PROFESSEUR D'UNE MATIERE
+exports.deleteProfFromMatiere = (req, res, db, fs) => {
   if(req.session.rang >= 10) {
     let DBModel = new DB(db);
-    let action = "Delete Prof From Matière";
+    let LogsModel = new Logs();
     let idprof = req.body.idprof;
     let idmatiere = req.params.idmatiere;
       (async function() {
@@ -785,13 +992,21 @@ exports.deleteProfFromMatiere = (req, res, db) => {
           // Delete the following teacher from this subject
           await DBModel.deleteMatiereForOneProf(idmatiere, idprof);
           // Write logs
-          let data = "       ======= "+ Date() +" =======  \n \n user : " + req.session.pseudo +"\n action : "+action+" \n objet : [idprof="+idprof+", idmatiere="+idmatiere+"]\n \n";
-          logs.writeLog(data, fs);
+          let action = "Delete teacher from subject";
+          let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+          let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"teacher": idprof, "subject" : idmatiere}]};
+          LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
           res.redirect("/admin/matieres/edit/" + idmatiere);
         }
         catch (err) {
           // Write error logs
-          logs.writeErrorLog(fs, req, action, err);
+          let description = err.toString();
+          let action = "Delete teacher from subject failed";
+          let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+          let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description, "teacher": idprof, "subject" : idmatiere}]};
+          LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
           res.redirect("/admin/matieres/edit/" + idmatiere);
         }
 
@@ -800,5 +1015,87 @@ exports.deleteProfFromMatiere = (req, res, db) => {
     req.session.login = false;
     req.session.rang = 0;
     res.redirect("/admin")
+  }
+}
+
+// MODIFIER UNE MATIERE
+exports.editMatiereData = (req, res, db, fs) => {
+  if(req.session.rang >= 10) {
+    let DBModel = new DB(db);
+    let LogsModel = new Logs();
+    let idmatiere = req.params.idmatiere;
+    let nommatiere = req.body.nommatiere;
+      (async function() {
+        try {
+          // Get last subject data
+          let datasubject = await DBModel.getMatieresById(idmatiere);
+          // Update subject name
+          await DBModel.editMatiere(idmatiere, nommatiere);
+          // Write logs
+          let action = "Modify subject";
+          let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+          let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": datasubject[0].id , "nom" : datasubject[0].nommatiere}, {"id": idmatiere, "nom" : nommatiere}]};
+          LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+          res.redirect("/admin/matieres/edit/" + idmatiere);
+        }
+        catch (err) {
+          // Write error logs
+          let description = err.toString();
+          let action = "Modify subject failed";
+          let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+          let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description}]};
+          LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+          res.redirect("/admin/matieres/edit/" + idmatiere);
+        }
+    })();
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/admin");
+  }
+}
+
+// GESTION DES LOGS
+
+exports.getLog = (req, res, fs) => {
+  if(req.session.rang >= 10) {
+
+    let path = "./Logs/["+getdate()+"]/";
+    let tab = new Array()
+    let LogsModel = new Logs();
+    (async function() {
+      let dir = await LogsModel.readdirectory(fs, path);
+      for (i=0;i<dir.length;i++) {
+        tab[i] = await LogsModel.readfile(fs, path, dir[i]);
+      }
+      res.render('admin/log.ejs', {data : await tab });
+    })();
+
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/admin");
+  }
+}
+
+// AFFICHER LES DETAILS D'UN LOG
+exports.getLogforUser = (req, res, fs) => {
+  if(req.session.rang >= 10) {
+    let idlog = req.params.id;
+    let file = "log-["+req.params.pseudo+"]_["+req.params.date+"].json";
+    let path = "./Logs/["+req.params.date+"]/";
+    let fullpath = path + file;
+    let content;
+    let LogsModel = new Logs();
+    (async function() {
+      content = await LogsModel.readfileForOneUser(fs, fullpath, idlog);
+      res.render('admin/logedit.ejs', {data : content, pseudo : req.params.pseudo});
+    })();
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/admin");
   }
 }

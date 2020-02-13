@@ -2,6 +2,9 @@
 ########## TO DO LIST ##########
 ================================
 
+/!\ Attention, ne pas oublier de mettre des point virgules sur une ligne précédant (async function() { ... })
+la ligne est considéré comme faisant partie de la fonction !!!
+
 Profs : 
 	- édition de la fiche prof
 	- retirer matière enseignée

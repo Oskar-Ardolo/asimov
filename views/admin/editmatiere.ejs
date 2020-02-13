@@ -27,7 +27,7 @@
               <img src="/img/classe.png" alt="<%= matiere.nommatiere %>" width=300 />
             </div>
             <div class="col-lg-9">
-              <form method="post" action="/admin/classes/edit/editclasse">
+              <form method="post" action="/admin/matiere/edit/<%= matiere.id %>">
                 <input type="hidden" name="idmatiere" value="<%= matiere.id %>">
               <div class="form-group">
                 <label for="nom">Nom de la matière</label>
@@ -91,6 +91,7 @@
         <i class="fas fa-user"></i>
         Ajouter un professeur à la classe</div>
       <div class="card-body">
+        <!--
         <form method="post" action="/admin/matieres/edit/addmatiere">
       <div class="form-group">
         <label for="nom">Nom</label>
@@ -100,7 +101,7 @@
       </div><hr>
       <input type="hidden" name="matiere" value="<%= matiere.id %>">
       <button type="submit" class="btn btn-primary">Ajouter le professeur à la matière</button>
-    </form>
+    </form>-->
       </div>
     </div>
 

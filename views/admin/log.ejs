@@ -1,0 +1,65 @@
+<% include ../include/header.ejs %>
+
+<div id="content-wrapper">
+
+<div class="container-fluid">
+    <!-- CODE HERE -->
+     <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="/">Accueil</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="/admin">Admin</a>
+      </li>
+      <li class="breadcrumb-item active">Gestion des logs</li>
+    </ol>
+
+    <div class="card mb-3">
+      <div class="card-header">
+        <i class="fas fa-users"></i>
+        Gestion des logs</div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+            <thead>
+              <tr>
+                <th>Pseudo</th>
+                <th>Action</th>
+                <th>Date</th>
+                <th>Visualiser</th>
+              </tr>
+            </thead>
+            <tfoot>
+              <tr>
+                <th>Pseudo</th>
+                <th>Action</th>
+                <th>Date</th>
+                <th>Visualiser</th>
+              </tr>
+            </tfoot>
+            <tbody>
+            <% for(var i=0; i < data.length; i++) { %>
+              <% for(var j=0; j < data[i].length; j++) { %>
+                <tr>
+                  <td><%= data[i][j][0] %></td>
+                  <td><%= data[i][j][2] %></td>
+                  <td><%= data[i][j][3] +" | "+ data[i][j][4]%></td>
+                  <td>
+                    <form style="width:100%;padding:0;margin:0;" action="/admin/logEdit/pseudo=<%= data[i][j][0] %>&id=<%= data[i][j][1] %>&date=<%= data[i][j][3] %>" method="get">
+                      <button id="deleteProf" style="width:49%;" type="submit" class="btn btn-danger">Détails</button>
+                    </form>
+                  </td>
+                </tr>
+              <% } %>
+             <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-footer small text-muted">Mis à jour : il y a quelques secondes...</div>
+    </div>
+    <div class="card mb-3">
+    </div>
+</div>
+<!-- /.container-fluid -->
+<% include ../include/footer.ejs %>

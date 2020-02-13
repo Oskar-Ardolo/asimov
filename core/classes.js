@@ -47,6 +47,10 @@ class DB {
       let query = "SELECT * FROM asimov_classes WHERE idclasse = '"+idclasse+"'"
       return this.doQuery(query)
     }
+    async getClasseByNom(nomclasse) {
+      let query = "SELECT * FROM asimov_classes WHERE nomclasse = '"+nomclasse+"'"
+      return this.doQuery(query)
+    }
     async getCountForOneClasse(classe) {
       let query = "SELECT asimov_classes.idclasse, nomclasse, count(iduser) as effectif FROM asimov_classes LEFT JOIN asimov_dansclasse ON asimov_classes.idclasse = asimov_dansclasse.idclasse WHERE asimov_classes.idclasse ='"+classe+"'";
       return this.doQuery(query)
@@ -68,6 +72,10 @@ class DB {
   		let query = "SELECT * FROM asimov_matieres WHERE id='"+ id +"' ORDER BY nommatiere";
   		return this.doQuery(query)
   	}
+    async getMatiereByNom(nom) {
+      let query = "SELECT * FROM asimov_matieres WHERE nommatiere='"+ nom +"' ORDER BY nommatiere";
+      return this.doQuery(query)
+    }
   	async getMatieresAndProfCount() {
   		let query = "SELECT id, nommatiere, count(idprof) as effectif FROM asimov_matieres LEFT JOIN asimov_enseignematiere ON asimov_matieres.id = asimov_enseignematiere.idmatiere GROUP BY nommatiere";
   		return this.doQuery(query)
@@ -151,6 +159,13 @@ class DB {
 
     async defaultPassword(id, password){
       let query = "UPDATE asimov_users SET password = '"+password+"' WHERE id = '"+id+"'"
+      return this.doQuery(query)
+    }
+
+    // Matières
+
+    async editMatiere(id, nom){
+      let query = "UPDATE asimov_matieres SET nommatiere = '"+nom+"' WHERE id = '"+id+"'"
       return this.doQuery(query)
     }
 

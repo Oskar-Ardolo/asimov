@@ -1693,6 +1693,11 @@ pre code {
   padding: 0.3rem;
 }
 
+.table-log {
+  border: 1px solid #dee2e6;
+  border-radius: 15px;
+}
+
 .table-bordered {
   border: 1px solid #dee2e6;
 }

@@ -118,7 +118,7 @@ db.connect(function(err) {
 		asimov.addClasse(req, res, db, fs);
 	});
   // A modifier, un user ne peu être ajouté à une classe s'il n'existe pas : ILLOGIQUE
-  // Interface proposant une liste d'élèves non attribué
+  // Interface proposant une liste d'élèves non attribué à la place
 	app.post("/admin/classes/edit/adduser", (req, res) => {
 		asimov.addUserToClasse(req, res, db, crypto, fs);
 	});
@@ -141,12 +141,25 @@ db.connect(function(err) {
     asimov.deleteProfFromMatiere(req, res, db, fs);
   });
 
+  app.post("/admin/matiere/edit/:idmatiere", (req, res) => {
+    asimov.editMatiereData(req, res, db, fs);
+  });
+
 	/* END ADMIN ROUTES */
 
+  /* LOG ROUTES */
+
+  app.get("/admin/log", (req, res) => {
+    asimov.getLog(req, res, fs);
+  });
+
+  app.get("/admin/logEdit/pseudo=:pseudo&id=:id&date=:date", (req, res) => {
+    asimov.getLogforUser(req, res, fs);
+  });
 
 	/* GLOBAL POST ROUTES */
 	app.post("/login", (req, res) => {
-		asimov.login(req, res, db, crypto, fs)
+		asimov.login(req, res, db, crypto, fs);
 	});
 
   // 404, PAS DE ROUTES APRES CA
