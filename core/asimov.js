@@ -920,7 +920,7 @@ exports.addMatiere = (req, res, db, fs) => {
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
-		res.redirect("/admin")
+		res.redirect("/admin");
 	}
 }
 
