@@ -17,6 +17,10 @@ class DB {
       let query = "SELECT id, nom, prenom, pseudo FROM asimov_users WHERE asimov_users.id = '"+ id +"'"
       return this.doQuery(query)
     }
+    async getUsersWithoutClasses() {
+      let query = "SELECT asimov_users.* FROM asimov_users LEFT JOIN asimov_dansclasse ON asimov_users.id=asimov_dansclasse.iduser WHERE asimov_dansclasse.iduser IS NULL ORDER BY asimov_users.nom"
+      return this.doQuery(query)
+    }
     async getUsersFromClasse(idclasse) {
       let query = "SELECT asimov_users.* FROM asimov_users, asimov_dansclasse WHERE asimov_dansclasse.iduser = asimov_users.id AND asimov_dansclasse.idclasse = '"+ idclasse +"' ORDER BY asimov_users.nom"
       return this.doQuery(query)
@@ -134,7 +138,10 @@ class DB {
   		let query = "INSERT INTO asimov_matieres(id, nommatiere) VALUES ('', ?)"
   		return this.doInsert(query, [matiere])
   	}
-
+    async addClasseForUser(id, classe) {
+      let query = "INSERT INTO asimov_dansclasse(iduser, idclasse) VALUES ('"+id+"', '"+classe+"')"
+  		return this.doInsert(query)
+    }
 
 
     //MODIFICATIONS

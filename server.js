@@ -5,6 +5,8 @@ const DB_USER = "root"
 const DB_PASS = ""
 
 var fs = require('fs');
+var toastr = require('express-toastr');
+var flash = require('connect-flash')
 var asimov = require("./core/asimov.js");
 var express = require('express');
 var session = require('express-session')
@@ -26,6 +28,8 @@ app.use(express.static(__dirname + '/public')) // Indique que le dossier /public
 app.use(bodyParser());
 app.use(cookieParser());
 app.use(session({secret: "Shh, its a secret!", resave: true, saveUninitialized: true}));
+app.use(flash());
+app.use(toastr());
 
 db.connect(function(err) {
   	if (err) throw err;
@@ -58,7 +62,7 @@ db.connect(function(err) {
 	/* ADMIN ROUTES */
 	app.get("/admin", (req, res) => {
 		if(req.session.login && req.session.rang >= 5) {
-			asimov.getAdminInfo(req, res, db);
+			asimov.getAdminInfo(req, res, db, toastr, flash);
 		} else {
 			res.redirect("/home")
 		}
@@ -117,9 +121,8 @@ db.connect(function(err) {
 	app.post("/admin/classes/add", (req, res) => {
 		asimov.addClasse(req, res, db, fs);
 	});
-  // A modifier, un user ne peu être ajouté à une classe s'il n'existe pas : ILLOGIQUE
-  // Interface proposant une liste d'élèves non attribué à la place
-	app.post("/admin/classes/edit/adduser", (req, res) => {
+
+	app.post("/admin/classes/edit/adduser/:idclasse", (req, res) => {
 		asimov.addUserToClasse(req, res, db, crypto, fs);
 	});
 	app.post("/admin/classes/edit/editclasse", (req, res) => {
