@@ -106,6 +106,48 @@
         <i class="fas fa-user"></i>
         Ajouter un élève à la classe</div>
       <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Pseudonyme</th>
+                <th>Moyenne générale</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tfoot>
+              <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Pseudonyme</th>
+                <th>Moyenne générale</th>
+                <th>Actions</th>
+              </tr>
+            </tfoot>
+            <tbody>
+      <% for(var i=0; i < adduser.length; i++) { %>
+              <tr>
+                <td><%= adduser[i].nom %></td>
+                <td><%= adduser[i].prenom %></td>
+                <td><%= adduser[i].pseudo %></td>
+                <td>12/20</td>
+                <td>
+                  <form action="/admin/classes/edit/adduser/<%= classe.idclasse %>" method="post">
+                    <input type="hidden" name="idUserToAdd" value="<%= adduser[i].id %>">
+                    <button style="width:43%;" type="button" onclick="location.href='/admin/users/edit/<%= adduser[i].id %>';" class="btn btn-primary">Editer</button>
+                    <button style="width:55%;" type="submit" class="btn btn-success">Ajouter l'élève à la classe</button>
+                  </form>
+                </td>
+              </tr>
+             <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-footer small text-muted">Mis à jour : il y a quelques secondes...</div>
+    </div>
         <!--<form method="post" action="/admin/classes/edit/adduser">
       <div class="form-group">
         <label for="nom">Nom</label>
@@ -116,9 +158,8 @@
       <input type="hidden" name="classe" value="<%= classe.idclasse %>">
       <button type="submit" class="btn btn-primary">Ajouter l'élève à la classe</button>
     </form>-->
-      </div>
-    </div>
-
 </div>
 <!-- /.container-fluid -->
+
+
 <% include ../include/footer.ejs %>

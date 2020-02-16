@@ -20,6 +20,7 @@ gethours() : renvoie l'heure au format h:min
 
 const DB = require('./classes.js');
 const Logs = require('../Logs/js/log.js');
+const Notif = require('../notification/js/notif.js');
 
 const cap = (s) => {
   if (typeof s !== 'string') return ''
@@ -75,6 +76,8 @@ const gethours = () => {
   return h +":"+ min ;
 }
 
+
+
 /*
 ======================
 MODULES GENERAUX
@@ -89,11 +92,18 @@ login :
 */
 
 exports.doLogStuff = (req, res) => {
-	if(req.session.login) {
-		res.render("index.ejs");
-	} else {
-		res.render("login.ejs");
-	}
+  let NotifModel = new Notif({bool : false});
+  let notification = req.session.notif;
+  (async function() {
+    if(req.session.login) {
+  		res.render("index.ejs");
+  	} else {
+      // Notification
+      req.session.notif = await NotifModel.gettoast();
+  		res.render("login.ejs", {notification : notification});
+  	}
+  })();
+
 }
 
 
@@ -104,6 +114,7 @@ exports.login = (req, res, db, crypto, fs) => {
 	               .digest('hex');
 	let DBModel = new DB(db);
   let LogsModel = new Logs();
+  let NotifModel = new Notif();
   let day = new Date();
 	(async function() {
     try {
@@ -114,15 +125,25 @@ exports.login = (req, res, db, crypto, fs) => {
   	    	req.session.rang = userLogin[0].rang;
   	    	if(userLogin[0].rang >= 5) {
             req.session.pseudo = pseudo;
+
             // Write logs
             let idlog = await LogsModel.getIdLog(fs, pseudo, getdate());
             let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours()};
             LogsModel.writeLog(data, fs, getdate(), pseudo);
+
+            // Notifcation
+            NotifModel = new Notif({bool : true, type : "success", message : "Connexion successful"});
+            req.session.notif = await NotifModel.gettoast();
+
   	    		res.redirect("/admin");
   	    	} else {
   	    		res.redirect("/home");
   	    	}
   		} else {
+          // Notifcation
+          NotifModel = new Notif({bool : true, type : "error", message : "Identifiant ou mot de passe incorrect"});
+          req.session.notif = await NotifModel.gettoast();
+
   	    	res.redirect("/home");
   	    }
     }
@@ -132,8 +153,13 @@ exports.login = (req, res, db, crypto, fs) => {
       let action = "Connexion failed";
       // Write error logs
       let idlog = await LogsModel.getIdLog(fs, pseudo, getdate());
-      let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{ "err" : description }]};
+      let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{ "Error message" : description }]};
       LogsModel.writeLog(data, fs, getdate(), pseudo);
+
+      // Notifcation
+      NotifModel = new Notif({bool : true, type : "error", message : "La connexion a échoué"});
+      req.session.notif = await NotifModel.gettoast();
+
       res.redirect("/home");
     }
 
@@ -156,16 +182,19 @@ getUsers : affiche admin/users.ejs avec la liste des élèves
 
 
 // ADMINISTRATION GENERALE PROFS + PERSONNEL
-exports.getAdminInfo = (req, res, db) => {
+exports.getAdminInfo = (req, res, db, toastr, flash) => {
 	if(req.session.rang >= 5) {
 		let DBModel = new DB(db);
+    let NotifModel = new Notif({bool : false});
+    let notification = req.session.notif;
 		(async function() {
 			let userCount = await DBModel.userCount();
 			let profCount = await DBModel.profCount();
 			let classeCount = await DBModel.classeCount();
 			let matiereCount = await DBModel.matiereCount();
-			res.render("admin/admin.ejs", {counts : [userCount, profCount, classeCount, matiereCount]});
-		})()
+      req.session.notif = await NotifModel.gettoast();
+			res.render("admin/admin.ejs", {counts : [userCount, profCount, classeCount, matiereCount], notification : notification });
+		})();
 	}
 }
 
@@ -175,15 +204,20 @@ exports.getAdminInfo = (req, res, db) => {
 exports.getUsers = (req, res, db) => {
 	if(req.session.rang >= 5) {
 		let DBModel = new DB(db);
+    let NotifModel = new Notif({bool : false});
+    let notification = req.session.notif;
 		(async function() {
 			let users = await DBModel.getUsers();
 			let classes = await DBModel.getClasses();
-			res.render("admin/users.ejs", {data : users, classe : classes});
-		})()
+
+      // Notification
+      req.session.notif = await NotifModel.gettoast();
+			res.render("admin/users.ejs", {data : users, classe : classes, notification : notification});
+		})();
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
-		res.redirect("/home")
+		res.redirect("/home");
 	}
 }
 
@@ -203,16 +237,20 @@ exports.addUser = (req, res, db, crypto, fs) => {
   	    let userInputs = [nom, prenom, pseudo, password, rang, titre];
         let LogsModel = new Logs();
   	    let DBModel = new DB(db);
+        let NotifModel = new Notif();
   		(async function() {
         try {
           let action = "Create user";
           // If user already exist
           let duplicata = await double(nom, prenom, pseudo, db);
-          console.log(duplicata);
           if(duplicata == undefined | duplicata == true) {
+            NotifModel = new Notif({bool : true, type : "error", message : "L'utilisateur existe déjà"});
+            req.session.notif = await NotifModel.gettoast();
             res.redirect("/admin/users");
           }
           else {
+            NotifModel = new Notif({bool : true, type : "success", message : "Utilisateur ajouté avec succès"});
+            req.session.notif = await NotifModel.gettoast();
             // Create user
             await DBModel.addUser(userInputs, classe);
             // Write log
@@ -242,15 +280,22 @@ exports.addUser = (req, res, db, crypto, fs) => {
 	}
 }
 
-// AFFICHER LA LISTE DES ELEVES
+// AFFICHER LA FICHE D'UN ELEVE
 exports.editUsersView = (req, res, db) => {
     if(req.session.rang == 10) {
       let DBModel = new DB(db);
+      let NotifModel = new Notif({bool : false});
+      let notification = req.session.notif;
       (async function() {
         let users = await DBModel.getUserById(req.params.ideleve);
         let classes = await DBModel.getClasses();
         let classeofuser = await DBModel.getUserClasseFromId(req.params.ideleve);
-        res.render("admin/edituser.ejs", {data : users, classe : classes, userClasse : classeofuser});
+        // If user doesn't have class
+        if (classeofuser[0] == null) {
+          classeofuser = [{ nomclasse : ''}];
+        }
+        req.session.notif = await NotifModel.gettoast();
+        res.render("admin/edituser.ejs", {data : users, classe : classes, userClasse : classeofuser, notification: notification});
       })()
     } else {
   		req.session.login = false;
@@ -264,6 +309,7 @@ exports.editUserData = (req, res, db, fs) => {
   if(req.session.rang == 10) {
     let DBModel = new DB(db);
     let LogsModel = new Logs();
+    let NotifModel = new Notif();
     let iduser =  req.params.ideleve;
     let lastname = (req.body.nomeleve.toUpperCase()).replace(/ /g, "");
     let firstname = (cap(req.body.prenomeleve.toLowerCase())).replace(/ /g, "");
@@ -286,8 +332,16 @@ exports.editUserData = (req, res, db, fs) => {
           let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": iduser, "nom" : userdata[0].nom, "prenom" : userdata[0].prenom, "pseudo" : userdata[0].pseudo, "classe" : userclasse[0].nomclasse }, { "id": iduser, "nom" : lastname, "prenom" : firstname, "pseudo" : pseudo, "classe" : classe }]};
           LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
+          // Notification
+          NotifModel = new Notif({bool : true, type : "success", message : "L'utilisateur a été mis à jour"});
+          req.session.notif = await NotifModel.gettoast();
           res.redirect("/admin/users/edit/" + iduser);
         } else {
+
+          // Notification
+          NotifModel = new Notif({bool : true, type : "error", message : "L'utilisateur n'a pas pu être mis à jour"});
+          req.session.notif = await NotifModel.gettoast();
+
           res.redirect("/admin/users/edit/" + iduser);
         }
       }
@@ -298,6 +352,11 @@ exports.editUserData = (req, res, db, fs) => {
         let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
         let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{ "Error message" : description }]};
         LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+        // Notification
+        NotifModel = new Notif({bool : true, type : "error", message : "L'utilisateur n'a pas pu être mis à jour"});
+        req.session.notif = await NotifModel.gettoast();
+
         res.redirect("/admin/users/edit/" + iduser);
       }
     })();
@@ -313,6 +372,7 @@ exports.defaultPasswordForUser = (req, res, db, crypto, fs) => {
   if(req.session.rang == 10) {
     let DBModel = new DB(db);
     let LogsModel = new Logs();
+    let NotifModel = new Notif();
     (async () => {
       let id = req.params.ideleve;
       try {
@@ -330,6 +390,10 @@ exports.defaultPasswordForUser = (req, res, db, crypto, fs) => {
         let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": id, "nom" : userdata[0].nom, "prenom" : userdata[0].prenom, "pseudo" : userdata[0].pseudo}]};
         LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
+        // Notification
+        NotifModel = new Notif({bool : true, type : "success", message : "Le mot de passe a été réinitialisé"});
+        req.session.notif = await NotifModel.gettoast();
+
         res.redirect("/admin/users/edit/" + id)
       }
       catch (err) {
@@ -340,13 +404,17 @@ exports.defaultPasswordForUser = (req, res, db, crypto, fs) => {
         let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description }]};
         LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
+        // Notification
+        NotifModel = new Notif({bool : true, type : "error", message : "Echec de la réinitialisation du mot de passe"});
+        req.session.notif = await NotifModel.gettoast();
+
         res.redirect("/admin/users/edit/" + id);
       }
     })();
   } else {
     req.session.login = false;
     req.session.rang = 0;
-    res.redirect("/home")
+    res.redirect("/home");
   }
 }
 
@@ -355,6 +423,7 @@ exports.deleteUser = (req, res, db, fs) => {
   if(req.session.rang >= 10) {
     let DBModel = new DB(db);
     let LogsModel = new Logs();
+    let NotifModel = new Notif();
     (async function() {
       try {
         let user = await req.body.delete;
@@ -373,6 +442,10 @@ exports.deleteUser = (req, res, db, fs) => {
           let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": dataUser[0].id, "nom" : dataUser[0].nom, "prenom" : dataUser[0].prenom, "pseudo" : dataUser[0].pseudo}]};
           LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
+          // Notification
+          NotifModel = new Notif({bool : true, type : "success", message : "Utilisateur supprimé"});
+          req.session.notif = await NotifModel.gettoast();
+
           // Redirect to the corresponding page
           if(rangUser[0].rang < 5) {
             res.redirect('/admin/users');
@@ -390,6 +463,11 @@ exports.deleteUser = (req, res, db, fs) => {
         let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
         let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": user}]};
         LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+        // Notification
+        NotifModel = new Notif({bool : true, type : "error", message : "Erreur lors de la suppréssion de l'utilisateur"});
+        req.session.notif = await NotifModel.gettoast();
+
         res.redirect('/admin/users');
       }
     })();
@@ -404,11 +482,17 @@ exports.deleteUser = (req, res, db, fs) => {
 exports.getProfs = (req, res, db) => {
 	if(req.session.rang == 10) {
 		let DBModel = new DB(db);
+    let NotifModel = new Notif({bool : false});
+    let notification = req.session.notif;
 		(async function() {
 			let users = await DBModel.getUsers();
 			let profs = await DBModel.getProfs();
-			res.render("admin/profs.ejs", {data : profs});
-		})()
+
+      // Notification
+      req.session.notif = await NotifModel.gettoast();
+
+			res.render("admin/profs.ejs", {data : profs, notification : notification});
+		})();
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
@@ -421,6 +505,7 @@ exports.getProfs = (req, res, db) => {
 exports.addProf = (req, res, db, crypto, fs) => {
 	if(req.session.rang == 10) {
     let LogsModel = new Logs();
+    let NotifModel = new Notif();
     try {
       let nom = (req.body.nom.toUpperCase()).replace(/ /g, "");
       let prenom = (cap(req.body.prenom.toLowerCase())).replace(/ /g, "");
@@ -444,6 +529,10 @@ exports.addProf = (req, res, db, crypto, fs) => {
             let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": dataUser[0].id, "nom" : dataUser[0].nom, "prenom" : dataUser[0].prenom, "pseudo" : dataUser[0].pseudo, "rang" : rang.toString(), "titre" : titre}]};
             LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
+            // Notification
+            NotifModel = new Notif({bool : true, type : "success", message : "Le professeur à été ajouté avec succès"});
+            req.session.notif = await NotifModel.gettoast();
+
             // Redirect to last page
             res.redirect("/admin/profs");
           }
@@ -459,6 +548,10 @@ exports.addProf = (req, res, db, crypto, fs) => {
         let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
         let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description }]};
         LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+        // Notification
+        NotifModel = new Notif({bool : true, type : "error", message : "Erreur lors de l'ajout du professeur"});
+        req.session.notif = await NotifModel.gettoast();
 
         res.redirect("/admin/profs");
       })();
@@ -477,12 +570,18 @@ exports.editProfView = (req, res, db) => {
 	if(req.session.rang == 10) {
 		let idprof = req.params.idprof;
 		let DBModel = new DB(db);
+    let NotifModel = new Notif({bool : false});
+    let notification = req.session.notif;
 	    (async function() {
 			let utilisateur = await DBModel.getUserById(idprof);
 			let matieres = await DBModel.getMatieres();
 			let enseignematiere = await DBModel.getMatieresForOneProf(idprof);
-			utilisateur[0].fullName = function() {return this.nom + " " + this.prenom }
-			res.render('admin/editprof.ejs', {user : utilisateur[0], matiere : matieres, enseigne : enseignematiere});
+			utilisateur[0].fullName = function() {return this.nom + " " + this.prenom };
+
+      // Notification
+      req.session.notif = await NotifModel.gettoast();
+
+			res.render('admin/editprof.ejs', {user : utilisateur[0], matiere : matieres, enseigne : enseignematiere, notification : notification});
 
 		})()
 	} else {
@@ -495,6 +594,7 @@ exports.editProfData = (req, res, db, fs) => {
   if(req.session.rang == 10) {
     let DBModel = new DB(db);
     let LogsModel = new Logs();
+    let NotifModel = new Notif();
     let idprof =  req.params.idprof;
     let lastname = (req.body.nomprof.toUpperCase()).replace(/ /g, "");
     let firstname = (cap(req.body.prenomprof.toLowerCase())).replace(/ /g, "");
@@ -510,6 +610,10 @@ exports.editProfData = (req, res, db, fs) => {
           let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": idprof, "nom" : lastname, "prenom" : firstname, "pseudo" : pseudo}]};
           LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
+          // Notification
+          NotifModel = new Notif({bool : true, type : "success", message : "Le professeur a été mis à jour"});
+          req.session.notif = await NotifModel.gettoast();
+
           res.redirect("/admin/profs/edit/" + idprof);
         } else { res.redirect("/admin/profs/edit/" + idprof) }
       }
@@ -520,6 +624,10 @@ exports.editProfData = (req, res, db, fs) => {
         let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
         let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description}]};
         LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+        // Notification
+        NotifModel = new Notif({bool : true, type : "error", message : "Erreur lors de la mise à jour du professeur"});
+        req.session.notif = await NotifModel.gettoast();
 
         res.redirect("/admin/profs/edit/" + idprof);
       }
@@ -536,7 +644,7 @@ exports.defaultPasswordForProf = (req, res, db, crypto, fs) => {
   if(req.session.rang == 10) {
     let DBModel = new DB(db);
     let LogsModel = new Logs();
-    let action = "Default password (prof)";
+    let NotifModel = new Notif();
     (async () => {
       try {
         let id = req.params.idprof;
@@ -552,6 +660,10 @@ exports.defaultPasswordForProf = (req, res, db, crypto, fs) => {
         let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": id, "nom" : userdata[0].nom, "prenom" : userdata[0].prenom, "pseudo" : userdata[0].pseudo}]};
         LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
+        // Notification
+        NotifModel = new Notif({bool : true, type : "success", message : "Mot de passe réinitialisé"});
+        req.session.notif = await NotifModel.gettoast();
+
         res.redirect("/admin/profs/edit/" + id);
       }
       catch (err) {
@@ -561,6 +673,10 @@ exports.defaultPasswordForProf = (req, res, db, crypto, fs) => {
         let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
         let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description}]};
         LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+        // Notification
+        NotifModel = new Notif({bool : true, type : "error", message : "Erreur lors de la réinitialisation du mot de passe"});
+        req.session.notif = await NotifModel.gettoast();
 
         res.redirect("/admin/profs/edit/" + id);
       }
@@ -579,6 +695,7 @@ exports.matiereToProf = (req, res, db, fs) => {
 		let idprof = req.params.idprof;
 		let DBModel = new DB(db);
     let LogsModel = new Logs();
+    let NotifModel = new Notif();
 	    (async function() {
         try {
           let data = await DBModel.getMatieresForOneProf(idprof);
@@ -593,6 +710,10 @@ exports.matiereToProf = (req, res, db, fs) => {
             let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"idteacher": idprof, "idsubject" : idmatiere}]};
             LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
+            // Notification
+            NotifModel = new Notif({bool : true, type : "success", message : "Matière désatribuée"});
+            req.session.notif = await NotifModel.gettoast();
+
             res.redirect("/admin/profs/edit/"+idprof);
           } else {
             // Add this teacher to this subject
@@ -602,6 +723,10 @@ exports.matiereToProf = (req, res, db, fs) => {
             let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
             let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"idteacher": idprof, "idsubject" : idmatiere}]};
             LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+            // Notification
+            NotifModel = new Notif({bool : true, type : "success", message : "Matière atribuée"});
+            req.session.notif = await NotifModel.gettoast();
 
             res.redirect("/admin/profs/edit/"+idprof);
           }
@@ -614,6 +739,10 @@ exports.matiereToProf = (req, res, db, fs) => {
           let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description}]};
           LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
+          // Notification
+          NotifModel = new Notif({bool : true, type : "error", message : "Erreur lors de l'atribution/désatribution de matière"});
+          req.session.notif = await NotifModel.gettoast();
+
           res.redirect("/admin/profs/edit/"+idprof);
         }
 		})()
@@ -624,45 +753,44 @@ exports.matiereToProf = (req, res, db, fs) => {
 	}
 }
 
-// Suspendu
 exports.addUserToClasse = (req, res, db, crypto, fs) => {
 	if(req.session.rang >= 10) {
-	    let nom = req.body.nom.toUpperCase();
-	    let prenom = cap(req.body.prenom.toLowerCase());
-      let classe = req.body.classe;
-      if ((nom != ('' & undefined)) & (prenom != ('' & undefined))) {
-  	    let pseudo = nom.substr(0, 7).toLowerCase().replace(" ", "").replace("-", "") + prenom.substr(0,2).toLowerCase().replace(" ", "").replace("-", "");
-  	    let password = crypto.createHmac('sha256', nom + "-" + prenom)
-  	               .update('jojofags suck')
-  	               .digest('hex');
-  	    let rang = 1;
-  	    let titre = "Élève";
-  	    let userInputs = [nom, prenom, pseudo, password, rang, titre];
-  	    let DBModel = new DB(db);
-        let LogsModel = new Logs();
-        let action = "Add User";
+	   let DBModel = new DB(db);
+     let LogsModel = new Logs();
+     let NotifModel = new Notif();
   		  (async function() {
+          let classe = req.params.idclasse;
+          let user = req.body.idUserToAdd
           try {
-            // Add an user
-            //await DBModel.addUser(userInputs, classe);
+            await  DBModel.addClasseForUser(user, classe);
+
             // Write log
-            /*
             let action = "Add user to class";
             let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
-            let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{}]};
+            let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"iduser" : user, "idclasse" : classe}]};
             LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
-            let log = "       ======= "+ Date() +" =======  \n \n user : "+ req.session.pseudo +"\n action : "+ action +" \n objet : Matière [nom="+nom+" ,prenom="+prenom+", pseudo="+pseudo+", classe="+classe+", rang="+rang+", titre="+titre+"] \n \n";
-            logs.writeLog(log, fs, req);*/
-      			res.redirect("/admin/classes/edit/"+classe);
+            // Notification
+            NotifModel = new Notif({bool : true, type : "success", message : "L'utilisateur à été ajouté à la classe"});
+            req.session.notif = await NotifModel.gettoast();
+
+            res.redirect("/admin/classes/edit/"+classe);
           }
           catch (err) {
             // Write logs
-            //logs.writeErrorLog(fs, req, action, err)
+            let description = err.toString();
+            let action = "Add user to class failed";
+            let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+            let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error Message" : description, "iduser" : user, "idclasse" : classe}]};
+            LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+            // Notification
+            NotifModel = new Notif({bool : true, type : "error", message : "Impossible d'ajouter l'utilisateur à la classe"});
+            req.session.notif = await NotifModel.gettoast();
+
             res.redirect("/admin/classes/edit/"+classe);
           }
   		})()
-      } else { res.redirect("/admin/classes/edit/"+classe); }
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
@@ -678,6 +806,7 @@ exports.doModifClasse = (req, res, db, fs) => {
 		let classeToEdit = req.body.idclasse;
 	  let DBModel = new DB(db);
     let LogsModel = new Logs();
+    let NotifModel = new Notif();
     (async function() {
       try {
         // Edit the following class
@@ -689,6 +818,10 @@ exports.doModifClasse = (req, res, db, fs) => {
         let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": classeToEdit, "nom" : lastdata[0].nomclasse, "main teacher" : lastdata[0].profprincipal}, {"id": classeToEdit, "nom" : nomclasse, "main teacher" : profprincipal}]};
         LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
+        // Notification
+        NotifModel = new Notif({bool : true, type : "success", message : "La classe a été mise à jour"});
+        req.session.notif = await NotifModel.gettoast();
+
         res.redirect("/admin/classes/edit/"+classeToEdit);
       }
       catch (err) {
@@ -699,6 +832,9 @@ exports.doModifClasse = (req, res, db, fs) => {
         let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description}]};
         LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
+        // Notification
+        NotifModel = new Notif({bool : true, type : "error", message : "Erreur lors de la mise à jour de la classe"});
+        req.session.notif = await NotifModel.gettoast();
 
         res.redirect("/admin/classes/edit/"+classeToEdit);
       }
@@ -715,13 +851,17 @@ exports.doModifClasse = (req, res, db, fs) => {
 // GESTION DES CLASSES
 exports.getClasses = (req, res, db) => {
 	if(req.session.rang == 10) {
-
+    let NotifModel = new Notif({bool : false});
+    let notification = req.session.notif
 		let DBModel = new DB(db);
 	    (async function() {
 			let classes = await DBModel.getClassesAndUserCount();
-			res.render("admin/classes.ejs", {data : classes});
-		})()
 
+      // Notification
+      req.session.notif = await NotifModel.gettoast();
+
+			res.render("admin/classes.ejs", {data : classes, notification : notification});
+		})();
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
@@ -733,16 +873,23 @@ exports.getClasses = (req, res, db) => {
 exports.editClasse = (req, res, db) => {
 	if(req.session.rang == 10) {
 		let DBModel = new DB(db);
+    let NotifModel = new Notif({bool : false});
+    let notification = req.session.notif;
 	    (async function() {
 			let classe = await DBModel.getClasseById(req.params.idclasse);
 			let users = await DBModel.getUsersFromClasse(req.params.idclasse);
 			let profs = await DBModel.getProfs();
-			res.render("admin/editclasse.ejs", {users : users, classe : classe[0], profs : profs} );
+      let userWithoutClasses = await DBModel.getUsersWithoutClasses();
+
+      // Notification
+      req.session.notif = await NotifModel.gettoast();
+
+			res.render("admin/editclasse.ejs", {users : users, classe : classe[0], profs : profs, adduser : userWithoutClasses, toast : null, notification : notification} );
 		})()
 	} else {
 		req.session.login = false;
 		req.session.rang = 0;
-		res.redirect("/admin")
+		res.redirect("/admin");
 	}
 }
 
@@ -751,6 +898,7 @@ exports.addClasse = (req, res, db, fs) => {
 	if(req.session.rang == 10) {
 		let DBModel = new DB(db);
     let LogsModel = new Logs();
+    let NotifModel = new Notif();
     let classenom = (req.body.nomclasse).replace(/ /g, "");
   	    (async function() {
           try {
@@ -768,6 +916,10 @@ exports.addClasse = (req, res, db, fs) => {
               let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": newclasse[0].idclasse, "nom" : newclasse[0].nomclasse, "main teacher" : newclasse[0].profprincipal}]};
               LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
+              // Notification
+              NotifModel = new Notif({bool : true, type : "success", message : "Classe ajoutée avec succès"});
+              req.session.notif = await NotifModel.gettoast();
+
         			res.redirect("/admin/classes");
             } else res.redirect("/admin/classes");
           }
@@ -778,6 +930,10 @@ exports.addClasse = (req, res, db, fs) => {
             let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
             let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description}]};
             LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+            // Notification
+            NotifModel = new Notif({bool : true, type : "error", message : "Erreur lors de l'ajout de la classe"});
+            req.session.notif = await NotifModel.gettoast();
 
             res.redirect("/admin/classes");
           }
@@ -794,6 +950,7 @@ exports.deleteClasse = (req, res, db, fs) => {
   if(req.session.rang >= 10) {
     let DBModel = new DB(db);
     let LogsModel = new Logs();
+    let NotifModel = new Notif();
     (async function() {
       let classe = await req.body.delete;
       try {
@@ -808,6 +965,10 @@ exports.deleteClasse = (req, res, db, fs) => {
           let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": nomclasse[0].idclasse, "nom" : nomclasse[0].nomclasse}]};
           LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
+          // Notification
+          NotifModel = new Notif({bool : true, type : "success", message : "Classe supprimée avec succès"});
+          req.session.notif = await NotifModel.gettoast();
+
           res.redirect('/admin/classes');
         } else { res.redirect('/admin/classes'); }
       }
@@ -818,6 +979,10 @@ exports.deleteClasse = (req, res, db, fs) => {
         let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
         let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error Message" : description + " (id : "+classe +")"}]};
         LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+        // Notification
+        NotifModel = new Notif({bool : true, type : "error", message : "Erreur lors de la suppression de la classe"});
+        req.session.notif = await NotifModel.gettoast();
 
         res.redirect('/admin/classes');
       }
@@ -834,6 +999,7 @@ exports.modifElevesInClasse = (req, res, db, fs) => {
     if(req.session.rang >= 10) {
       let DBModel = new DB(db);
       let LogsModel = new Logs();
+      let NotifModel = new Notif();
       let iduser = req.body.iduser;
       let idclasse = req.params.idclasse;
       (async () => {
@@ -846,6 +1012,10 @@ exports.modifElevesInClasse = (req, res, db, fs) => {
           let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"idclass": idclasse, "iduser" : iduser}]};
           LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
+          // Notification
+          NotifModel = new Notif({bool : true, type : "success", message : "Elève supprimé de la classe"});
+          req.session.notif = await NotifModel.gettoast();
+
           res.redirect("/admin/classes/edit/" + idclasse);
         }
         catch (err) {
@@ -855,6 +1025,10 @@ exports.modifElevesInClasse = (req, res, db, fs) => {
           let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
           let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description}]};
           LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+          // Notification
+          NotifModel = new Notif({bool : true, type : "success", message : "Elève supprimé de la classe"});
+          req.session.notif = await NotifModel.gettoast();
 
           res.redirect("/admin/classes/edit/" + idclasse);
         }
@@ -870,9 +1044,15 @@ exports.modifElevesInClasse = (req, res, db, fs) => {
 exports.getMatieres = (req, res, db) => {
 	if(req.session.rang == 10) {
 		let DBModel = new DB(db);
+    let NotifModel = new Notif({bool : false});
+    let notification = req.session.notif;
 		(async function() {
 			let matieres = await DBModel.getMatieresAndProfCount();
-			res.render("admin/matieres.ejs", {data : matieres});
+
+      // Notifcation
+      req.session.notif = await NotifModel.gettoast();
+
+			res.render("admin/matieres.ejs", {data : matieres, notification : notification});
 		})()
 	} else {
 		req.session.login = false;
@@ -886,6 +1066,7 @@ exports.addMatiere = (req, res, db, fs) => {
 	if(req.session.rang == 10) {
 		let DBModel = new DB(db);
     let LogsModel = new Logs();
+    let NotifModel = new Notif();
     let nomMatiere = (req.body.nommatiere).replace(/ /g, "");
 	  (async function() {
       try {
@@ -903,6 +1084,10 @@ exports.addMatiere = (req, res, db, fs) => {
           let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": matiere[0].id, "nom" : matiere[0].nommatiere}]};
           LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
+          // Notification
+          NotifModel = new Notif({bool : true, type : "success", message : "Matière ajouté avec succès"});
+          req.session.notif = await NotifModel.gettoast();
+
           res.redirect("/admin/matieres");
         } else res.redirect("/admin/matieres");
       }
@@ -913,6 +1098,10 @@ exports.addMatiere = (req, res, db, fs) => {
         let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
         let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description, "nom" : nomMatiere}]};
         LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+        // Notification
+        NotifModel = new Notif({bool : true, type : "error", message : "Erreur lors de l'ajout de la matière"});
+        req.session.notif = await NotifModel.gettoast();
 
         res.redirect("/admin/matieres");
       }
@@ -929,6 +1118,7 @@ exports.deleteMatiere = (req, res, db, fs) => {
   if(req.session.rang >= 10) {
     let DBModel = new DB(db);
     let LogsModel = new Logs();
+    let NotifModel = new Notif();
     (async function() {
       let matiere = await req.body.delete;
       if (matiere != undefined) {
@@ -942,6 +1132,10 @@ exports.deleteMatiere = (req, res, db, fs) => {
           let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": matieredata[0].id, "nom" : matieredata[0].nommatiere}]};
           LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
+          // Notification
+          NotifModel = new Notif({bool : true, type : "success", message : "Matière supprimée"});
+          req.session.notif = await NotifModel.gettoast();
+
           res.redirect('/admin/matieres');
         }
         catch (err) {
@@ -951,6 +1145,10 @@ exports.deleteMatiere = (req, res, db, fs) => {
           let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
           let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message": description,"id": matieredata[0].id}]};
           LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+          // Notification
+          NotifModel = new Notif({bool : true, type : "error", message : "Erreur lors de la suppression de la matière"});
+          req.session.notif = await NotifModel.gettoast();
 
           res.redirect('/admin/matieres');
         }
@@ -968,10 +1166,16 @@ exports.deleteMatiere = (req, res, db, fs) => {
 exports.editmatiere = (req, res, db) => {
     if(req.session.rang >= 10) {
       let DBModel = new DB(db);
+      let NotifModel = new Notif({bool : false});
+      let notification = req.session.notif;
         (async function() {
         let matiere = await DBModel.getMatieresById(req.params.idmatiere);
         let profs = await DBModel.getProfsForOneMatiere(req.params.idmatiere);
-        res.render("admin/editmatiere.ejs", {matiere : matiere[0], profs : profs} );
+
+        // Notifcation
+        req.session.notif = await NotifModel.gettoast();
+
+        res.render("admin/editmatiere.ejs", {matiere : matiere[0], profs : profs, notification : notification});
       })()
     } else {
       req.session.login = false;
@@ -985,6 +1189,7 @@ exports.deleteProfFromMatiere = (req, res, db, fs) => {
   if(req.session.rang >= 10) {
     let DBModel = new DB(db);
     let LogsModel = new Logs();
+    let NotifModel = new Notif();
     let idprof = req.body.idprof;
     let idmatiere = req.params.idmatiere;
       (async function() {
@@ -997,6 +1202,10 @@ exports.deleteProfFromMatiere = (req, res, db, fs) => {
           let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"teacher": idprof, "subject" : idmatiere}]};
           LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
+          // Notification
+          NotifModel = new Notif({bool : true, type : "success", message : "Le professeur à été désatribué de cette matière"});
+          req.session.notif = await NotifModel.gettoast();
+
           res.redirect("/admin/matieres/edit/" + idmatiere);
         }
         catch (err) {
@@ -1007,9 +1216,12 @@ exports.deleteProfFromMatiere = (req, res, db, fs) => {
           let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description, "teacher": idprof, "subject" : idmatiere}]};
           LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
+          // Notification
+          NotifModel = new Notif({bool : true, type : "error", message : "Impossible d désatribuer le professeur de cette matière"});
+          req.session.notif = await NotifModel.gettoast();
+
           res.redirect("/admin/matieres/edit/" + idmatiere);
         }
-
     })()
   } else {
     req.session.login = false;
@@ -1023,6 +1235,7 @@ exports.editMatiereData = (req, res, db, fs) => {
   if(req.session.rang >= 10) {
     let DBModel = new DB(db);
     let LogsModel = new Logs();
+    let NotifModel = new Notif();
     let idmatiere = req.params.idmatiere;
     let nommatiere = req.body.nommatiere;
       (async function() {
@@ -1037,6 +1250,10 @@ exports.editMatiereData = (req, res, db, fs) => {
           let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"id": datasubject[0].id , "nom" : datasubject[0].nommatiere}, {"id": idmatiere, "nom" : nommatiere}]};
           LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
+          // Notification
+          NotifModel = new Notif({bool : true, type : "success", message : "La matière à été mise à jour"});
+          req.session.notif = await NotifModel.gettoast();
+
           res.redirect("/admin/matieres/edit/" + idmatiere);
         }
         catch (err) {
@@ -1046,6 +1263,10 @@ exports.editMatiereData = (req, res, db, fs) => {
           let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
           let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error message" : description}]};
           LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+          // Notification
+          NotifModel = new Notif({bool : true, type : "error", message : "Erreur lors de la mise à jour de la matière"});
+          req.session.notif = await NotifModel.gettoast();
 
           res.redirect("/admin/matieres/edit/" + idmatiere);
         }

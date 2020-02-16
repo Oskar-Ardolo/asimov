@@ -1,4 +1,26 @@
 
+<!-- Notification system -->
+<% try { %>
+  <% if (notification.bool) {%>
+    <div class="toast">
+    <% if(notification.type == "success") {%>
+      <div class="toast-block-col1" >
+        <img id="toast-img" src="/img/checked.png">
+      </div>
+    <% } else {%>
+      <div class="toast-block-col1" >
+        <img id="toast-img" src="/img/croix.png">
+      </div>
+    <% } %>
+    <div class="toast-block-col2">
+      <p id="toast-message"><%= notification.message %></p>
+    </div>
+
+    </div>
+  <% } %>
+<% } catch(err) { }%>
+
+
       <!-- Sticky Footer -->
       <footer class="sticky-footer">
         <div class="container my-auto">
@@ -38,7 +60,7 @@
     </div>
   </div>
 
-  
+
   <!-- Bootstrap core JavaScript-->
   <script src="/vendor/jquery/jquery.min.js"></script>
   <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -57,6 +79,8 @@
   <!-- Demo scripts for this page-->
   <script src="/js/demo/datatables-demo.js"></script>
   <script src="/js/demo/chart-area-demo.js"></script>
+
+
 
 </body>
 

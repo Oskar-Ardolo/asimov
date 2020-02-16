@@ -17,6 +17,9 @@
   <!-- Custom styles for this template-->
   <link href="css/sb-admin.css" rel="stylesheet">
 
+  <!-- Custom styles for notifications -->
+  <link href="/notification/css/notif.css" rel="stylesheet">
+
 </head>
 
 <body class="bg-dark">
@@ -51,6 +54,20 @@
       </div>
     </div>
   </div>
+
+  <!-- Notification system -->
+  <% try { %>
+    <% if (notification.bool) {%>
+      <div class="toast">
+        <div class="toast-block-col1" >
+          <img id="toast-img" src="/img/croix.png">
+        </div>
+        <div class="toast-block-col2">
+          <p id="toast-message"><%= notification.message %></p>
+        </div>
+      </div>
+    <% } %>
+  <% } catch(err) { }%>
 
   <!-- Bootstrap core JavaScript-->
   <script src="vendor/jquery/jquery.min.js"></script>
