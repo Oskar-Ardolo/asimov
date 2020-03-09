@@ -18,7 +18,7 @@ class DB {
       return this.doQuery(query)
     }
     async getUsersWithoutClasses() {
-      let query = "SELECT asimov_users.* FROM asimov_users LEFT JOIN asimov_dansclasse ON asimov_users.id=asimov_dansclasse.iduser WHERE asimov_dansclasse.iduser IS NULL ORDER BY asimov_users.nom"
+      let query = "SELECT asimov_users.* FROM asimov_users LEFT JOIN asimov_dansclasse ON asimov_users.id=asimov_dansclasse.iduser WHERE asimov_dansclasse.iduser IS NULL AND asimov_users.rang ='1' ORDER BY asimov_users.nom"
       return this.doQuery(query)
     }
     async getUsersFromClasse(idclasse) {
@@ -35,6 +35,10 @@ class DB {
     }
     async getUserDuplicate(nom, prenom, pseudo) {
       let query = "SELECT id, nom, prenom, pseudo, rang FROM asimov_users WHERE nom='"+nom+"' AND prenom='"+prenom+"' AND pseudo='"+pseudo+"'"
+      return this.doQuery(query)
+    }
+    async getProfWithoutThisMatiere(idmatiere) {
+      let query = "SELECT asimov_users.* FROM asimov_users LEFT JOIN asimov_enseignematiere ON asimov_users.id=asimov_enseignematiere.idprof WHERE (asimov_users.id=asimov_enseignematiere.idprof) AND (asimov_users.rang ='5') AND (asimov_enseignematiere.idmatiere != '"+idmatiere+"') ORDER BY asimov_users.nom"
       return this.doQuery(query)
     }
 
