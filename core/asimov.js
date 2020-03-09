@@ -195,6 +195,10 @@ exports.getAdminInfo = (req, res, db, toastr, flash) => {
       req.session.notif = await NotifModel.gettoast();
 			res.render("admin/admin.ejs", {counts : [userCount, profCount, classeCount, matiereCount], notification : notification });
 		})();
+	} else {
+		req.session.login = false;
+		req.session.rang = 0;
+		res.redirect("/home");
 	}
 }
 
@@ -518,8 +522,15 @@ exports.addProf = (req, res, db, crypto, fs) => {
         let titre = "Professeur";
         let DBModel = new DB(db);
         (async function() {
-          // Verify if this user already exist
-          if(double(nom, prenom, pseudo, db)) {
+
+
+          let duplicata = await double(nom, prenom, pseudo, db);
+          if(duplicata == undefined | duplicata == true) {
+            NotifModel = new Notif({bool : true, type : "error", message : "Le professeur existe déjà"});
+            req.session.notif = await NotifModel.gettoast();
+            res.redirect("/admin/profs");
+          }
+          else {
             // Add the user
             await DBModel.addProf([nom, prenom, pseudo, password, rang, titre]);
             let dataUser = await DBModel.getUserByPseudo(pseudo);
@@ -536,7 +547,6 @@ exports.addProf = (req, res, db, crypto, fs) => {
             // Redirect to last page
             res.redirect("/admin/profs");
           }
-          else { res.redirect("/admin/profs") }
         })();
       } else { res.redirect("/admin/profs") }
     }
@@ -753,6 +763,7 @@ exports.matiereToProf = (req, res, db, fs) => {
 	}
 }
 
+// ADD USER TO CLASS
 exports.addUserToClasse = (req, res, db, crypto, fs) => {
 	if(req.session.rang >= 10) {
 	   let DBModel = new DB(db);
@@ -1154,11 +1165,11 @@ exports.deleteMatiere = (req, res, db, fs) => {
         }
 
       } else { res.redirect('/admin/matieres') }
-    })()
+    })();
   } else {
     req.session.login = false;
     req.session.rang = 0;
-    res.redirect("/admin")
+    res.redirect("/admin");
   }
 }
 
@@ -1171,11 +1182,12 @@ exports.editmatiere = (req, res, db) => {
         (async function() {
         let matiere = await DBModel.getMatieresById(req.params.idmatiere);
         let profs = await DBModel.getProfsForOneMatiere(req.params.idmatiere);
-
+        let profwithoutmatiere = await DBModel.getProfWithoutThisMatiere(req.params.idmatiere);
+        console.log(profwithoutmatiere);
         // Notifcation
         req.session.notif = await NotifModel.gettoast();
 
-        res.render("admin/editmatiere.ejs", {matiere : matiere[0], profs : profs, notification : notification});
+        res.render("admin/editmatiere.ejs", {matiere : matiere[0], profs : profs, notification : notification, profwithoutmatiere : profwithoutmatiere});
       })()
     } else {
       req.session.login = false;
@@ -1275,6 +1287,51 @@ exports.editMatiereData = (req, res, db, fs) => {
     req.session.login = false;
     req.session.rang = 0;
     res.redirect("/admin");
+  }
+}
+
+exports.addProfToMatiere = (req, res, db, fs) => {
+  if(req.session.rang >= 10) {
+     let DBModel = new DB(db);
+     let LogsModel = new Logs();
+     let NotifModel = new Notif();
+        (async function() {
+          let matiere = req.params.idmatiere;
+          let prof = req.body.idProfToAdd;
+          try {
+            await  DBModel.addClasseForUser(prof, matiere);
+
+            // Write log
+            let action = "Add teacher to subject";
+            let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+            let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"iduser" : user, "idclasse" : classe}]};
+            LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+            // Notification
+            NotifModel = new Notif({bool : true, type : "success", message : "Le professeur à été ajouté à la matière"});
+            req.session.notif = await NotifModel.gettoast();
+
+            res.redirect("/admin/matieres/edit/"+matiere);
+          }
+          catch (err) {
+            // Write logs
+            let description = err.toString();
+            let action = "Add teacher to subject failed";
+            let idlog = await LogsModel.getIdLog(fs, req.session.pseudo, getdate());
+            let data = {"id": idlog, "nom" : action, "date" : getdate(), "heure" : gethours(), "description" : [{"Error Message" : description, "iduser" : user, "idclasse" : classe}]};
+            LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
+
+            // Notification
+            NotifModel = new Notif({bool : true, type : "error", message : "Impossible d'ajouter le professeur à la matière"});
+            req.session.notif = await NotifModel.gettoast();
+
+            res.redirect("/admin/matieres/edit/"+matiere);
+          }
+      })()
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/home")
   }
 }
 

@@ -148,6 +148,10 @@ db.connect(function(err) {
     asimov.editMatiereData(req, res, db, fs);
   });
 
+  app.post("/admin/matiere/addprof/:idmatiere", (req, res) => {
+    asimov.addProfToMatiere(req, res, db, fs)
+  });
+
 	/* END ADMIN ROUTES */
 
   /* LOG ROUTES */

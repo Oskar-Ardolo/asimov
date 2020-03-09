@@ -1,0 +1,79 @@
+{
+    "pseudo": "oldfield-graham",
+    "action": [
+        {
+            "id": "0",
+            "nom": "Connexion",
+            "date": "9-3-2020",
+            "heure": "15:27"
+        },
+        {
+            "id": "1",
+            "nom": "Delete user",
+            "date": "9-3-2020",
+            "heure": "15:43",
+            "description": [
+                {
+                    "id": 206,
+                    "nom": "A",
+                    "prenom": "A",
+                    "pseudo": "aa"
+                }
+            ]
+        },
+        {
+            "id": "2",
+            "nom": "Delete user",
+            "date": "9-3-2020",
+            "heure": "15:57",
+            "description": [
+                {
+                    "id": 138,
+                    "nom": "ADAM",
+                    "prenom": "Lapute",
+                    "pseudo": "adamla"
+                }
+            ]
+        },
+        {
+            "id": "3",
+            "nom": "Delete user",
+            "date": "9-3-2020",
+            "heure": "16:04",
+            "description": [
+                {
+                    "id": 152,
+                    "nom": "FFDD",
+                    "prenom": "Fddf",
+                    "pseudo": "ffddfd"
+                }
+            ]
+        },
+        {
+            "id": "4",
+            "nom": "Delete user",
+            "date": "9-3-2020",
+            "heure": "16:06",
+            "description": [
+                {
+                    "id": 137,
+                    "nom": "FGFGFGFG",
+                    "prenom": "Gfgfdgfdgfgfdgfgf",
+                    "pseudo": "fgfgfgfgf"
+                }
+            ]
+        },
+        {
+            "id": "5",
+            "nom": "Add user to class",
+            "date": "9-3-2020",
+            "heure": "16:11",
+            "description": [
+                {
+                    "iduser": "140",
+                    "idclasse": "5"
+                }
+            ]
+        }
+    ]
+}

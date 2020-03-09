@@ -4,7 +4,7 @@
   margin-right: -15px;
   margin-left: -15px;
   background: white;
-  border-radius: 10px;
+  border-radius: 5px;
   z-index: 9999;
   min-width : 300px;
   min-height : 40px;
@@ -15,7 +15,7 @@
   animation-name: notif;
   animation-duration: 8s;
   font-size: 100%;
-
+  background-color: #32e33a;
 }
 
 #toast-message {
@@ -35,7 +35,6 @@
 .toast-block-col1 {
   flex: 0 0 20%;
   max-width: 20%;
-
 }
 .toast-block-col2 {
   flex: 0 0 80%;
