@@ -525,12 +525,11 @@ exports.addProf = (req, res, db, crypto, fs) => {
 
 
           let duplicata = await double(nom, prenom, pseudo, db);
-          if(duplicata == undefined | duplicata == true) {
+          if (duplicata == undefined | duplicata == true) {
             NotifModel = new Notif({bool : true, type : "error", message : "Le professeur existe déjà"});
             req.session.notif = await NotifModel.gettoast();
             res.redirect("/admin/profs");
-          }
-          else {
+          } else {
             // Add the user
             await DBModel.addProf([nom, prenom, pseudo, password, rang, titre]);
             let dataUser = await DBModel.getUserByPseudo(pseudo);
@@ -932,7 +931,14 @@ exports.addClasse = (req, res, db, fs) => {
               req.session.notif = await NotifModel.gettoast();
 
         			res.redirect("/admin/classes");
-            } else res.redirect("/admin/classes");
+            } else {
+
+              // Notification
+              NotifModel = new Notif({bool : true, type : "error", message : "Erreur lors de l'ajout de la classe"});
+              req.session.notif = await NotifModel.gettoast();
+
+              res.redirect("/admin/classes");
+            }
           }
           catch (err) {
             // Write error logs
@@ -1096,11 +1102,18 @@ exports.addMatiere = (req, res, db, fs) => {
           LogsModel.writeLog(data, fs, getdate(), req.session.pseudo);
 
           // Notification
-          NotifModel = new Notif({bool : true, type : "success", message : "Matière ajouté avec succès"});
+          NotifModel = new Notif({bool : true, type : "success", message : "Matière ajoutée avec succès"});
           req.session.notif = await NotifModel.gettoast();
 
           res.redirect("/admin/matieres");
-        } else res.redirect("/admin/matieres");
+        } else {
+
+          // Notification
+          NotifModel = new Notif({bool : true, type : "error", message : "Erreur lors de l'ajout de la matière"});
+          req.session.notif = await NotifModel.gettoast();
+
+          res.redirect("/admin/matieres")
+        };
       }
       catch (err) {
         // Write error logs

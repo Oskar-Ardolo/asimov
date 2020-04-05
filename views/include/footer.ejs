@@ -2,21 +2,26 @@
 <!-- Notification system -->
 <% try { %>
   <% if (notification.bool) {%>
-    <div class="toast">
+
     <% if(notification.type == "success") {%>
-      <div class="toast-block-col1" >
-        <img id="toast-img" src="/img/checked.png">
+      <div class="toast success">
+        <div class="toast-block-col1" >
+          <img id="toast-img" src="/img/checked.png">
+        </div>
+        <div class="toast-block-col2">
+          <p id="toast-success"><%= notification.message %></p>
+        </div>
       </div>
     <% } else {%>
-      <div class="toast-block-col1" >
-        <img id="toast-img" src="/img/croix.png">
+      <div class="toast error">
+        <div class="toast-block-col1" >
+          <img id="toast-img" src="/img/croix.png">
+        </div>
+        <div class="toast-block-col2">
+          <p id="toast-error"><%= notification.message %></p>
+        </div>
       </div>
     <% } %>
-    <div class="toast-block-col2">
-      <p id="toast-message"><%= notification.message %></p>
-    </div>
-
-    </div>
   <% } %>
 <% } catch(err) { }%>
 
