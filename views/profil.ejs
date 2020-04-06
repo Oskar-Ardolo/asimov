@@ -1,0 +1,129 @@
+<% include ./include/header.ejs %>
+
+<div id="content-wrapper">
+
+<div class="container-fluid">
+    <!-- CODE HERE -->
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="/">Accueil</a>
+      </li>
+      <li class="breadcrumb-item active"> Profil </li>
+    </ol>
+
+    <div class="row">
+      <div class="col-9">
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="fas fa-users"></i>
+            Votre profil</div>
+          <div class="card-body">
+            <div class="text-muted">
+              Informations sur le compte
+            </div>
+            <hr>
+            <div class="row">
+              <div class="col-4">
+                <form method="post" action="">
+                  <input type="hidden" name="idclasse" value="">
+                  <div class="form-group">
+                    <label for="nom">Nom</label>
+                    <input type="text" id="nom" name="nom" class="form-control" value="<%= data.nom %>"><br/>
+                    <label for="prenom">Pseudo</label>
+                    <input type="text" id="prenom" name="prenom" class="form-control" value="<%= data.pseudo %>"><br/>
+                  </div>
+                </form>
+              </div>
+              <div class="col-4">
+                <form method="post" action="">
+                  <input type="hidden" name="idclasse" value="">
+                  <div class="form-group">
+                    <label for="nom">Prénom</label>
+                    <input type="text" id="nom" name="nom" class="form-control" value="<%= data.prenom %>"><br/>
+                    <label for="prenom">Rang</label>
+                    <input type="text" id="prenom" name="prenom" class="form-control" value="<%= data.titre %>"><br/>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <center><button class="btn btn-success">Enregistrer les modifications</button></center>
+          </div>
+          <div class="card-footer small text-muted">Mis à jour : il y a quelques secondes...</div>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="card mb-4">
+          <div class="card-body">
+            <div class="row">
+              <div class="">
+                <center><img style="width:50%;" src="/img/user.png"/></center>
+
+                <button type="button" class="btn-add-file" name="button" data-toggle="modal" data-target="#addfileModal"></button>
+                <!--
+                -->
+              </div>
+            </div>
+            <div class="row">
+              <div style="width:100%; text-align:center">
+                <b><%= data.nom +" "+ data.prenom %></b>
+              </div>
+            </div>
+            <div class="row">
+              <div style="width:100%; text-align:center">
+                <i><%= data.titre %></i>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer small text-muted">Mis à jour : il y a quelques secondes...</div>
+        </div>
+      </div>
+    </div>
+
+</div>
+
+<!-- add avatar file modal -->
+<div class="modal fade" id="addfileModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Veuillez choisir une image</h5>
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+
+
+      <div class="modal-body">
+        <form class="" action="" method="post">
+          <center>
+            <label for="file" class="input_file_label">Select a file... <i>(.jpg, .png, 2Mo max)</i></label>
+            <input id="file" class="input_file" type="file" accept="image/jpeg, image/png" name="" value="">
+            <div id="error_file" style="visibility:hidden">
+              <b><i>Le fichier est trop volumineux.</i></b>
+            </div>
+          </center>
+        </form>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-dismiss="modal">Annuler</button>
+        <a class="btn btn-primary" href="">Confirmer</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  var input_file = document.getElementById("file");
+  var error_file = document.getElementById("error_file");
+
+  input_file.onchange = function() {
+    if (this.files[0].size > 2000000) {
+       error_file.setAttribute('style', 'color:red; visibility:show;');
+       this.value = "";
+    } else {
+      error_file.setAttribute('style', 'visibility:hidden;');
+    }
+  };
+</script>
+
+<!-- /.container-fluid -->
+<% include ./include/footer.ejs %>

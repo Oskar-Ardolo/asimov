@@ -56,6 +56,10 @@ db.connect(function(err) {
 		req.session.login = false;
 		res.redirect("/");
 	});
+
+  app.get("/profil", (req, res) => {
+    asimov.getProfil(req, res, db);
+  });
 	/* END GLOBAT GET ROUTES */
 
 

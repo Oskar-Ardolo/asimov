@@ -166,6 +166,19 @@ exports.login = (req, res, db, crypto, fs) => {
 	})();
 }
 
+// Profil page
+exports.getProfil = (req, res, db) => {
+  if (req.session.login) {
+    let DBModel = new DB(db);
+    (async function () {
+      let data = await DBModel.getUserByPseudo(req.session.pseudo);
+      console.log(data);
+      res.render("profil.ejs", {data : data[0]});
+    })();
+
+  } else res.redirect("/home");
+}
+
 /*
 ======================
 MODULES ADMINISTRATION

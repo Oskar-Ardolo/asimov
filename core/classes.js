@@ -10,7 +10,7 @@ class DB {
 		return this.doQuery(query)
   	}
   	async getUserByPseudo(pseudo) {
-  		let query = "SELECT id, nom, prenom, pseudo FROM asimov_users WHERE asimov_users.pseudo = '"+ pseudo +"'"
+  		let query = "SELECT id, nom, prenom, pseudo, titre FROM asimov_users WHERE asimov_users.pseudo = '"+ pseudo +"'"
 		  return this.doQuery(query)
   	}
     async getUserById(id) {
