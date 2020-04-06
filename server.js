@@ -60,6 +60,10 @@ db.connect(function(err) {
   app.get("/profil", (req, res) => {
     asimov.getProfil(req, res, db);
   });
+
+  app.get("/parameters", (req, res) => {
+    asimov.getParameters(req, res, db);
+  });
 	/* END GLOBAT GET ROUTES */
 
 

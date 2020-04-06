@@ -175,7 +175,16 @@ exports.getProfil = (req, res, db) => {
       console.log(data);
       res.render("profil.ejs", {data : data[0]});
     })();
+  } else res.redirect("/home");
+}
 
+exports.getParameters = (req, res, db) => {
+  if (req.session.login) {
+    let DBModel = new DB(db);
+    (async function () {
+      
+      res.render("parameters.ejs");
+    })();
   } else res.redirect("/home");
 }
 
