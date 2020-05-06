@@ -96,7 +96,7 @@ exports.doLogStuff = (req, res) => {
   let notification = req.session.notif;
   (async function() {
     if(req.session.login) {
-  		res.render("index.ejs");
+  		res.render("index.ejs", { client : req.session.user });
   	} else {
       // Notification
       req.session.notif = await NotifModel.gettoast();
@@ -107,7 +107,7 @@ exports.doLogStuff = (req, res) => {
 }
 
 
-exports.login = (req, res, db, crypto, fs) => {
+exports.login = (req, res, db, crypto, fs, io) => {
 	let pseudo = req.body.pseudo;
 	let password = crypto.createHmac('sha256', req.body.password)
 	               .update('jojofags suck')
@@ -122,9 +122,12 @@ exports.login = (req, res, db, crypto, fs) => {
       let userLogin = await DBModel.login(pseudo, password);
   		if(userLogin.length != 0) {
   			req.session.login = true;
-  	    	req.session.rang = userLogin[0].rang;
+  	    req.session.rang = userLogin[0].rang;
+        req.session.pseudo = pseudo;
+        req.session.user = await DBModel.getUserByPseudo(req.session.pseudo);
+        console.log(req.session.user);
   	    	if(userLogin[0].rang >= 5) {
-            req.session.pseudo = pseudo;
+
 
             // Write logs
             let idlog = await LogsModel.getIdLog(fs, pseudo, getdate());
@@ -173,7 +176,7 @@ exports.getProfil = (req, res, db) => {
     (async function () {
       let data = await DBModel.getUserByPseudo(req.session.pseudo);
       console.log(data);
-      res.render("profil.ejs", {data : data[0]});
+      res.render("profil.ejs", {data : data[0], client : req.session.user});
     })();
   } else res.redirect("/home");
 }
@@ -182,10 +185,36 @@ exports.getParameters = (req, res, db) => {
   if (req.session.login) {
     let DBModel = new DB(db);
     (async function () {
-      
-      res.render("parameters.ejs");
+
+      res.render("parameters.ejs", { client : req.session.user });
     })();
   } else res.redirect("/home");
+}
+
+exports.getDiscussions = (req, res, db) => {
+  if (req.session.login) {
+    let DBModel = new DB(db);
+    (async function() {
+      let allconverse = await DBModel.getAllDiscussionById(req.session.user[0].id);
+      //console.log(allconverse);
+      res.render("messages.ejs", {allconverse : allconverse, client : req.session.user});
+    })();
+  } else res.redirect("/home");
+}
+
+exports.postMessage = (req, res, db, msg) => {
+  if (req.session.login) {
+    console.log("ça marche");
+    let DBModel = new DB(db);
+    (async function() {
+      if (req.body.msg) {
+        await DBModel.addNewMessage(1, req.session.user[0].id, msg);
+        let lastmsg = await DBModel.getLastMessageOfUser(req.session.user[0].id, 1);
+        res.send({newmsg : lastmsg[0].content});
+      } else res.send({newmsg : ""});
+    })();
+  } else res.redirect("/home");
+
 }
 
 /*
@@ -215,7 +244,7 @@ exports.getAdminInfo = (req, res, db, toastr, flash) => {
 			let classeCount = await DBModel.classeCount();
 			let matiereCount = await DBModel.matiereCount();
       req.session.notif = await NotifModel.gettoast();
-			res.render("admin/admin.ejs", {counts : [userCount, profCount, classeCount, matiereCount], notification : notification });
+			res.render("admin/admin.ejs", {counts : [userCount, profCount, classeCount, matiereCount], notification : notification, client : req.session.user });
 		})();
 	} else {
 		req.session.login = false;
@@ -238,7 +267,7 @@ exports.getUsers = (req, res, db) => {
 
       // Notification
       req.session.notif = await NotifModel.gettoast();
-			res.render("admin/users.ejs", {data : users, classe : classes, notification : notification});
+			res.render("admin/users.ejs", {data : users, classe : classes, notification : notification, client : req.session.user});
 		})();
 	} else {
 		req.session.login = false;
@@ -321,7 +350,7 @@ exports.editUsersView = (req, res, db) => {
           classeofuser = [{ nomclasse : ''}];
         }
         req.session.notif = await NotifModel.gettoast();
-        res.render("admin/edituser.ejs", {data : users, classe : classes, userClasse : classeofuser, notification: notification});
+        res.render("admin/edituser.ejs", {data : users, classe : classes, userClasse : classeofuser, notification: notification, client : req.session.user});
       })()
     } else {
   		req.session.login = false;
@@ -517,7 +546,7 @@ exports.getProfs = (req, res, db) => {
       // Notification
       req.session.notif = await NotifModel.gettoast();
 
-			res.render("admin/profs.ejs", {data : profs, notification : notification});
+			res.render("admin/profs.ejs", {data : profs, notification : notification, client : req.session.user});
 		})();
 	} else {
 		req.session.login = false;
@@ -612,7 +641,7 @@ exports.editProfView = (req, res, db) => {
       // Notification
       req.session.notif = await NotifModel.gettoast();
 
-			res.render('admin/editprof.ejs', {user : utilisateur[0], matiere : matieres, enseigne : enseignematiere, notification : notification});
+			res.render('admin/editprof.ejs', {user : utilisateur[0], matiere : matieres, enseigne : enseignematiere, notification : notification, client : req.session.user});
 
 		})()
 	} else {
@@ -892,7 +921,7 @@ exports.getClasses = (req, res, db) => {
       // Notification
       req.session.notif = await NotifModel.gettoast();
 
-			res.render("admin/classes.ejs", {data : classes, notification : notification});
+			res.render("admin/classes.ejs", {data : classes, notification : notification, client : req.session.user});
 		})();
 	} else {
 		req.session.login = false;
@@ -916,7 +945,7 @@ exports.editClasse = (req, res, db) => {
       // Notification
       req.session.notif = await NotifModel.gettoast();
 
-			res.render("admin/editclasse.ejs", {users : users, classe : classe[0], profs : profs, adduser : userWithoutClasses, toast : null, notification : notification} );
+			res.render("admin/editclasse.ejs", {users : users, classe : classe[0], profs : profs, adduser : userWithoutClasses, toast : null, notification : notification, client : req.session.user} );
 		})()
 	} else {
 		req.session.login = false;
@@ -1091,7 +1120,7 @@ exports.getMatieres = (req, res, db) => {
       // Notifcation
       req.session.notif = await NotifModel.gettoast();
 
-			res.render("admin/matieres.ejs", {data : matieres, notification : notification});
+			res.render("admin/matieres.ejs", {data : matieres, notification : notification, client : req.session.user});
 		})()
 	} else {
 		req.session.login = false;
@@ -1222,7 +1251,7 @@ exports.editmatiere = (req, res, db) => {
         // Notifcation
         req.session.notif = await NotifModel.gettoast();
 
-        res.render("admin/editmatiere.ejs", {matiere : matiere[0], profs : profs, notification : notification, profwithoutmatiere : profwithoutmatiere});
+        res.render("admin/editmatiere.ejs", {matiere : matiere[0], profs : profs, notification : notification, profwithoutmatiere : profwithoutmatiere, client : req.session.user});
       })()
     } else {
       req.session.login = false;
@@ -1383,7 +1412,7 @@ exports.getLog = (req, res, fs) => {
       for (i=0;i<dir.length;i++) {
         tab[i] = await LogsModel.readfile(fs, path, dir[i]);
       }
-      res.render('admin/log.ejs', {data : await tab });
+      res.render('admin/log.ejs', {data : await tab, client : req.session.user });
     })();
 
   } else {
@@ -1404,7 +1433,7 @@ exports.getLogforUser = (req, res, fs) => {
     let LogsModel = new Logs();
     (async function() {
       content = await LogsModel.readfileForOneUser(fs, fullpath, idlog);
-      res.render('admin/logedit.ejs', {data : content, pseudo : req.params.pseudo});
+      res.render('admin/logedit.ejs', {data : content, pseudo : req.params.pseudo, client : req.session.user});
     })();
   } else {
     req.session.login = false;

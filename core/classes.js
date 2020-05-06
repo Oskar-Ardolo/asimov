@@ -3,8 +3,13 @@ class DB {
    		this.db = db;
   	}
 
-  	// GET
-  		// USERS
+// ======================================== SELECT / GET ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================
+
+// _______________________________________
+//
+//                USERS
+// _______________________________________
+
   	async getUsers() {
   		let query = "SELECT asimov_users.id, asimov_users.nom, asimov_users.prenom, asimov_users.pseudo, asimov_classes.nomclasse FROM asimov_users, asimov_classes, asimov_dansclasse WHERE rang = '1' AND asimov_users.id = asimov_dansclasse.iduser AND asimov_dansclasse.idclasse = asimov_classes.idclasse ORDER BY nom ASC"
 		return this.doQuery(query)
@@ -42,7 +47,11 @@ class DB {
       return this.doQuery(query)
     }
 
-  		// CLASSES
+// _______________________________________
+//
+//                CLASSES
+// _______________________________________
+
   	async getClasses() {
   		let query = "SELECT * FROM asimov_classes ORDER BY nomclasse"
 	    return this.doQuery(query)
@@ -64,14 +73,22 @@ class DB {
       return this.doQuery(query)
     }
 
-  		// PROFS
+// _______________________________________
+//
+//                PROFS
+// _______________________________________
+
   	async getProfs() {
   		let query = "SELECT asimov_users.id, asimov_users.nom, asimov_users.prenom, asimov_users.pseudo FROM asimov_users WHERE rang = 5 ORDER BY nom";
 	    return this.doQuery(query)
   	}
 
 
-  		// MATIERES
+// _______________________________________
+//
+//                MATIERES
+// _______________________________________
+
   	async getMatieres() {
   		let query = "SELECT * FROM asimov_matieres ORDER BY nommatiere";
   		return this.doQuery(query)
@@ -101,8 +118,23 @@ class DB {
       return this.doInsert(query);
     }
 
+// _______________________________________
+//
+//               DISCUSSIONS
+// _______________________________________
 
-  	// COUNTS
+    async getAllDiscussionById(iduser) {
+      let query = "select msg1.*, users1.pseudo, CASE WHEN convers1.id_firstuser != '"+iduser+"' THEN users2.pseudo WHEN convers1.id_seconduser != '"+iduser+"' THEN users3.pseudo END AS destinataire from asimov_messages AS msg1 JOIN asimov_users AS users1 ON users1.id = msg1.iduser JOIN asimov_conversations AS convers1 ON convers1.id = msg1.idconvers JOIN asimov_users AS users2 ON users2.id = convers1.id_firstuser JOIN asimov_users AS users3 ON users3.id = convers1.id_seconduser where msg1.id = (select max(msg2.id) from asimov_messages AS msg2, asimov_conversations AS convers where msg2.idconvers = msg1.idconvers AND (convers.id_firstuser = '"+iduser+"' OR convers.id_seconduser = '"+iduser+"')) AND (convers1.id_firstuser = '"+iduser+"' OR convers1.id_seconduser = '"+iduser+"') ORDER BY msg1.id DESC"
+      return this.doQuery(query);
+    }
+
+    async getDiscussionById(id_convers, id_user) {
+      let query = "SELECT C.id AS idconv, M.id AS idmsg, M.iduser AS iduser, M.libelle AS content, CASE WHEN C.id_firstuser != '"+id_user+"' THEN users1.pseudo WHEN C.id_seconduser != '"+id_user+"' THEN users2.pseudo END AS destinataire, M.vu FROM asimov_messages AS M, asimov_conversations as C JOIN asimov_users AS users1 ON users1.id = C.id_firstuser JOIN asimov_users AS users2 ON users2.id = C.id_seconduser WHERE C.id = M.idconvers AND C.id ='"+id_convers+"' ORDER BY M.id";
+      return this.doQuery(query);
+    }
+
+// ======================================== COUNT ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================
+
   	async userCount() {
   		let query = "SELECT Count(*) as nbre FROM asimov_users WHERE rang = 1";
 	    return this.doQuery(query)
@@ -120,7 +152,8 @@ class DB {
 	    return this.doQuery(query)
   	}
 
-  	// INSERTS
+// ======================================== INSERT ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================
+
   	async addUser(userInfos, classe) {
   		let query = "INSERT INTO asimov_users(id, nom, prenom, pseudo, password, rang, titre) VALUES (NULL, ?, ?, ?, ?, ?, ?)";
   		let insertedQuery = this.doInsert(query, userInfos);
@@ -147,8 +180,18 @@ class DB {
   		return this.doInsert(query)
     }
 
+// _______________________________________
+//
+//               DISCUSSIONS
+// _______________________________________
 
-    //MODIFICATIONS
+    async addNewMessage(idconvers, iduser, msg) {
+      let query = `INSERT INTO asimov_messages (id, idconvers, iduser, libelle, date, vu) VALUES (NULL, "`+idconvers+`", "`+iduser+`", "`+msg+`", date, 0)`
+      return this.doQuery(query)
+    }
+
+// ======================================== UPDATE ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================
+
 
     // Classes
     async editClasse(idclasse, nomclasse, profprincipal) {
@@ -180,7 +223,18 @@ class DB {
       return this.doQuery(query)
     }
 
-   //SUPPRESSION
+// _______________________________________
+//
+//               DISCUSSIONS
+// _______________________________________
+
+  async readMessage(id_user, id_convers) {
+    let query = 'UPDATE asimov_messages SET vu = "1" WHERE  iduser!="'+id_user+'" AND idconvers="'+id_convers+'" AND vu="0"';
+    return this.doQuery(query);
+  }
+
+// ======================================== DELETE ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================
+
 
     //USERS
     async deleteUser(user) {
@@ -212,6 +266,7 @@ class DB {
     }
 
 
+
   	// VERIFICATIONS
   	async login(pseudo, password) {
   		let query = "SELECT * FROM asimov_users WHERE pseudo = '" + pseudo + "' AND password = '" + password + "'";
@@ -219,9 +274,8 @@ class DB {
   	}
 
 
+// ======================================== CORE FUNCTION ==========================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
-
-  	// CORE FUNCTIONS
   	async doQuery(queryToDo) {
   		let pro = new Promise((resolve,reject) => {
   			let query = queryToDo;

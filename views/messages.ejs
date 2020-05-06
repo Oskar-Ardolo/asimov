@@ -1,0 +1,112 @@
+<% include ./include/header.ejs %>
+
+<div id="content-wrapper">
+
+<div class="container-fluid">
+    <!-- CODE HERE -->
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="/">Accueil</a>
+      </li>
+      <li class="breadcrumb-item active"> Discussions </li>
+    </ol>
+
+    <div class="row">
+      <div class="col-9">
+        <div class="card mb-4">
+          <div id="header_description" class="card-header">
+            <i class="fas fa-paper-plane "></i>
+            </div>
+            <div id="card_chat" class="card-body" >
+              <% try { %>
+                <% if (thisconverse) { %>
+              <div id="scroll_container" class="card mb-3" style="overflow:auto;max-height:500px;">
+                <div id="container_msg" class="card-body">
+
+
+                    <% for (let items in allconverse) { %>
+                      <% if (allconverse[items].iduser == client[0].id) { %>
+                        <div class="row">
+                          <div class="col-12" >
+                            <div class="float-right" style="max-width:60%;">
+                              <div class="card bg-primary text-white mb-4 ">
+                                <div class="card-body" >
+                                  <%= allconverse[items].content %>
+
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      <% } else { %>
+                        <div class="row" >
+                          <div class="card bg-primary text-white mb-4">
+                            <div class="card-body">
+                              <%= allconverse[items].content %>
+                            </div>
+                          </div>
+                        </div>
+                      <% } %>
+                    <% } %>
+
+                </div>
+              </div>
+              <form id="form-msg" class="form-group" method="post">
+                <div class="form-group" style="display:flex">
+                  <input type="hidden" name="iduser" value="<%= client[0].id %>">
+                  <input type="hidden" name="idconvers" value="1">
+                  <input id="msg" class="form-control" style=" display:flex; flex: 0 0 95%;" type="text" name="msg" value="" placeholder="Ecrivez un message...">
+                  <button class="btn btn-success" style="display:flex; flex: 0 0 5%" type="submit" value="Save"><center><i class="fas fa-paper-plane "></i></center></button>
+                </div>
+              </form>
+              <% } %>
+            <% } catch(err) { %>
+              <div id="scroll_container" class="card mb-3" style="overflow:auto;max-height:500px;">
+                <div id="container_msg" class="card-body">
+                  <h3>Démarrez une conversation...</h3>
+                </div>
+              </div>
+              <form id="form-msg" class="form-group" method="post">
+              </form>
+            <% } %>
+            </div>
+            <div class="card-footer small text-muted">Mis à jour : il y a quelques secondes...</div>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="card mb-4">
+          <div class="card-header">
+            <i style="backgrround-color:red" class="fas fa-paper-plane "></i>
+            Mes discussions</div>
+            <div class="card-body" >
+              <div class="card mb-3" style="overflow:auto;max-height:500px;">
+                <div id="list_discussions" class="card-body">
+                  <% try {%>
+                    <% for (let items in allconverse) { %>
+                      <div class="row">
+                        <div class="card mb-4" style="width:100%<%if(allconverse[items].vu == 0 & allconverse[items].iduser != client[0].id) {%>;background-color:orange<%}%>" onclick="loadchat(<%= allconverse[items].idconvers%>, <%= client[0].id%>, '<%= (client[0].pseudo).toString() %>')">
+                          <div class="card-header">
+                            <i class="fas fa-paper-plane "></i>
+                            <%= allconverse[items].destinataire %> </div>
+                            <div class="card-body">
+                              <% if (allconverse[items].iduser == client[0].id) { %>
+                                Vous :
+                              <% } else { %>
+                                <%= allconverse[items].pseudo %> :
+                              <% } %>
+                                <%= allconverse[items].libelle %>
+                            </div>
+                        </div>
+                      </div>
+                    <% } %>
+                  <% } catch(err) {}%>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+<!-- /.container-fluid -->
+<% include ./include/footer.ejs %>

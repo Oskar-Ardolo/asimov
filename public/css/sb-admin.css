@@ -603,12 +603,8 @@ pre code {
   border: none;
 }
 
-.input_file {
-
-}
-
 .input_file_label {
-  
+
   display: block;
   border-radius: 3px;
   width: 70%;

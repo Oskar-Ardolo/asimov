@@ -8,8 +8,10 @@ var fs = require('fs');
 var toastr = require('express-toastr');
 var flash = require('connect-flash')
 var asimov = require("./core/asimov.js");
+var socket = require("./core/socket.js")
 var express = require('express');
 var session = require('express-session')
+var socketSession = require("socket.io-session-middleware");
 var bodyParser = require("body-parser");
 var crypto = require('crypto');
 var cookieParser = require('cookie-parser');
@@ -23,25 +25,29 @@ var db = mysql.createConnection({
 });
 
 var app = express();
+var http = require('http').createServer(app);
+var io = require('socket.io').listen(http);
+var ent = require('ent');
+
+
 
 app.use(express.static(__dirname + '/public')) // Indique que le dossier /public contient des fichiers statiques (middleware chargé de base)
 app.use(bodyParser());
 app.use(cookieParser());
 app.use(session({secret: "Shh, its a secret!", resave: true, saveUninitialized: true}));
-app.use(flash());
-app.use(toastr());
+
+
 
 db.connect(function(err) {
   	if (err) throw err;
   	console.log("Connecté à la base de données '"+ DB_NAME +"'");
+    
+    socket.listen(io, db, ent, session);
+
 
     /* GLOBAT GET ROUTES */
 	app.get("/", (req, res) => {
 		asimov.doLogStuff(req, res);
-/*<<<<<<< HEAD
-=======
-
->>>>>>> Edit-and-DELETE-user*/
 	});
 	app.get("/home", (req, res) => {
 		asimov.doLogStuff(req, res);
@@ -64,6 +70,15 @@ db.connect(function(err) {
   app.get("/parameters", (req, res) => {
     asimov.getParameters(req, res, db);
   });
+
+  app.get("/discussions", (req, res) => {
+    asimov.getDiscussions(req, res, db);
+  });
+
+  app.post('/postMessage', (req, res) => {
+    asimov.postMessage(req, res, db);
+  });
+
 	/* END GLOBAT GET ROUTES */
 
 
@@ -72,7 +87,7 @@ db.connect(function(err) {
 		if(req.session.login && req.session.rang >= 5) {
 			asimov.getAdminInfo(req, res, db, toastr, flash);
 		} else {
-			res.redirect("/home")
+			res.redirect("/home");
 		}
 	});
 	app.get("/admin/users", (req, res) => {
@@ -174,18 +189,21 @@ db.connect(function(err) {
 
 	/* GLOBAL POST ROUTES */
 	app.post("/login", (req, res) => {
-		asimov.login(req, res, db, crypto, fs);
+		asimov.login(req, res, db, crypto, fs, io);
 	});
+
+
 
   // 404, PAS DE ROUTES APRES CA
   app.get('*', function(req, res){
     res.render("404.ejs");
   });
 
+
+
 });
 
 
 
-
-app.listen(PORT);
+http.listen(PORT);
 console.log("Server running : http://localhost:"+PORT+"/");

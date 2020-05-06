@@ -4,20 +4,20 @@
   <% if (notification.bool) {%>
 
     <% if(notification.type == "success") {%>
-      <div class="toast success">
-        <div class="toast-block-col1" >
+      <div class="toast">
+        <div class="toast-header" >
           <img id="toast-img" src="/img/checked.png">
         </div>
-        <div class="toast-block-col2">
+        <div class="toast-body">
           <p id="toast-success"><%= notification.message %></p>
         </div>
       </div>
     <% } else {%>
-      <div class="toast error">
-        <div class="toast-block-col1" >
+      <div class="toast">
+        <div class="toast-header" >
           <img id="toast-img" src="/img/croix.png">
         </div>
-        <div class="toast-block-col2">
+        <div class="toast-body">
           <p id="toast-error"><%= notification.message %></p>
         </div>
       </div>
@@ -25,6 +25,7 @@
   <% } %>
 <% } catch(err) { }%>
 
+<div id="msg_notification"></div>
 
       <!-- Sticky Footer -->
       <footer class="sticky-footer">
@@ -65,6 +66,16 @@
     </div>
   </div>
 
+  <!-- Message JavaScript -->
+
+  <script type="application/javascript" src="/js/socket.js"></script>
+  <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+  <script src="/vendor/jquery/jquery-3.1.0.min.js"></script>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+  <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+  <script type="application/javascript" src="/js/message.js" pseudo="<%= client[0].pseudo.toString() %>" id_user="<%= client[0].id %>" ></script>
 
   <!-- Bootstrap core JavaScript-->
   <script src="/vendor/jquery/jquery.min.js"></script>

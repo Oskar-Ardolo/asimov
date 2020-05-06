@@ -45,3 +45,4 @@ empêcher l'ajout de deux user avec le même nom
 [13/02/2020] : Remplacer lors de l'ajout dans la base de donnée les caractères spéciaux (é, à ...) par des normaux
 [16/02/2020] : Empêcher l'ajout dans la BDD s'il y a des caractères spéciaux, nombre, etc..
 	       Empêcher l'ajout de deux professeurs identiques
+[06/05/2020] : Rmq, dans chaque res.render ajouter ceci : `client : req.session.user` (utilisé par msg.js pour garantir les notifications dynamiques).
