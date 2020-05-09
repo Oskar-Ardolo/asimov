@@ -41,7 +41,7 @@ app.use(session({secret: "Shh, its a secret!", resave: true, saveUninitialized: 
 db.connect(function(err) {
   	if (err) throw err;
   	console.log("Connecté à la base de données '"+ DB_NAME +"'");
-    
+
     socket.listen(io, db, ent, session);
 
 
@@ -189,14 +189,14 @@ db.connect(function(err) {
 
 	/* GLOBAL POST ROUTES */
 	app.post("/login", (req, res) => {
-		asimov.login(req, res, db, crypto, fs, io);
+		asimov.login(req, res, db, crypto, fs);
 	});
 
 
 
   // 404, PAS DE ROUTES APRES CA
   app.get('*', function(req, res){
-    res.render("404.ejs");
+    res.render("404.ejs", {client : req.session.user});
   });
 
 

@@ -133,6 +133,21 @@ class DB {
       return this.doQuery(query);
     }
 
+    async getDiscussionsByUsers(id_one, id_two) {
+      let query = 'SELECT C.id FROM asimov_conversations AS C WHERE (C.id_firstuser = "'+id_one+'" AND C.id_seconduser = "'+id_two+'") OR (C.id_firstuser = "'+id_two+'" AND C.id_seconduser = "'+id_one+'")';
+      return this.doQuery(query)
+    }
+
+    async getListOfUsersByStr(str) {
+      let query = 'SELECT users.id, users.pseudo, users.nom, users.prenom FROM asimov_users AS users WHERE users.pseudo LIKE "%'+str+'%" OR users.nom LIKE "%'+str+'%" OR users.prenom LIKE "%'+str+'%" ORDER BY users.pseudo';
+      return this.doQuery(query);
+    }
+
+    async conversExist(id_sender, id_destinataire) {
+      let query = 'SELECT CASE WHEN C.id_seconduser = "'+id_destinataire+'" AND C.id_firstuser = "'+id_sender+'" THEN "true" WHEN C.id_firstuser = "'+id_destinataire+'" AND C.id_seconduser = "'+id_sender+'" THEN "true" END AS exist FROM asimov_conversations AS C WHERE (C.id_firstuser = "'+id_sender+'" AND C.id_seconduser = "'+id_destinataire+'") OR (C.id_firstuser = "'+id_destinataire+'" AND C.id_seconduser = "'+id_sender+'")';
+      return this.doQuery(query);
+    }
+
 // ======================================== COUNT ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
   	async userCount() {
@@ -188,6 +203,11 @@ class DB {
     async addNewMessage(idconvers, iduser, msg) {
       let query = `INSERT INTO asimov_messages (id, idconvers, iduser, libelle, date, vu) VALUES (NULL, "`+idconvers+`", "`+iduser+`", "`+msg+`", date, 0)`
       return this.doQuery(query)
+    }
+
+    async addNewConvers(id_sender, id_destinataire) {
+      let query = 'INSERT INTO asimov_conversations (id, id_firstuser, id_seconduser) VALUES (NULL,'+id_sender+', '+id_destinataire+')'
+      return this.doQuery(query);
     }
 
 // ======================================== UPDATE ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================

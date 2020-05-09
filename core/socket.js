@@ -21,19 +21,33 @@ exports.listen = (io, db, ent, session) => {
     });
 
     socket.on('chat-message', (data) => {
-      console.log("Sending: " + data.content + " to " + data.username);
+      console.log("Sending: " + data.content + " to " + data.destinataire);
       (async function() {
-        await DBModel.addNewMessage(data.idconvers, data.iduser, data.content);
+
+        let user_destinataire = await DBModel.getUserByPseudo(data.destinataire);
+
+        // CONFIRM IF THE CONVERSATION EXIST, IF TRUE SEND MSG, IF FALSE CREATE CONVERSATION
+        let convers_confirm = await DBModel.conversExist(data.iduser, user_destinataire[0].id);
+        console.log(convers_confirm, convers_confirm.length);
+        if(convers_confirm.length > 0) {
+          await DBModel.addNewMessage(data.idconvers, data.iduser, data.content);
+        } else {
+          await DBModel.addNewConvers(data.iduser, user_destinataire[0].id);
+          console.log(data.iduser, user_destinataire[0].id);
+          let new_convers = await DBModel.getDiscussionsByUsers(data.iduser, user_destinataire[0].id);
+          console.log(new_convers);
+          await DBModel.addNewMessage(new_convers[0].id, data.iduser, data.content);
+        }
+
 
         // GET ALL CONVERSATIONS OF SENDER
         let allconverse = await DBModel.getAllDiscussionById(data.iduser);
-
         if (clients[data.username]) io.sockets.connected[clients[data.username].socket].emit("add-message", { message: ent.encode(data.content) , convers : data.idconvers , id_sender : data.iduser, pseudo_sender : data.username, id_target : data.iduser, allconverse : allconverse });
         else console.log("User does not exist: " + data.username);
         console.log("sender", allconverse);
 
         // GET ALL CONVERSATIONS OF TARGET CLIENT
-        user_destinataire = await DBModel.getUserByPseudo(data.destinataire);
+        //user_destinataire = await DBModel.getUserByPseudo(data.destinataire);
         allconverse = await DBModel.getAllDiscussionById(user_destinataire[0].id);
         console.log("target", allconverse);
 
@@ -55,6 +69,29 @@ exports.listen = (io, db, ent, session) => {
 
       })();
 
+    });
+
+    socket.on('find_users', (data) => {
+      (async () => {
+
+        let list_users = await DBModel.getListOfUsersByStr(data.value);
+          console.log(list_users);
+        if (clients[data.username]) io.sockets.connected[clients[data.username].socket].emit('list_of_users', list_users);
+        else console.log("User does not exist: " + data.username);
+      })();
+    });
+
+    socket.on('btn_list_users', (data) => {
+      (async () => {
+        let user_destinataire = await DBModel.getUserByPseudo(data.destinataire);
+        let convers_confirm = await DBModel.conversExist(data.id_user, user_destinataire[0].id);
+        let data_convers = await DBModel.getDiscussionsByUsers(data.id_user, user_destinataire[0].id);
+        if (convers_confirm.length > 0) {
+          socket.emit('searching_existing_convers', {bool : true, id_user : data.id_user , id_convers : data_convers[0].id});
+        } else {
+          socket.emit('searching_existing_convers', {bool : false, destinataire : data.destinataire });
+        }
+      })();
     });
 
     //Removing the socket on disconnect

@@ -107,7 +107,7 @@ exports.doLogStuff = (req, res) => {
 }
 
 
-exports.login = (req, res, db, crypto, fs, io) => {
+exports.login = (req, res, db, crypto, fs) => {
 	let pseudo = req.body.pseudo;
 	let password = crypto.createHmac('sha256', req.body.password)
 	               .update('jojofags suck')
