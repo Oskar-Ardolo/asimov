@@ -96,7 +96,7 @@
                   <% try {%>
                     <% for (let items in allconverse) { %>
                       <div class="row">
-                        <div class="card mb-4" style="width:100%<%if(allconverse[items].vu == 0 & allconverse[items].iduser != client[0].id) {%>;background-color:orange<%}%>" onclick="loadchat(<%= allconverse[items].idconvers%>, <%= client[0].id%>, '<%= (client[0].pseudo).toString() %>')">
+                        <div class="card mb-4 bubule" style="width:100%<%if(allconverse[items].vu == 0 & allconverse[items].iduser != client[0].id) {%>;background-color:orange<%}%>" onclick="loadchat(<%= allconverse[items].idconvers%>, <%= client[0].id%>, '<%= (client[0].pseudo).toString() %>')">
                           <div class="card-header">
                             <i class="fas fa-paper-plane "></i>
                             <%= allconverse[items].destinataire %> </div>

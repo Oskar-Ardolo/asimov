@@ -1,16 +1,21 @@
 
 (function() {
 
+    // Create connection
     var socket = io.connect("http://localhost:3000");
+
+    // Global variables
     var pseudo = document.currentScript.getAttribute('pseudo');
     var id_user = document.currentScript.getAttribute('id_user');
-    var list_discussions;
+
+    // Events listener
     var input = document.getElementById('input_list_of_users');
     let btn = document.getElementById('btn_list_users');
-    console.log(pseudo);
 
+    // Emit user pseudo to authentification
     socket.emit('username', {username : pseudo});
-    console.log(location.pathname)
+
+    // If send msg, emit data to server
     $("form#form-msg").submit(function(e) {
         e.preventDefault(); // prevents page reloading
         socket.emit("chat-message", {content : $("input[name=msg]").val(), destinataire : $("input[name=destinataire]").val(), iduser : $("input[name=iduser]").val(), idconvers : $("input[name=idconvers]").val(), username : pseudo });
@@ -18,9 +23,8 @@
     return false;
   });
 
+  // Add message in view, and refresh list of chats
   socket.on("add-message", data  =>  {
-    list_discussions = data.allconverse;
-    console.log(data);
     if (location.pathname == '/discussions') {
       if (data.convers == $("input[name=idconvers]").val()) {
         if (data.id_sender == id_user){
@@ -32,18 +36,21 @@
         $("#scroll_container").scrollTop($("#scroll_container")[0].scrollHeight);
       }
 
+      // Move the search bar
       $('#list_discussions').empty();
       $('#list_discussions').append('<div class="card mb-4" style="width:100%;"><div class="card-header"><i class="fas fa-search"></i> Trouver une personne</div><div class="card-body" style="display:flex"><input id="input_list_of_users" class="form-control" style="display:flex; flex: 0 0 50%;max-width: 85%;" list="list_users" value=""><datalist id="list_users"></datalist><input type="hidden" id="id_user_in_list" value=""><button id="btn_list_users" class="btn btn-primary" style="display:flex; flex: 0 0 5%" type="button" name="button"><center><i class="fas fa-search"></i></center></button></div></div>');
 
+      // Refresh event listener
       input = document.getElementById('input_list_of_users');
       input.addEventListener('input', updateValue);
       btn = document.getElementById('btn_list_users');
       btn.addEventListener('click', btn_list);
 
+      // Refresh list of chats
       for (let items in data.allconverse) {
         let container;
         if (data.allconverse[items].vu == 0 & data.allconverse[items].iduser != id_user) container = '<div class="row"><div class="card mb-4" style="width:100%;background-color:orange" onclick="loadchat('+data.allconverse[items].idconvers+','+data.id_target+',`'+pseudo+'`)"><div class="card-header"><i class="fas fa-paper-plane "></i> '+data.allconverse[items].destinataire+'</div><div class="card-body">';
-        else container = '<div class="row"><div class="card mb-4" style="width:100%" onclick="loadchat('+data.allconverse[items].idconvers+','+data.id_target+',`'+pseudo+'`)"><div class="card-header"><i class="fas fa-paper-plane "></i> '+data.allconverse[items].destinataire+'</div><div class="card-body">';
+        else container = '<div class="row"><div class="card mb-4 bubule" style="width:100%" onclick="loadchat('+data.allconverse[items].idconvers+','+data.id_target+',`'+pseudo+'`)"><div class="card-header"><i class="fas fa-paper-plane "></i> '+data.allconverse[items].destinataire+'</div><div class="card-body">';
 
         if (data.allconverse[items].iduser == id_user) {
           container += 'Vous : ';
@@ -53,6 +60,7 @@
         $('#list_discussions').append(container + data.allconverse[items].libelle + '</div></div></div>');
       }
     } else {
+      // Add a notification if the location isn't /discussion
       let msg = data.message;
       if (msg.length >= 20) msg = msg.substr(0, 20) + '...'
       $('#msg_notification').empty();
@@ -61,8 +69,10 @@
 
   });
 
+  // Load the chat
   socket.on("loadchat", (data) => {
-    console.log(data);
+
+    // Add messages in the right order
     $('#container_msg').empty();
     for (let items in data.convers) {
       if (data.convers[items].iduser == data.user) {
@@ -71,24 +81,30 @@
         $('#container_msg').append('<div class="row" ><div class="card bg-primary text-white mb-4"><div class="card-body">'+data.convers[items].content+'</div></div></div>');
         }
     }
+
+    // Add the input and the sender button
     $('#card_chat').children("#form-msg").html('<div class="form-group" style="display:flex"><input type="hidden" name="iduser" value="'+data.user+'"><input type="hidden" name="destinataire" value="'+(data.convers[0].destinataire).toString()+'"><input type="hidden" name="idconvers" value="'+data.convers[0].idconv+'"><input id="msg" class="form-control" style=" display:flex; flex: 0 0 95%;" type="text" name="msg" value="" placeholder="Ecrivez un message..." required><button class="btn btn-success" style="display:flex; flex: 0 0 5%" type="submit" value="Save"><center><i class="fas fa-paper-plane "></i></center></button></div>');
     $("#scroll_container").scrollTop($("#scroll_container")[0].scrollHeight);
 
+    // Change the name of target
     $('#header_description').empty();
     $('#header_description').append('<i class="fas fa-paper-plane "></i> Discussion avec ' + data.convers[0].destinataire);
 
+    // Move the search bar
     $('#list_discussions').empty();
     $('#list_discussions').append('<div class="card mb-4" style="width:100%;"><div class="card-header"><i class="fas fa-search"></i> Trouver une personne</div><div class="card-body" style="display:flex"><input id="input_list_of_users" class="form-control" style="display:flex; flex: 0 0 50%;max-width: 85%;" list="list_users" value=""><datalist id="list_users"></datalist><input type="hidden" id="id_user_in_list" value=""><button id="btn_list_users" class="btn btn-primary" style="display:flex; flex: 0 0 5%" type="button" name="button"><center><i class="fas fa-search"></i></center></button></div></div>');
 
+    // Refresh events listener
     input = document.getElementById('input_list_of_users');
     input.addEventListener('input', updateValue);
     btn = document.getElementById('btn_list_users');
     btn.addEventListener('click', btn_list);
 
+    // Refresh list of chats
     for (let items in data.allconverse) {
       let container;
       if (data.allconverse[items].vu == 0 & data.allconverse[items].iduser != id_user) container = '<div class="row"><div class="card mb-4" style="width:100%;background-color:orange" onclick="loadchat('+data.allconverse[items].idconvers+','+data.user+',`'+pseudo+'`)"><div class="card-header"><i class="fas fa-paper-plane "></i> '+data.allconverse[items].destinataire+'</div><div class="card-body">';
-      else container = '<div class="row"><div class="card mb-4" style="width:100%" onclick="loadchat('+data.allconverse[items].idconvers+','+data.user+',`'+pseudo+'`)"><div class="card-header"><i class="fas fa-paper-plane "></i> '+data.allconverse[items].destinataire+'</div><div class="card-body">';
+      else container = '<div class="row"><div class="card mb-4 bubule" style="width:100%" onclick="loadchat('+data.allconverse[items].idconvers+','+data.user+',`'+pseudo+'`)"><div class="card-header"><i class="fas fa-paper-plane "></i> '+data.allconverse[items].destinataire+'</div><div class="card-body">';
 
       if (data.allconverse[items].iduser == id_user) {
         container += 'Vous : ';
@@ -99,14 +115,13 @@
     }
   });
 
+  // Event on change of this input
   input.addEventListener('input', updateValue);
-
   function updateValue(e) {
     let value = e.target.value;
     if (value.replace(/ /g, "")) {
       socket.emit('find_users', { value : value, username : pseudo });
     }
-    console.log(value);
     let option = $('option');
     for (let items in option) {
       if(option[items].value == value) {

@@ -611,6 +611,16 @@ pre code {
   cursor: pointer;
 }
 
+/* End */
+
+/* Style for chat */
+
+.bubule:hover {
+  background-color: #85c1e9;
+  cursor:pointer;
+}
+/* End */
+
 .container-fluid {
   width: 100%;
   padding-right: 15px;

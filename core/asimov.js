@@ -214,7 +214,6 @@ exports.postMessage = (req, res, db, msg) => {
       } else res.send({newmsg : ""});
     })();
   } else res.redirect("/home");
-
 }
 
 /*
