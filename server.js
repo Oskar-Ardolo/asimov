@@ -177,6 +177,27 @@ db.connect(function(err) {
 
 	/* END ADMIN ROUTES */
 
+
+  /* PROF ROUTES */
+
+  app.get("/prof/notes/:id", (req, res) => {
+    asimov.getNotesForUsers(req, res, db);
+  });
+
+  app.post("/prof/notes/add-ds", (req, res) => {
+    asimov.postAddNewDs(req, res, db);
+  });
+
+  /* END PROF ROUTES */
+
+  /* USER ROUTES */
+
+  app.get("/user/notes", (req, res) => {
+    asimov.getNotes(req, res, db);
+  });
+
+  /* END USER ROUTES */
+
   /* LOG ROUTES */
 
   app.get("/admin/log", (req, res) => {

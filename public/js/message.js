@@ -34,11 +34,14 @@
         }
 
         $("#scroll_container").scrollTop($("#scroll_container")[0].scrollHeight);
+      } else {
+        loadchat(data.convers, data.id_sender, pseudo);
       }
+      
 
       // Move the search bar
       $('#list_discussions').empty();
-      $('#list_discussions').append('<div class="card mb-4" style="width:100%;"><div class="card-header"><i class="fas fa-search"></i> Trouver une personne</div><div class="card-body" style="display:flex"><input id="input_list_of_users" class="form-control" style="display:flex; flex: 0 0 50%;max-width: 85%;" list="list_users" value=""><datalist id="list_users"></datalist><input type="hidden" id="id_user_in_list" value=""><button id="btn_list_users" class="btn btn-primary" style="display:flex; flex: 0 0 5%" type="button" name="button"><center><i class="fas fa-search"></i></center></button></div></div>');
+      $('#list_discussions').append('<div id="search-bar" class="card mb-4" style="width:100%;"><div class="card-header"><i class="fas fa-search"></i> Trouver une personne</div><div class="card-body" style="display:flex"><input id="input_list_of_users" class="form-control" style="display:flex; flex: 0 0 50%;max-width: 85%;" list="list_users" value=""><datalist id="list_users"></datalist><input type="hidden" id="id_user_in_list" value=""><button id="btn_list_users" class="btn btn-primary" style="display:flex; flex: 0 0 5%" type="button" name="button"><center><i class="fas fa-search"></i></center></button></div></div>');
 
       // Refresh event listener
       input = document.getElementById('input_list_of_users');
@@ -92,7 +95,7 @@
 
     // Move the search bar
     $('#list_discussions').empty();
-    $('#list_discussions').append('<div class="card mb-4" style="width:100%;"><div class="card-header"><i class="fas fa-search"></i> Trouver une personne</div><div class="card-body" style="display:flex"><input id="input_list_of_users" class="form-control" style="display:flex; flex: 0 0 50%;max-width: 85%;" list="list_users" value=""><datalist id="list_users"></datalist><input type="hidden" id="id_user_in_list" value=""><button id="btn_list_users" class="btn btn-primary" style="display:flex; flex: 0 0 5%" type="button" name="button"><center><i class="fas fa-search"></i></center></button></div></div>');
+    $('#list_discussions').append('<div id="search-bar" class="card mb-4" style="width:100%;"><div class="card-header"><i class="fas fa-search"></i> Trouver une personne</div><div class="card-body" style="display:flex"><input id="input_list_of_users" class="form-control" style="display:flex; flex: 0 0 50%;max-width: 85%;" list="list_users" value=""><datalist id="list_users"></datalist><input type="hidden" id="id_user_in_list" value=""><button id="btn_list_users" class="btn btn-primary" style="display:flex; flex: 0 0 5%" type="button" name="button"><center><i class="fas fa-search"></i></center></button></div></div>');
 
     // Refresh events listener
     input = document.getElementById('input_list_of_users');
@@ -132,6 +135,7 @@
     }
   }
 
+  // Add the list of users in datalist
   socket.on('list_of_users', (data) => {
     $('#list_users').empty();
     for (let items in data) {
@@ -139,9 +143,8 @@
     }
   });
 
-
+  // Events on button
   btn.addEventListener('click', btn_list);
-
   function btn_list() {
     let destinataire = $('#id_user_in_list').val()
     if (destinataire) {
@@ -157,22 +160,23 @@
     if (data.bool) {
       loadchat(data.id_convers, data.id_user, pseudo);
     } else {
-      if (!$('#list_discussions')) {
-        $('#list_discussions').prepend('<div class="card mb-4" style="width:100%;"><div class="card-header"><i class="fas fa-search"></i> Trouver une personne</div><div class="card-body" style="display:flex"><input id="input_list_of_users" class="form-control" style="display:flex; flex: 0 0 95%;max-width: 85%;" list="list_users" value=""><datalist id="list_users"></datalist><input type="hidden" id="id_user_in_list" value=""><button id="btn_list_users" class="btn btn-primary" style="display:flex; flex: 0 0 5%" type="button" name="button"><center><i class="fas fa-search"></i></center></button></div></div>');
-      }
-
-      input = document.getElementById('input_list_of_users');
-      input.addEventListener('input', updateValue);
-      btn = document.getElementById('btn_list_users');
-      btn.addEventListener('click', btn_list);
 
       $('#card_chat').children("#form-msg").html('<div class="form-group" style="display:flex"><input type="hidden" name="iduser" value="'+id_user+'"><input type="hidden" name="destinataire" value="'+data.destinataire+'"><input type="hidden" name="idconvers" value="0"><input id="msg" class="form-control" style=" display:flex; flex: 0 0 95%;" type="text" name="msg" value="" placeholder="Ecrivez un message..." required><button class="btn btn-success" style="display:flex; flex: 0 0 5%" type="submit" value="Save"><center><i class="fas fa-paper-plane "></i></center></button></div>');
       $("#scroll_container").scrollTop($("#scroll_container")[0].scrollHeight);
       $('#container_msg').empty();
       $('#header_description').empty();
       $('#header_description').append('<i class="fas fa-paper-plane "></i> Discussion avec ' + data.destinataire);
+
+      console.log($('#search-bar'));
+      if ($('#search-bar').length == 0) {
+        $('#list_discussions').prepend('<div id="search-bar" class="card mb-4" style="width:100%;"><div class="card-header"><i class="fas fa-search"></i> Trouver une personne</div><div class="card-body" style="display:flex"><input id="input_list_of_users" class="form-control" style="display:flex; flex: 0 0 95%;max-width: 85%;" list="list_users" value=""><datalist id="list_users"></datalist><input type="hidden" id="id_user_in_list" value=""><button id="btn_list_users" class="btn btn-primary" style="display:flex; flex: 0 0 5%" type="button" name="button"><center><i class="fas fa-search"></i></center></button></div></div>');
+      }
+      input = document.getElementById('input_list_of_users');
+      input.addEventListener('input', updateValue);
+      btn = document.getElementById('btn_list_users');
+      btn.addEventListener('click', btn_list);
     }
-    });
+  });
 })();
 
 function loadchat(idconv, iduser, pseudo) {

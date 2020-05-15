@@ -23,7 +23,7 @@ exports.listen = (io, db, ent, session) => {
     socket.on('chat-message', (data) => {
       console.log("Sending: " + data.content + " to " + data.destinataire);
       (async function() {
-
+        let new_convers;
         let user_destinataire = await DBModel.getUserByPseudo(data.destinataire);
 
         // CONFIRM IF THE CONVERSATION EXIST, IF TRUE SEND MSG, IF FALSE CREATE CONVERSATION
@@ -34,9 +34,11 @@ exports.listen = (io, db, ent, session) => {
         } else {
           await DBModel.addNewConvers(data.iduser, user_destinataire[0].id);
           console.log(data.iduser, user_destinataire[0].id);
-          let new_convers = await DBModel.getDiscussionsByUsers(data.iduser, user_destinataire[0].id);
+          new_convers = await DBModel.getDiscussionsByUsers(data.iduser, user_destinataire[0].id);
           console.log(new_convers);
           await DBModel.addNewMessage(new_convers[0].id, data.iduser, data.content);
+          data.idconvers = new_convers[0].id;
+          console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa : ", data.idconvers);
         }
 
 

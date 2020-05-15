@@ -1,0 +1,101 @@
+<% include ../include/header.ejs %>
+<div id="content-wrapper">
+
+<div class="container-fluid">
+    <!-- CODE HERE -->
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="/">Accueil</a>
+      </li>
+      <li class="breadcrumb-item active"> Mes classes </li>
+    </ol>
+
+    <div class="row">
+      <div class="col-8">
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="fas fa-paste "></i> Notes
+          </div>
+          <div id="zones_notes" class="card-body">
+            <% try { %>
+              <% if(data_control) { %>
+              <h4>Récapitulatif</h4>
+              <hr>
+              <form method="post" action="/prof/notes/edit-ds">
+                <label>Classe</label>
+                <input type="hidden" value="<%= data_control[0].id_classe %>" />
+                <input type="text" class="form-control" disabled value="<%= data_control[0].nomclasse %>" />
+                <label>Description</label>
+                <input type="text" class="form-control" disabled value="<%= data_control[0].description %>" />
+                <label>Date</label>
+                <input type="text" class="form-control" disabled value="<%= data_control[0].date %>" />
+                <label>Bareme</label>
+                <input type="text" class="form-control" disabled value="<%= data_control[0].bareme %>"/>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Nom prénom</th>
+                      <th>Note</th>
+                    </tr>
+                  </thead>
+                </table>
+              </form>
+              <% } %>
+            <% } catch(err) {%>
+              <h3>Selectionnez un devoir pour le modifier ou créez en un... </h3>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="fas fa-chart-area"></i> Devoirs
+          </div>
+          <div class="card-body">
+            <div class="text-muted">
+              Ajouter un devoir
+            </div>
+            <hr>
+            <button id="btn-devoir" type="button" name="button" class="btn btn-primary"><i class="fas fa-plus "></i> Nouveau devoir</button>
+            <br>
+            <br>
+            <div class="text-muted">
+              Modifier un devoir
+            </div>
+            <hr>
+            <div class="table-responsive">
+              <table id="dataTable" class="table table-bordered" width="100%">
+                <thead>
+                  <tr>
+                    <th>Description</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tfoot>
+                  <tr>
+                    <th>Description</th>
+                    <th>Date</th>
+                  </tr>
+                </tfoot>
+                <tbody>
+                <% for (let items in control) { %>
+                  <tr class="bubule" onclick="location.href='/prof/notes/<%= control[items].id %>'">
+                    <td><%= control[items].description %></td>
+                    <td><%= control[items].date %></td>
+                  </tr>
+                <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+</div>
+
+<script src="/vendor/jquery/jquery-3.1.0.min.js"></script>
+<script type="text/javascript" src='/js/prof/AddNewDs.js' classes='<%= JSON.stringify(classes) %>'></script>
+<!-- /.container-fluid -->
+<% include ../include/footer.ejs %>

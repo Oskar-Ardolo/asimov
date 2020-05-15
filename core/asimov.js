@@ -1421,6 +1421,84 @@ exports.getLog = (req, res, fs) => {
   }
 }
 
+/*
+======================
+MODULES PROFESSEURS
+======================
+*/
+
+exports.getNotesForUsers = (req, res, db) => {
+  if (req.session.rang >= 5) {
+    let DBModel = new DB(db);
+    (async () => {
+      try {
+        console.log(req.params.id, typeof(req.params.id));
+        let control = await DBModel.getControlByIdProf(req.session.user[0].id);
+        let classes = await DBModel.getUsersByIdProf(req.session.user[0].id);
+        console.log(control)
+        function verify_params() {
+          let bool = false;
+          for (let items in control) {
+            console.log("ok", control[items].id, req.params.id)
+            if (control[items].id == req.params.id) {
+              bool = true;
+              console.log("bool1", bool);
+              return bool;
+            }
+          }
+          console.log("bool2", bool);
+          return bool;
+        }
+
+        if (await verify_params()) {
+          let data_control = await DBModel.getDataControlById(req.params.id);
+          console.log(data_control);
+          res.render('prof/notes.ejs', {client : req.session.user, classes : classes, control : control , data_control : data_control});
+        } else {
+          res.render('prof/notes.ejs', {client : req.session.user, classes : classes, control : control});
+        }
+      } catch (err) {
+        console.log(err);
+        res.redirect("/home");
+      }
+    })();
+  }
+}
+
+exports.postAddNewDs = (req, res, db) => {
+  if (req.session.rang >= 5) {
+    let DBModel = new DB(db);
+    (async () => {
+      await DBModel.addControl(JSON.parse(req.body.data_ds), req.session.user[0].id);
+    })();
+    console.log("data : ", JSON.parse(req.body.data_ds));
+    res.redirect("/discussions");
+  }
+}
+/*
+======================
+MODULES UTILISATEURS
+======================
+*/
+
+exports.getNotes = (req, res, db) => {
+  if (req.session.rang == 1) {
+    let DBModel = new DB(db);
+    (async () => {
+      let notes = await DBModel.getNotesByIdUser(req.session.user[0].id)
+      console.log(notes)
+      res.render("user/notes.ejs", { client : req.session.user, notes : notes})
+    })();
+  }
+}
+
+
+/*
+======================
+MODULES DE LOGS
+======================
+*/
+
 // AFFICHER LES DETAILS D'UN LOG
 exports.getLogforUser = (req, res, fs) => {
   if(req.session.rang >= 10) {

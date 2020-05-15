@@ -15,7 +15,7 @@ class DB {
 		return this.doQuery(query)
   	}
   	async getUserByPseudo(pseudo) {
-  		let query = "SELECT id, nom, prenom, pseudo, titre FROM asimov_users WHERE asimov_users.pseudo = '"+ pseudo +"'"
+  		let query = "SELECT id, nom, prenom, pseudo, titre, rang FROM asimov_users WHERE asimov_users.pseudo = '"+ pseudo +"'"
 		  return this.doQuery(query)
   	}
     async getUserById(id) {
@@ -45,6 +45,11 @@ class DB {
     async getProfWithoutThisMatiere(idmatiere) {
       let query = "SELECT asimov_users.* FROM asimov_users LEFT JOIN asimov_enseignematiere ON asimov_users.id=asimov_enseignematiere.idprof WHERE (asimov_users.id=asimov_enseignematiere.idprof) AND (asimov_users.rang ='5') AND (asimov_enseignematiere.idmatiere != '"+idmatiere+"') ORDER BY asimov_users.nom"
       return this.doQuery(query)
+    }
+
+    async getUsersByIdProf(id_prof) {
+      let query = 'SELECT users.id, users.nom, users.prenom, DA.idclasse, classes.nomclasse FROM asimov_dansclasse AS DA JOIN asimov_users AS users ON users.id = DA.iduser JOIN asimov_classes AS classes ON classes.idclasse = DA.idclasse WHERE DA.idclasse IN (SELECT DA2.idclasse FROM asimov_dansclasse AS DA2 WHERE DA2.iduser = "'+id_prof+'") AND DA.iduser != "'+id_prof+'" ORDER BY classes.nomclasse';
+      return this.doQuery(query);
     }
 
 // _______________________________________
@@ -148,6 +153,31 @@ class DB {
       return this.doQuery(query);
     }
 
+// _______________________________________
+//
+//               NOTES
+// _______________________________________
+
+    async getNotesByIdUser(id) {
+      let query = 'SELECT N.id, N.note, N.bareme, N.description, N.date, N.coefficient, M.nommatiere FROM asimov_notes AS N JOIN asimov_matieres AS M ON M.id = N.id_matiere WHERE N.id_user = "'+id+'"';
+      return this.doQuery(query);
+    }
+
+// _______________________________________
+//
+//               CONTRÔLES
+// _______________________________________
+
+    async getControlByIdProf(id) {
+      let query = 'SELECT C.*, classes.nomclasse FROM asimov_control AS C JOIN asimov_classes AS classes ON classes.idclasse = C.id_classe WHERE C.id_prof ="'+id+'";';
+      return this.doQuery(query);
+    }
+
+    async getDataControlById(id) {
+      let query = 'SELECT N.*, U.nom, U.prenom FROM asimov_notes AS N JOIN asimov_users AS U ON U.id = N.id_user WHERE N.id_ds =' + id;
+      return this.doQuery(query);
+    }
+
 // ======================================== COUNT ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
   	async userCount() {
@@ -209,6 +239,23 @@ class DB {
       let query = 'INSERT INTO asimov_conversations (id, id_firstuser, id_seconduser) VALUES (NULL,'+id_sender+', '+id_destinataire+')'
       return this.doQuery(query);
     }
+
+// _______________________________________
+//
+//               CONTRÔLES
+// _______________________________________
+
+    async addControl(data, id_prof) {
+      let query = 'INSERT INTO asimov_control (id, id_prof, id_classe, description, coefficient, bareme, date) VALUES (NULL, '+id_prof+', '+data["header"].classe.id+', "'+data["header"].description+'", '+data["header"].coefficient+', '+data["header"].bareme+', '+data["header"].date+')'
+      return this.doQuery(query).then((r, e) => {
+        let second_query = '';
+        for (let items in data["body"]) {
+          second_query += 'INSERT INTO asimov_notes (id, note, id_user, id_ds) VALUES (NULL, '+data["body"][items].notes+', '+data["body"][items].id+', '+r.insertId+');'
+        }
+        return this.doQuery(second_query);
+      });
+    }
+
 
 // ======================================== UPDATE ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================
 

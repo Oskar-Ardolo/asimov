@@ -1,0 +1,92 @@
+<% include ../include/header.ejs %>
+<% var noteforchart = new Array()  %>
+<% var json_data = {}; %>
+<% for (let items in notes) { %>
+  <% json_data[notes[items].nommatiere] = { notes : [], coefficient : [] } %>
+<% } %>
+<div id="content-wrapper">
+
+<div class="container-fluid">
+    <!-- CODE HERE -->
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="/">Accueil</a>
+      </li>
+      <li class="breadcrumb-item active"> Mes notes </li>
+    </ol>
+
+    <div class="row">
+      <div class="col-7">
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="fas fa-paste "></i> Notes
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                  <tr>
+                    <th>Matière</th>
+                    <th>Description</th>
+                    <th>Note</th>
+                    <th>Coéfficient</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tfoot>
+                  <tr>
+                    <th>Matière</th>
+                    <th>Description</th>
+                    <th>Note</th>
+                    <th>Coéfficient</th>
+                    <th>Date</th>
+                  </tr>
+                </tfoot>
+                <tbody>
+                  <% for (let items in notes) { %>
+                    <% noteforchart[items] = notes[items].note %>
+
+                    <% json_data[notes[items].nommatiere].notes.push(notes[items].note)  %>
+                    <% json_data[notes[items].nommatiere].coefficient.push(notes[items].coefficient)  %>
+                  <tr>
+                    <td><%= notes[items].nommatiere %></td>
+                    <td><%= notes[items].description %></td>
+                    <td><%= notes[items].note %>/<%= notes[items].bareme %></td>
+                    <td><%= notes[items].coefficient %></td>
+                    <td><%= notes[items].date %></td>
+                  </tr>
+                  <% } %>
+                  <% for (let items in json_data) { %>
+                    <% let moyenne = 0; %>
+                    <% let coefficient = 0;%>
+                    <% for (let notes in json_data[items].notes) { %>
+                      <% moyenne += json_data[items].notes[notes]*json_data[items].coefficient[notes]%>
+                      <% coefficient += json_data[items].coefficient[notes]%>
+                    <% } %>
+                      <% moyenne = moyenne/coefficient %>
+                    <% json_data[items].notes = moyenne.toFixed(2)  %>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-5">
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="fas fa-chart-area"></i> Graphique
+          </div>
+          <div class="card-body">
+            <canvas id="Chart" width="100%" height="30"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+<script src="/vendor/chart.js/Chart.min.js"></script>
+<script src="/js/chart/notes-chart.js" data="<%= JSON.stringify(json_data) %>"></script>
+
+<!-- /.container-fluid -->
+<% include ../include/footer.ejs %>
