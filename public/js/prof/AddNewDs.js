@@ -142,7 +142,7 @@ function btn_recap() {
   for (let items in new_ds["body"]) {
     recap += '<tr><td><label>'+new_ds["body"][items].nom+' '+new_ds["body"][items].prenom+'</label></td><td><input type="text" class="form-control" value="'+new_ds["body"][items].notes+'" disabled></td></tr>';
   }
-  let str = JSON.stringify(new_ds).replace(/"/g, `&quot;`)
+  let str = JSON.stringify(new_ds).replace(/"/g, `&quot;`);
   $('#zones_notes').append(recap + '</table><hr><input name="data_ds" type="hidden" value="'+str+'" /><div class="row"><div class="col-6"><center><button id="btn_precedent" type="button" class="btn btn-danger">Précédent</button></center></div><div class="col-6"><center><button type="submit" class="btn btn-success">Valider</button></center></form></div></div>');
   document.getElementById('btn_precedent').addEventListener('click', back_to_body);
   console.log("4", new_ds["body"])

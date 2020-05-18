@@ -46,25 +46,29 @@
                   <% for (let items in notes) { %>
                     <% noteforchart[items] = notes[items].note %>
 
-                    <% json_data[notes[items].nommatiere].notes.push(notes[items].note)  %>
-                    <% json_data[notes[items].nommatiere].coefficient.push(notes[items].coefficient)  %>
+                    <% if(notes[items].note != "ABS" && notes[items].note != "Non noté") { %>
+                      <% json_data[notes[items].nommatiere].notes.push(notes[items].note); %>
+                      <% json_data[notes[items].nommatiere].coefficient.push(notes[items].coefficient); %>
+                    <% } %>
                   <tr>
                     <td><%= notes[items].nommatiere %></td>
                     <td><%= notes[items].description %></td>
-                    <td><%= notes[items].note %>/<%= notes[items].bareme %></td>
+                    <td><%= notes[items].note %><% if(notes[items].note != "ABS" && notes[items].note != "Non noté") { %>/<%= notes[items].bareme %><% } %></td>
                     <td><%= notes[items].coefficient %></td>
                     <td><%= notes[items].date %></td>
                   </tr>
                   <% } %>
                   <% for (let items in json_data) { %>
-                    <% let moyenne = 0; %>
-                    <% let coefficient = 0;%>
-                    <% for (let notes in json_data[items].notes) { %>
-                      <% moyenne += json_data[items].notes[notes]*json_data[items].coefficient[notes]%>
-                      <% coefficient += json_data[items].coefficient[notes]%>
-                    <% } %>
+                    <% if ((json_data[items].notes).length > 0) { %>
+                      <% let moyenne = 0; %>
+                      <% let coefficient = 0; %>
+                      <% for (let notes in json_data[items].notes) { %>
+                        <% moyenne += json_data[items].notes[notes]*json_data[items].coefficient[notes]%>
+                        <% coefficient += json_data[items].coefficient[notes]%>
+                      <% } %>
                       <% moyenne = moyenne/coefficient %>
-                    <% json_data[items].notes = moyenne.toFixed(2)  %>
+                      <% json_data[items].notes = moyenne.toFixed(2)  %>
+                    <% } %>
                   <% } %>
                 </tbody>
               </table>

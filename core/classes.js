@@ -159,7 +159,7 @@ class DB {
 // _______________________________________
 
     async getNotesByIdUser(id) {
-      let query = 'SELECT N.id, N.note, N.bareme, N.description, N.date, N.coefficient, M.nommatiere FROM asimov_notes AS N JOIN asimov_matieres AS M ON M.id = N.id_matiere WHERE N.id_user = "'+id+'"';
+      let query = 'SELECT N.id, N.note, C.bareme, C.description, DATE_FORMAT(C.date, "%d-%m-%Y") AS date, C.coefficient, C.id_matiere, M.nommatiere FROM asimov_notes AS N JOIN asimov_control AS C ON C.id = N.id_ds JOIN asimov_matieres AS M ON M.id = C.id_matiere WHERE N.id_user = "'+id+'"';
       return this.doQuery(query);
     }
 

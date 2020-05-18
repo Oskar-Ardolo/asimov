@@ -7,16 +7,30 @@ var ctx = document.getElementById("Chart");
 var data = JSON.parse(document.currentScript.getAttribute('data'));
 
 if (data) {
+  /*
   var label = Object.keys(data);
-  label.push("Général");
+  label.push("Général");*/
+
+  var label = [];
+  for (let items in data) {
+    if ((data[items].notes).length > 0) {
+      label.push(items);
+    }
+  }
+
+  if (label.length > 0) {
+    label.push("Général");
+  }
 
   var values = [];
   var conteneur = 0;
   var cpt = 0;
   for (let items in data) {
-    conteneur += parseInt(data[items].notes);
-    values.push(data[items].notes);
-    cpt ++
+    if ((data[items].notes).length > 0) {
+      conteneur += parseInt(data[items].notes);
+      values.push(data[items].notes);
+      cpt ++
+    }
   }
 
   values.push((conteneur/cpt).toFixed(2));
