@@ -1,4 +1,5 @@
 let data = JSON.parse(document.currentScript.getAttribute('classes'));
+let matiere = JSON.parse(document.currentScript.getAttribute('matiere'));
 
 let new_ds = {};
 new_ds["body"] = [];
@@ -34,9 +35,25 @@ function btn_devoir() {
 
 // ACTION ON INPUT SELECT CLASSES
 function getclasse(e) {
+
   let value = $('#list_classes').val();
   let txt = $('#list_classes option:selected').text();
 
+  new_ds["header"] = {
+    classe : { id : value, nom : txt }
+  }
+
+  $('#zones_notes').empty();
+  let input = '<label for="classes">Choisissez une matière</label><select id="list_matiere" name="matiere" class="form-control"><option value="" class="text-muted" selected disabled>-- Selectionnez une matière --</option>'
+  for (let items in matiere) {
+    input += '<option value="'+ matiere[items].idmatiere +'">'+ matiere[items].nommatiere +'</option>'
+  }
+  $('#zones_notes').append(input + '</select><br><center><button id="back" class="btn btn-danger" type="button">Précédent</button></center>');
+  document.getElementById('list_matiere').addEventListener('input', getMatiere);
+
+  document.getElementById('back').addEventListener('click', back_to_classe);
+  console.log(new_ds["header"])
+  /*
   $('#zones_notes').empty();
 
   $('#zones_notes').append('<div class="form-group"><label>Description</label><input id="description" type="text" class="form-control"/><label>Date du devoir (date à laquelle à eu lieu le devoir)</label><input id="date" type="date" class="form-control"/><label>Barème</label><input id="bareme" type=number class="form-control" min="0"/><label>Coéfficient</label><input id="coefficient" type="number" class="form-control" min="0"/><hr><div class="row"><div class="col-6"><center><button id="back" type="reset" class="btn btn-danger">Annuler</button></center></div><div class="col-6"><center><button id="btn_suivant" type="button" class="btn btn-primary">Suivant</button></center></div></div></div>');
@@ -44,8 +61,27 @@ function getclasse(e) {
   new_ds["header"] = {
     classe : { id : value, nom : txt }
   }
-  document.getElementById('back').addEventListener('click', back_to_classe);
+  document.getElementById('back').addEventListener('click', back_to_classe);*/
 }
+
+// ACTION ON INPUT SELECT MATIERE
+function getMatiere() {
+
+  let value = $('#list_matiere').val();
+  let txt = $('#list_matiere option:selected').text();
+
+  new_ds["header"].matiere = { id : value , nom : txt}
+
+
+  $('#zones_notes').empty();
+
+  $('#zones_notes').append('<div class="form-group"><label>Description</label><input id="description" type="text" class="form-control"/><label>Date du devoir (date à laquelle à eu lieu le devoir)</label><input id="date" type="date" class="form-control"/><label>Barème</label><input id="bareme" type=number class="form-control" min="0"/><label>Coéfficient</label><input id="coefficient" type="number" class="form-control" min="0"/><hr><div class="row"><div class="col-6"><center><button id="back" type="reset" class="btn btn-danger">Annuler</button></center></div><div class="col-6"><center><button id="btn_suivant" type="button" class="btn btn-primary">Suivant</button></center></div></div></div>');
+  document.getElementById('btn_suivant').addEventListener('click', btn_suivant);
+
+  document.getElementById('back').addEventListener('click', back_to_matiere);
+  console.log(new_ds["header"])
+}
+
 
 // ACTION ON CLICK ON BUTTON NEXT (header to body)
 function btn_suivant() {
@@ -88,6 +124,7 @@ function btn_suivant() {
 
   document.getElementById('btn_precedent').addEventListener('click', back_to_header);
   document.getElementById('btn_recap').addEventListener('click', btn_recap);
+  console.log(new_ds["header"]);
 }
 
 // ACTION ON BUTTON TO GET RESUME
@@ -101,9 +138,9 @@ function btn_recap() {
   }
 
   $('#zones_notes').empty()
-  let recap = '<h4>Récapitulatif</h4><hr><form method="post" action="/prof/notes/add-ds"><label>Classe</label><input type="text" class="form-control" disabled value="'+new_ds["header"].classe.nom+'"><label>Description</label><input type="text" class="form-control" disabled value="'+new_ds["header"].description+'"><label>Date</label><input type="text" class="form-control" disabled value="'+new_ds["header"].date+'"><label>Bareme</label><input type="text" class="form-control" disabled value="'+new_ds["header"].bareme+'"><table class="table"><thead><th>Nom prénom</th><th>Note</th><thead>';
+  let recap = '<h4>Récapitulatif</h4><hr><form method="post" action="/prof/notes/add-ds"><label>Classe</label><input type="text" class="form-control" disabled value="'+new_ds["header"].classe.nom+'"><label>Matière</label><input class="form-control" type="text" disabled value="'+new_ds["header"].matiere.nom+'"/><label>Description</label><input type="text" class="form-control" disabled value="'+new_ds["header"].description+'"><label>Date</label><input type="text" class="form-control" disabled value="'+new_ds["header"].date+'"><label>Bareme</label><input type="text" class="form-control" disabled value="'+new_ds["header"].bareme+'"><label>Coéfficient</label><input type="text" class="form-control" disabled value="'+new_ds["header"].coefficient+'"/><table class="table table-bordered"><thead><th>Nom prénom</th><th>Note</th><thead>';
   for (let items in new_ds["body"]) {
-    recap += '<tr><td><label>'+new_ds["body"][items].nom+' '+new_ds["body"][items].prenom+'</label></td><td><input type="text" class="form-control" value="'+new_ds["body"][items].notes+'" disabled></td></tr>'
+    recap += '<tr><td><label>'+new_ds["body"][items].nom+' '+new_ds["body"][items].prenom+'</label></td><td><input type="text" class="form-control" value="'+new_ds["body"][items].notes+'" disabled></td></tr>';
   }
   let str = JSON.stringify(new_ds).replace(/"/g, `&quot;`)
   $('#zones_notes').append(recap + '</table><hr><input name="data_ds" type="hidden" value="'+str+'" /><div class="row"><div class="col-6"><center><button id="btn_precedent" type="button" class="btn btn-danger">Précédent</button></center></div><div class="col-6"><center><button type="submit" class="btn btn-success">Valider</button></center></form></div></div>');
@@ -115,6 +152,18 @@ function btn_recap() {
 
 function back_to_classe() {
   btn_devoir();
+}
+
+function back_to_matiere() {
+  $('#zones_notes').empty();
+  let input = '<label for="classes">Choisissez une matière</label><select id="list_matiere" name="matiere" class="form-control"><option value="" class="text-muted" selected disabled>-- Selectionnez une matière --</option>'
+  for (let items in matiere) {
+    input += '<option value="'+ matiere[items].idmatiere +'">'+ matiere[items].nommatiere +'</option>'
+  }
+  $('#zones_notes').append(input + '</select><br><center><button id="back" class="btn btn-danger" type="button">Précédent</button></center>');
+  document.getElementById('list_matiere').addEventListener('input', getMatiere);
+
+  document.getElementById('back').addEventListener('click', back_to_classe);
 }
 
 function back_to_header() {

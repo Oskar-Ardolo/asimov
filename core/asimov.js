@@ -1423,6 +1423,7 @@ exports.getNotesForUsers = (req, res, db) => {
       try {
         let control = await DBModel.getControlByIdProf(req.session.user[0].id);
         let classes = await DBModel.getUsersByIdProf(req.session.user[0].id);
+        let matiere = await DBModel.getMatieresForOneProf(req.session.user[0].id);
         function verify_params() {
           let bool = false;
           for (let items in control) {
@@ -1436,9 +1437,9 @@ exports.getNotesForUsers = (req, res, db) => {
 
         if (await verify_params()) {
           let data_control = await DBModel.getDataControlById(req.params.id);
-          res.render('prof/notes.ejs', {client : req.session.user, classes : classes, control : control , data_control : data_control, index : req.params.id});
+          res.render('prof/notes.ejs', {client : req.session.user, classes : classes, control : control , data_control : data_control, index : req.params.id, matiere : matiere});
         } else {
-          res.render('prof/notes.ejs', {client : req.session.user, classes : classes, control : control});
+          res.render('prof/notes.ejs', {client : req.session.user, classes : classes, control : control, matiere : matiere});
         }
       } catch (err) {
         console.log(err);

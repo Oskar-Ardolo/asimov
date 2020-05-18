@@ -111,7 +111,7 @@ class DB {
   		return this.doQuery(query)
   	}
     async getMatieresForOneProf(id) {
-      let query = "SELECT idmatiere FROM asimov_enseignematiere WHERE idprof = '"+id+"'"
+      let query = "SELECT E.idmatiere, M.nommatiere FROM asimov_enseignematiere AS E JOIN asimov_matieres AS M ON M.id = E.idmatiere WHERE E.idprof = '"+id+"'"
       return this.doQuery(query)
     }
     async addMatiereToProf(idprof, idmatiere) {
@@ -163,13 +163,19 @@ class DB {
       return this.doQuery(query);
     }
 
+    /*SELECT N.id, N.note, C.bareme, C.description, C.date, C.coefficient, M.nommatiere
+FROM asimov_notes AS N
+JOIN asimov_control AS C ON C.id = N.id_ds
+JOIN asimov_matieres AS M ON M.id = N.id_matiere
+WHERE N.id_user = 13*/
+
 // _______________________________________
 //
 //               CONTRÔLES
 // _______________________________________
 
     async getControlByIdProf(id) {
-      let query = 'SELECT C.id, C.id_prof, C.id_classe, C.description, C.coefficient, C.bareme, DATE_FORMAT(C.date, "%Y-%m-%d") AS date, classes.nomclasse FROM asimov_control AS C JOIN asimov_classes AS classes ON classes.idclasse = C.id_classe WHERE C.id_prof ="'+id+'";';
+      let query = 'SELECT C.id, C.id_prof, C.id_classe, C.id_matiere, C.description, C.coefficient, C.bareme, DATE_FORMAT(C.date, "%Y-%m-%d") AS date, classes.nomclasse FROM asimov_control AS C JOIN asimov_classes AS classes ON classes.idclasse = C.id_classe WHERE C.id_prof ="'+id+'";';
       return this.doQuery(query);
     }
 
@@ -246,7 +252,7 @@ class DB {
 // _______________________________________
 
     async addControl(data, id_prof) {
-      let query = 'INSERT INTO asimov_control (id, id_prof, id_classe, description, coefficient, bareme, date) VALUES (NULL, '+id_prof+', '+data["header"].classe.id+', "'+data["header"].description+'", '+data["header"].coefficient+', '+data["header"].bareme+', "'+data["header"].date+'")'
+      let query = 'INSERT INTO asimov_control (id, id_prof, id_classe, id_matiere, description, coefficient, bareme, date) VALUES (NULL, '+id_prof+', '+data["header"].classe.id+', '+data["header"].matiere.id+', "'+data["header"].description+'", '+data["header"].coefficient+', '+data["header"].bareme+', "'+data["header"].date+'")'
       return this.doQuery(query).then((r, e) => {
         let second_query = '';
         for (let items in data["body"]) {
@@ -302,7 +308,7 @@ class DB {
 
 // _______________________________________
 //
-//               DISCUSSIONS
+//               CONTRÔLES
 // _______________________________________
 
   async update_DS(header, body, id_ds) {
