@@ -18,30 +18,78 @@
           </div>
           <div id="zones_notes" class="card-body">
             <% try { %>
+              <% let bareme; %>
               <% if(data_control) { %>
               <h4>Récapitulatif</h4>
               <hr>
-              <form method="post" action="/prof/notes/edit-ds">
-                <label>Classe</label>
-                <input type="hidden" value="<%= data_control[0].id_classe %>" />
-                <input type="text" class="form-control" disabled value="<%= data_control[0].nomclasse %>" />
-                <label>Description</label>
-                <input type="text" class="form-control" disabled value="<%= data_control[0].description %>" />
-                <label>Date</label>
-                <input type="text" class="form-control" disabled value="<%= data_control[0].date %>" />
-                <label>Bareme</label>
-                <input type="text" class="form-control" disabled value="<%= data_control[0].bareme %>"/>
-                <table class="table">
+              <form id="form-edit" method="post" action="/prof/notes/edit-ds/<%= index %>">
+                <% for (let items in control) { %>
+                  <% if (control[items].id == index) { %>
+                    <label>Classe</label>
+                    <input id="header" type="hidden" value="<%= control[items].id_classe %>" />
+                    <input id="header" type="text" class="form-control" disabled value="<%= control[items].nomclasse %>" />
+                    <label>Description</label>
+                    <input id="header" type="text" class="form-control" value="<%= control[items].description %>" />
+                    <label>Date</label>
+                    <input id="header" type="date" name="date" class="form-control" value="<%= control[items].date %>" />
+                    <label>Bareme</label>
+                    <input id="header" type="number" class="form-control" name="input-bareme" value="<%= control[items].bareme %>"/>
+                    <label>Coéfficient</label>
+                    <input id="header" type="number" class="form-control" value="<%= control[items].coefficient %>"/>
+                    <% bareme = control[items].bareme; %>
+                    <% break; %>
+                  <% } %>
+                <% } %>
+                <hr>
+                <table class="table table-bordered" width="100%">
                   <thead>
                     <tr>
                       <th>Nom prénom</th>
                       <th>Note</th>
                     </tr>
                   </thead>
+                  <tbody>
+                    <% for (let items in data_control) { %>
+                    <tr>
+                      <td><%= data_control[items].nom + ' ' + data_control[items].prenom %><input id="id_user" type="hidden" value="<%= data_control[items].id_user %>"></td>
+                      <td>
+                        <select id="select_notes" class="form-control">
+                        <% if (data_control[items].note == 'ABS') { %>
+                          <option selected>ABS</option>
+                        <% } else { %>
+                          <option>ABS</option>
+                        <% } %>
+                        <% if (data_control[items].note == 'Non noté') { %>
+                          <option selected>Non noté</option>
+                          <% } else { %>
+                            <option>Non noté</option>
+                          <% } %>
+                        <% for (let i = 0; i < parseInt(bareme) + 1; i++) { %>
+                          <% if (i == data_control[items].note) { %>
+                            <option selected><%= i %></option>
+                          <% } else { %>
+                            <option><%= i %></option>
+                          <% } %>
+                        <% } %>
+                        </select>
+                      </td>
+                    </tr>
+                    <% } %>
+                  </tbody>
                 </table>
-              </form>
+                <input id="data_header" type="hidden" name="data_header" value="">
+                <input id="data_body" type="hidden" name="data_body" value="">
+                </form>
+                <div class="row">
+                  <div class="col-6">
+                    <center><button id="btn_delete" data-toggle="modal" data-target="#Delete_dsModal" type="submit" class="btn btn-danger" name="button">Supprimer</button></center>
+                  </div>
+                  <div class="col-6">
+                    <center><button id="btn_modify" form="form-edit" type="submit" disabled class="btn btn-success" name="button">Modifier</button></center>
+                  </div>
+                </div>
               <% } %>
-            <% } catch(err) {%>
+            <% } catch(err) { %>
               <h3>Selectionnez un devoir pour le modifier ou créez en un... </h3>
             <% } %>
           </div>
@@ -50,7 +98,7 @@
       <div class="col-4">
         <div class="card mb-4">
           <div class="card-header">
-            <i class="fas fa-chart-area"></i> Devoirs
+            <i class="fas fa-chart-area"></i> Evaluations
           </div>
           <div class="card-body">
             <div class="text-muted">
@@ -64,7 +112,7 @@
               Modifier un devoir
             </div>
             <hr>
-            <div class="table-responsive">
+            <div class="table-responsive" width="100%">
               <table id="dataTable" class="table table-bordered" width="100%">
                 <thead>
                   <tr>
@@ -97,5 +145,29 @@
 
 <script src="/vendor/jquery/jquery-3.1.0.min.js"></script>
 <script type="text/javascript" src='/js/prof/AddNewDs.js' classes='<%= JSON.stringify(classes) %>'></script>
+
+<% try { %>
+<!-- Logout Modal-->
+<div class="modal fade" id="Delete_dsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Êtes-vous sûr de vouloir vous supprimer ce contrôle ?</h5>
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">Cliquer sur <b>Confirmer</b> pour le supprimer</div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-dismiss="modal">Annuler</button>
+        <form id="form-delete" action="/prof/notes/delete-ds/<%= index %>" method="post">
+          <center><button id="btn_delete" form="form-delete" type="submit" class="btn btn-danger" name="button">Supprimer</button></center>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<% } catch (err) {} %>
+
 <!-- /.container-fluid -->
 <% include ../include/footer.ejs %>

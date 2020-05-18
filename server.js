@@ -188,6 +188,14 @@ db.connect(function(err) {
     asimov.postAddNewDs(req, res, db);
   });
 
+  app.post("/prof/notes/edit-ds/:id", (req, res) => {
+    asimov.postModifiyDs(req, res, db);
+  });
+
+  app.post("/prof/notes/delete-ds/:id", (req, res) => {
+    asimov.postDeleteDs(req, res, db);
+  });
+
   /* END PROF ROUTES */
 
   /* USER ROUTES */

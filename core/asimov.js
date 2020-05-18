@@ -188,7 +188,11 @@ exports.getParameters = (req, res, db) => {
 
       res.render("parameters.ejs", { client : req.session.user });
     })();
-  } else res.redirect("/home");
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/home");
+  }
 }
 
 exports.getDiscussions = (req, res, db) => {
@@ -199,7 +203,11 @@ exports.getDiscussions = (req, res, db) => {
       //console.log(allconverse);
       res.render("messages.ejs", {allconverse : allconverse, client : req.session.user});
     })();
-  } else res.redirect("/home");
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/home");
+  }
 }
 
 exports.postMessage = (req, res, db, msg) => {
@@ -213,7 +221,11 @@ exports.postMessage = (req, res, db, msg) => {
         res.send({newmsg : lastmsg[0].content});
       } else res.send({newmsg : ""});
     })();
-  } else res.redirect("/home");
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/home");
+  }
 }
 
 /*
@@ -1394,9 +1406,128 @@ exports.addProfToMatiere = (req, res, db, fs) => {
   } else {
     req.session.login = false;
     req.session.rang = 0;
-    res.redirect("/home")
+    res.redirect("/admin");
   }
 }
+
+/*
+======================
+MODULES PROFESSEURS
+======================
+*/
+
+exports.getNotesForUsers = (req, res, db) => {
+  if (req.session.rang >= 5) {
+    let DBModel = new DB(db);
+    (async () => {
+      try {
+        let control = await DBModel.getControlByIdProf(req.session.user[0].id);
+        let classes = await DBModel.getUsersByIdProf(req.session.user[0].id);
+        function verify_params() {
+          let bool = false;
+          for (let items in control) {
+            if (control[items].id == req.params.id) {
+              bool = true;
+              return bool;
+            }
+          }
+          return bool;
+        }
+
+        if (await verify_params()) {
+          let data_control = await DBModel.getDataControlById(req.params.id);
+          res.render('prof/notes.ejs', {client : req.session.user, classes : classes, control : control , data_control : data_control, index : req.params.id});
+        } else {
+          res.render('prof/notes.ejs', {client : req.session.user, classes : classes, control : control});
+        }
+      } catch (err) {
+        console.log(err);
+        res.redirect("/home");
+      }
+    })();
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/admin");
+  }
+}
+
+exports.postAddNewDs = (req, res, db) => {
+  if (req.session.rang >= 5) {
+    let DBModel = new DB(db);
+    (async () => {
+      await DBModel.addControl(JSON.parse(req.body.data_ds), req.session.user[0].id);
+    })();
+    console.log("data : ", JSON.parse(req.body.data_ds));
+    res.redirect("/prof/notes/index");
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/home");
+  }
+}
+
+exports.postModifiyDs = (req, res, db) => {
+  if (req.session.rang >= 5) {
+    let DBModel = new DB(db);
+    (async () => {
+      await DBModel.update_DS(JSON.parse(req.body.data_header), JSON.parse(req.body.data_body), req.params.id);
+      console.log(JSON.parse(req.body.data_header));
+      console.log(JSON.parse(req.body.data_body));
+      res.redirect("/prof/notes/index");
+    })();
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/home");
+  }
+}
+
+exports.postDeleteDs = (req, res, db) => {
+  if (req.session.rang >= 5) {
+    let DBModel = new DB(db);
+    (async () => {
+      // VERIFY IF THIS TEACHER CAN DELETE THIS CONTROL
+      let verifier = await DBModel.verifyProfAndDS(req.params.id);
+      if (verifier[0].id_prof == req.session.user[0].id) {
+        await DBModel.delete_ds(req.params.id);
+      }
+      res.redirect("/prof/notes/index");
+    })();
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/home");
+  }
+}
+
+/*
+======================
+MODULES UTILISATEURS
+======================
+*/
+
+exports.getNotes = (req, res, db) => {
+  if (req.session.rang == 1) {
+    let DBModel = new DB(db);
+    (async () => {
+      let notes = await DBModel.getNotesByIdUser(req.session.user[0].id)
+      console.log(notes)
+      res.render("user/notes.ejs", { client : req.session.user, notes : notes})
+    })();
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/home");
+  }
+}
+
+
+/*
+======================
+MODULES DE LOGS
+======================
+*/
 
 // GESTION DES LOGS
 
@@ -1420,84 +1551,6 @@ exports.getLog = (req, res, fs) => {
     res.redirect("/admin");
   }
 }
-
-/*
-======================
-MODULES PROFESSEURS
-======================
-*/
-
-exports.getNotesForUsers = (req, res, db) => {
-  if (req.session.rang >= 5) {
-    let DBModel = new DB(db);
-    (async () => {
-      try {
-        console.log(req.params.id, typeof(req.params.id));
-        let control = await DBModel.getControlByIdProf(req.session.user[0].id);
-        let classes = await DBModel.getUsersByIdProf(req.session.user[0].id);
-        console.log(control)
-        function verify_params() {
-          let bool = false;
-          for (let items in control) {
-            console.log("ok", control[items].id, req.params.id)
-            if (control[items].id == req.params.id) {
-              bool = true;
-              console.log("bool1", bool);
-              return bool;
-            }
-          }
-          console.log("bool2", bool);
-          return bool;
-        }
-
-        if (await verify_params()) {
-          let data_control = await DBModel.getDataControlById(req.params.id);
-          console.log(data_control);
-          res.render('prof/notes.ejs', {client : req.session.user, classes : classes, control : control , data_control : data_control});
-        } else {
-          res.render('prof/notes.ejs', {client : req.session.user, classes : classes, control : control});
-        }
-      } catch (err) {
-        console.log(err);
-        res.redirect("/home");
-      }
-    })();
-  }
-}
-
-exports.postAddNewDs = (req, res, db) => {
-  if (req.session.rang >= 5) {
-    let DBModel = new DB(db);
-    (async () => {
-      await DBModel.addControl(JSON.parse(req.body.data_ds), req.session.user[0].id);
-    })();
-    console.log("data : ", JSON.parse(req.body.data_ds));
-    res.redirect("/discussions");
-  }
-}
-/*
-======================
-MODULES UTILISATEURS
-======================
-*/
-
-exports.getNotes = (req, res, db) => {
-  if (req.session.rang == 1) {
-    let DBModel = new DB(db);
-    (async () => {
-      let notes = await DBModel.getNotesByIdUser(req.session.user[0].id)
-      console.log(notes)
-      res.render("user/notes.ejs", { client : req.session.user, notes : notes})
-    })();
-  }
-}
-
-
-/*
-======================
-MODULES DE LOGS
-======================
-*/
 
 // AFFICHER LES DETAILS D'UN LOG
 exports.getLogforUser = (req, res, fs) => {

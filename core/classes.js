@@ -169,7 +169,7 @@ class DB {
 // _______________________________________
 
     async getControlByIdProf(id) {
-      let query = 'SELECT C.*, classes.nomclasse FROM asimov_control AS C JOIN asimov_classes AS classes ON classes.idclasse = C.id_classe WHERE C.id_prof ="'+id+'";';
+      let query = 'SELECT C.id, C.id_prof, C.id_classe, C.description, C.coefficient, C.bareme, DATE_FORMAT(C.date, "%Y-%m-%d") AS date, classes.nomclasse FROM asimov_control AS C JOIN asimov_classes AS classes ON classes.idclasse = C.id_classe WHERE C.id_prof ="'+id+'";';
       return this.doQuery(query);
     }
 
@@ -246,11 +246,11 @@ class DB {
 // _______________________________________
 
     async addControl(data, id_prof) {
-      let query = 'INSERT INTO asimov_control (id, id_prof, id_classe, description, coefficient, bareme, date) VALUES (NULL, '+id_prof+', '+data["header"].classe.id+', "'+data["header"].description+'", '+data["header"].coefficient+', '+data["header"].bareme+', '+data["header"].date+')'
+      let query = 'INSERT INTO asimov_control (id, id_prof, id_classe, description, coefficient, bareme, date) VALUES (NULL, '+id_prof+', '+data["header"].classe.id+', "'+data["header"].description+'", '+data["header"].coefficient+', '+data["header"].bareme+', "'+data["header"].date+'")'
       return this.doQuery(query).then((r, e) => {
         let second_query = '';
         for (let items in data["body"]) {
-          second_query += 'INSERT INTO asimov_notes (id, note, id_user, id_ds) VALUES (NULL, '+data["body"][items].notes+', '+data["body"][items].id+', '+r.insertId+');'
+          second_query += 'INSERT INTO asimov_notes (id, note, id_user, id_ds) VALUES (NULL, "'+data["body"][items].notes+'", '+data["body"][items].id+', '+r.insertId+');'
         }
         return this.doQuery(second_query);
       });
@@ -300,6 +300,23 @@ class DB {
     return this.doQuery(query);
   }
 
+// _______________________________________
+//
+//               DISCUSSIONS
+// _______________________________________
+
+  async update_DS(header, body, id_ds) {
+    let query = 'UPDATE asimov_control SET id_classe = '+header[0][1]+', description = "'+header[2][1]+'", coefficient = '+header[5][1]+', bareme = '+header[4][1]+', date = "'+header[3][1]+'" WHERE id = '+id_ds;
+    return this.doQuery(query).then((r,e) => {
+      let second_query = '';
+      for (let items in body) {
+        second_query += 'UPDATE asimov_notes SET note="'+body[items][1]+'" WHERE id_ds="'+id_ds+'" AND id_user="'+body[items][0]+'";'
+      }
+      console.log(second_query);
+      return this.doQuery(second_query);
+    });
+  }
+
 // ======================================== DELETE ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
 
@@ -332,13 +349,23 @@ class DB {
       return this.doQuery(query)
     }
 
-
+    async delete_ds(id) {
+      let query = 'DELETE C, N FROM asimov_control AS C JOIN asimov_notes AS N ON N.id_ds = C.id WHERE C.id = ' + id;
+      return this.doQuery(query);
+    }
 
   	// VERIFICATIONS
   	async login(pseudo, password) {
   		let query = "SELECT * FROM asimov_users WHERE pseudo = '" + pseudo + "' AND password = '" + password + "'";
   		return this.doQuery(query);
   	}
+
+    async verifyProfAndDS(id) {
+      let query = 'SELECT * FROM asimov_control AS C WHERE C.id = '+id;
+      return this.doQuery(query);
+    }
+
+
 
 
 // ======================================== CORE FUNCTION ==========================================================================================================================================================================================================================================================================================================================================================================================================================================================
