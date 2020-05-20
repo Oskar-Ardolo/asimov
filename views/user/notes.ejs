@@ -2,7 +2,7 @@
 <% var noteforchart = new Array()  %>
 <% var json_data = {}; %>
 <% for (let items in notes) { %>
-  <% json_data[notes[items].nommatiere] = { notes : [], coefficient : [] } %>
+  <% json_data[notes[items].nommatiere] = { notes : [], coefficient : [], bareme : [] } %>
 <% } %>
 <div id="content-wrapper">
 
@@ -49,6 +49,7 @@
                     <% if(notes[items].note != "ABS" && notes[items].note != "Non noté") { %>
                       <% json_data[notes[items].nommatiere].notes.push(notes[items].note); %>
                       <% json_data[notes[items].nommatiere].coefficient.push(notes[items].coefficient); %>
+                      <% json_data[notes[items].nommatiere].bareme.push(notes[items].bareme); %>
                     <% } %>
                   <tr>
                     <td><%= notes[items].nommatiere %></td>

@@ -18,7 +18,7 @@
           </div>
           <div id="zones_notes" class="card-body">
             <% try { %>
-              <% let bareme; %>
+              <% let bareme; console.log(matiere)%>
               <% if(data_control) { %>
               <h4>Récapitulatif</h4>
               <hr>
@@ -29,8 +29,12 @@
                     <input id="header" type="hidden" value="<%= control[items].id_classe %>" />
                     <input id="header" type="text" class="form-control" disabled value="<%= control[items].nomclasse %>" />
                     <label>Matière</label>
-                    <input id="header" type="hidden" value="" />
-                    <input id="header" type="text" class="form-control" disabled value="" />
+                    <% for (let element in matiere) { %>
+                      <% if (matiere[element].idmatiere == control[items].id_matiere) { %>
+                      <input id="header" type="hidden" value="<%= matiere[element].idmatiere %>" />
+                      <input id="header" type="text" class="form-control" disabled value="<%= matiere[element].nommatiere %>" />
+                      <% } %>
+                    <% } %>
                     <label>Description</label>
                     <input id="header" type="text" class="form-control" value="<%= control[items].description %>" />
                     <label>Date</label>

@@ -5,7 +5,7 @@ Chart.defaults.global.defaultFontColor = '#292b2c';
 // Area Chart Example
 var ctx = document.getElementById("Chart");
 var data = JSON.parse(document.currentScript.getAttribute('data'));
-
+console.log(data);
 if (data) {
   /*
   var label = Object.keys(data);
@@ -25,11 +25,22 @@ if (data) {
   var values = [];
   var conteneur = 0;
   var cpt = 0;
+  var notes = 0;
   for (let items in data) {
+    console.log(data[items]);
     if ((data[items].notes).length > 0) {
-      conteneur += parseInt(data[items].notes);
-      values.push(data[items].notes);
-      cpt ++
+      if (parseInt(data[items].bareme) != 20) {
+        console.log(data[items].notes, data[items].bareme);
+        notes = ((parseInt(data[items].notes)/parseInt(data[items].bareme))*20).toFixed(2);
+        conteneur += parseInt(notes);
+        values.push(notes);
+        cpt ++;
+        console.log(conteneur, values, notes);
+      } else {
+        conteneur += parseInt(data[items].notes);
+        values.push(data[items].notes);
+        cpt ++;
+      }
     }
   }
 

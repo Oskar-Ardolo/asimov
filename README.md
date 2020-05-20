@@ -35,6 +35,8 @@ mdp : ROUMANET-David
 pseudo : ayedme
 mdp : AYED-Merwann
 ```
+La base de données est fournie à la racine du dossier sous le nom de *asimov.sql*.
+
 ## Contributions
 Les pull requests sont les bienvenues ! Pour les gros changements (majeurs), merci d'ouvrir un ticket dans *Issues* afin de discuter des ajouts que vous souhaitez apporter.  
 
