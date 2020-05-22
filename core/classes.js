@@ -184,6 +184,11 @@ WHERE N.id_user = 13*/
       return this.doQuery(query);
     }
 
+    async getEdtForOneClasse(id) {
+      let query ='SELECT E.*, C.nomclasse, M.nommatiere, U.nom, U.prenom FROM asimov_edt AS E JOIN asimov_classes AS C ON C.idclasse = E.id_classe JOIN asimov_matieres AS M ON M.id = E.id_matiere JOIN asimov_users AS U ON U.id = E.id_prof WHERE E.id_classe = 1'
+      return this.doQuery(query);
+    }
+
 // ======================================== COUNT ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
   	async userCount() {

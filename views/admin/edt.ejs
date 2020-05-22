@@ -1,0 +1,339 @@
+<%- include ../include/header.ejs %>
+
+<div id="content-wrapper">
+
+<div class="container-fluid">
+    <!-- CODE HERE -->
+     <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="/">Accueil</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="/admin">Admin</a>
+      </li>
+      <li class="breadcrumb-item active">Emplois du temps</li>
+    </ol>
+
+    <div class="row">
+      <div class="col-9">
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="fas fa-calendar "></i> Editer
+          </div>
+          <div class="card-body">
+            <!--
+            <div class="row">
+              <select class="form-control" name="">
+                <option disabled selected>--Sélectionnez une classe--</option>
+                <option>Terminale S</option>
+              </select>
+            </div>
+            <hr>
+            <div class="row">
+              <div class="col-2">
+                <div class="row">
+                  <div class="card mb-1" style="width:100%;text-align:center">
+                    <div class="card-body">
+                      Horaire
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="card mb-1" style="width:100%;text-align:center">
+                    <div class="card-body" >
+                      08:00
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="card mb-1" style="width:100%;text-align:center">
+                    <div class="card-body">
+                      09:00
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="card mb-1" style="width:100%;text-align:center">
+                    <div class="card-body">
+                      10:00
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="card mb-1" style="width:100%;text-align:center">
+                    <div class="card-body">
+                      11:00
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="card mb-1" style="width:100%;text-align:center">
+                    <div class="card-body">
+                      12:00
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="card mb-1" style="width:100%;text-align:center">
+                    <div class="card-body">
+                      13:00
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="card mb-1" style="width:100%;text-align:center">
+                    <div class="card-body">
+                      14:00
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="card mb-1" style="width:100%;text-align:center">
+                    <div class="card-body">
+                      15:00
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="card mb-1" style="width:100%;text-align:center">
+                    <div class="card-body">
+                      16:00
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="card mb-1" style="width:100%;text-align:center">
+                    <div class="card-body">
+                      17:00
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-2">
+                <div class="row">
+                  <div class="card mb-1" style="width:100%;text-align:center">
+                    <div class="card-body">
+                      Lundi
+                    </div>
+                  </div>
+                </div>
+                <table class="table table-bordered" style="width:100%;text-align:center">
+                  <tbody>
+                    <tr>
+                      <div class="card mb-1" style="width:100%;text-align:center">
+                        <div class="card-body">
+                          SI4
+                        </div>
+                      </div>
+                    </tr>
+                    <tr>
+                      <div class="card mb-1" style="width:100%;text-align:center">
+                        <div class="card-body">
+                          SI5
+                        </div>
+                      </div>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <% let y = 8 %>
+                <% for (let i = 0; i < 10; i++) { %>
+                <% if (data[i]) {  %>
+
+                    <div class="row">
+                      <div class="card mb-1" style="width:100%;text-align:center">
+                        <div class="card-body">
+                          <%= data[i].nommatiere %>
+                        </div>
+                      </div>
+                    </div>
+
+                  <% } else {%>
+                    <div class="row">
+                      <div class="card mb-1" style="width:100%;text-align:center">
+                        <div class="card-body">
+                          -
+                        </div>
+                      </div>
+                    </div>
+                  <% } %>
+                <% } %>
+              </div>
+              <div class="col-2">
+                <div class="row">
+                  <div class="card mb-1" style="width:100%;text-align:center">
+                    <div class="card-body">
+                      Mardi
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-2">
+                <div class="row">
+                  <div class="card mb-1" style="width:100%;text-align:center">
+                    <div class="card-body">
+                      Mercredi
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-2">
+                <div class="row">
+                  <div class="card mb-1" style="width:100%;text-align:center">
+                    <div class="card-body">
+                      Jeudi
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-2">
+                <div class="row">
+                  <div class="card mb-1" style="width:100%;text-align:center">
+                    <div class="card-body">
+                      Vendredi
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            -->
+            <% console.log((data[0].heure).substring(0,2), (data[0].heure).substring(3,5), (data[0].heure).substring(6,8))%>
+            <table class="table table-bordered" style="text-align:center">
+              <thead>
+                  <tr>
+                    <th>Horaires</th>
+                    <th>Lundi</th>
+                    <th>Mardi</th>
+                    <th>Mercredi</th>
+                    <th>Jeudi</th>
+                    <th>Vendredi</th>
+                  </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th>8:00</th>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <th>9:00</th>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <th>10:00</th>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <th>11:00</th>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <th>12:00</th>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <th>13:00</th>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <th>14:00</th>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <th>15:00</th>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <th>16:00</th>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <th>17:00</th>
+                  <td id="bg" style="padding:0"></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script src="/vendor/jquery/jquery-3.1.0.min.js"></script>
+<script type="text/javascript">
+  <% bg_color = {}; %>
+  <% for (let items in json) { %>
+    <% bg_color[json[items].matiere] = { color :'#'+Math.random().toString(16).substr(-6) }%>
+  <% } %>
+
+  let x = 0
+  for (let items in $('td')) {
+    if ($('td')[x] == undefined) {
+      break;
+    } else {
+      $('td')[x].setAttribute('id', x);
+      x++;
+    }
+
+  }
+
+  <% for (let i = 0; i<10; i++) { %>
+
+    <% if (json[i+8].matiere) { %>
+      <% console.log((json[i+8].duree).substring(3,5), parseInt((json[i+8].heure).substring(0,2)) + parseInt((json[i+8].duree).substring(0,2)), i) %>
+      $('td#<%= i*5 %>').append('<%= json[i+8].matiere %>')
+      $('td')[<%= i %>*5].setAttribute('style', 'background-color:<%= bg_color[json[i+8].matiere].color %>;border:none; ');
+      <% if ((json[i+8].duree).substring(3,5) == '30' && parseInt((json[i+8].heure).substring(0,2)) + parseInt((json[i+8].duree).substring(0,2)) == i+9) { %>
+        $('td#'+<%= i+1 %>*5).append('<table class="table" style="margin:0; padding:0;border:none"><tr><td style="padding:0;background-color:<%= bg_color[json[i+8].matiere].color %>; border:none">a</td></tr><tr><td style="padding:0">b</td></tr></table>');
+        <% console.log(true) %>
+      <% } %>
+    <% } else { %>
+      //$('td')[<%= i %>*5].append('-')
+    <% } %>
+    console.log($('td')[<%= i %>*5]);
+  <% } %>
+
+</script>
+
+  <!-- /.container-fluid -->
+  <%- include ../include/footer.ejs %>

@@ -1410,6 +1410,45 @@ exports.addProfToMatiere = (req, res, db, fs) => {
   }
 }
 
+exports.getEdt = (req, res, db) => {
+  if (req.session.rang >= 10) {
+    let DBModel = new DB(db);
+    (async ()=> {
+      let edt = await DBModel.getEdtForOneClasse();
+      let json = {
+        '8' : {},
+        '9' : {},
+        '10' : {},
+        '11' : {},
+        '12' : {},
+        '13' : {},
+        '14' : {},
+        '15' : {},
+        '16' : {},
+        '17' : {},
+      }
+      for (let items in edt) {
+        for (let i = 8; i < 18; i++) {
+          if ((edt[items].heure).substring(0,2) == i) {
+            for (let y = 0; y < (edt[items].duree).substring(0,2); y++) {
+              if (json[i + y]) {
+                json[i + y] = { matiere: edt[items].nommatiere, heure : edt[items].heure, duree : edt[items].duree }
+              }
+            }
+            break;
+          }
+        }
+      }
+      console.log(json);
+      res.render("admin/edt.ejs", { client : req.session.user, data : edt, json : json });
+    })();
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/admin");
+  }
+}
+
 /*
 ======================
 MODULES PROFESSEURS
