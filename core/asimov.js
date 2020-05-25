@@ -1415,6 +1415,37 @@ exports.getEdt = (req, res, db) => {
     let DBModel = new DB(db);
     (async ()=> {
       let edt = await DBModel.getEdtForOneClasse();
+      console.log(edt)
+
+      let timetable = { Lundi : [], Mardi : [], Mercredi : [], Jeudi : [], Vendredi : [] }
+
+      for (let items in edt) {
+        for (let i = 8; i < 18; i++) {
+          if ((edt[items].heure).substring(0,2) == i) {
+            console.log(edt[items]);
+            let hour;
+            let minute;
+            let fin;
+            if ((edt[items].heure).substring(3,5) == 30 && (edt[items].duree).substring(3,5) == 30) {
+              hour = 1;
+              minute = '00';
+            } else {
+              minute = (parseInt((edt[items].heure).substring(3,5)) + parseInt((edt[items].duree).substring(3,5)))
+              if (minute = 0) minute = '00';
+            }
+            hour += parseInt((edt[items].heure).substring(0,2));
+
+            if (hour < 10) hour = '0' + fin.toString();
+            fin = hour + ':' + minute;
+            console.log(fin);
+            timetable["Lundi"].push({ matiere : edt[items].nommatiere, debut : (edt[items].heure).substring(0,5), fin : fin});
+            break;
+          }
+        }
+      }
+
+      console.log(timetable);
+
       let json = {
         '8' : {},
         '9' : {},
@@ -1425,11 +1456,16 @@ exports.getEdt = (req, res, db) => {
         '14' : {},
         '15' : {},
         '16' : {},
-        '17' : {},
+        '17' : {}
       }
       for (let items in edt) {
         for (let i = 8; i < 18; i++) {
           if ((edt[items].heure).substring(0,2) == i) {
+            if ((edt[items].heure).substring(0,2) == '30') {
+
+            } else {
+
+            }
             for (let y = 0; y < (edt[items].duree).substring(0,2); y++) {
               if (json[i + y]) {
                 json[i + y] = { matiere: edt[items].nommatiere, heure : edt[items].heure, duree : edt[items].duree }

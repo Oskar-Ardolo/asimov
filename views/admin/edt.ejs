@@ -284,7 +284,7 @@
                 </tr>
                 <tr>
                   <th>17:00</th>
-                  <td id="bg" style="padding:0"></td>
+                  <td></td>
                   <td></td>
                   <td></td>
                   <td></td>
@@ -306,7 +306,7 @@
     <% bg_color[json[items].matiere] = { color :'#'+Math.random().toString(16).substr(-6) }%>
   <% } %>
 
-  let x = 0
+  let x = 0;
   for (let items in $('td')) {
     if ($('td')[x] == undefined) {
       break;
@@ -314,25 +314,44 @@
       $('td')[x].setAttribute('id', x);
       x++;
     }
-
   }
 
   <% for (let i = 0; i<10; i++) { %>
-
+    // SI IL Y A UN COURS A L'HEURE i+8 DONC ENTRE 8h et 18H
     <% if (json[i+8].matiere) { %>
       <% console.log((json[i+8].duree).substring(3,5), parseInt((json[i+8].heure).substring(0,2)) + parseInt((json[i+8].duree).substring(0,2)), i) %>
-      $('td#<%= i*5 %>').append('<%= json[i+8].matiere %>')
-      $('td')[<%= i %>*5].setAttribute('style', 'background-color:<%= bg_color[json[i+8].matiere].color %>;border:none; ');
-      <% if ((json[i+8].duree).substring(3,5) == '30' && parseInt((json[i+8].heure).substring(0,2)) + parseInt((json[i+8].duree).substring(0,2)) == i+9) { %>
-        $('td#'+<%= i+1 %>*5).append('<table class="table" style="margin:0; padding:0;border:none"><tr><td style="padding:0;background-color:<%= bg_color[json[i+8].matiere].color %>; border:none">a</td></tr><tr><td style="padding:0">b</td></tr></table>');
-        <% console.log(true) %>
+      // SI LE COURS NE COMMENCE PAS A LA DEMI HEURE ex: 8H00 et pas 8H30
+      <% if (parseInt((json[i+8].heure).substring(3,5)) != 30) { %>
+        $('td#<%= i*5 %>').append('<%= json[i+8].matiere %>');
+        $('td')[<%= i %>*5].setAttribute('style', 'background-color:<%= bg_color[json[i+8].matiere].color %>;border:none; ');
+        // SI LA DUREE NE CONTIENT UNE DEMI HEURE ET QUE L'HEURE (i+9) SOIT LA SOMME DE L'HEURE ET DE LA DUREE (placer la demi heure au bon endroit)
+        <% if ((json[i+8].duree).substring(3,5) == '30' && parseInt((json[i+8].heure).substring(0,2)) + parseInt((json[i+8].duree).substring(0,2)) == i+9) { %>
+          $('td')[<%= i+1 %>*5].setAttribute('style', 'padding:0;border:none');
+          $('td#'+<%= i+1 %>*5).append('<table class="table" style="margin:0; padding:0;border:none"><tr style="border:none;"><td style="padding:0;background-color:<%= bg_color[json[i+8].matiere].color %>; border:none"><%= json[i+8].matiere %></td></tr><tr><td style="padding:0;border:none"></td></tr></table>');
+          console.log($('td')[<%= i+1 %>*5].childElementCount);
+          <% console.log(true) %>
+        <% } %>
+      <% } else { %>
+        // SI IL EXISTE DEJA UNE DEMI HEURE DANS CETTE HEURE, ON REMPLI LA DEUXIEME CASE
+        if ($('td#'+<%= i %>*5).childElementCount > 0) {
+          $('td#'+<%= (i) %>*5).attr('style', 'padding:0;border:none')
+          $('td#'+<%= (i) %>*5).find("td")[1].setAttribute('style', 'padding:0;background-color:<%= bg_color[json[i+8].matiere].color %>; border:none');
+          $('td#'+<%= (i) %>*5).find("td")[1].append('<%= json[i+8].matiere %>')
+        } else {
+          $('td#<%= i*5 %>').attr('style', 'padding:0;border:none');
+          $('td#'+<%= (i) %>*5).append('<table class="table" style="margin:0; padding:0;border:none"><tr style="border:none;"><td style="border:none"></td></tr><tr><td style="padding:0;background-color:<%= bg_color[json[i+8].matiere].color %>; border:none"><%= json[i+8].matiere %></td></tr></table>');
+        }
       <% } %>
     <% } else { %>
-      //$('td')[<%= i %>*5].append('-')
+      if ($('td')[<%= i*5 %>].childElementCount > 0) {
+        $('td#<%= i*5 %>').find("td")[1].append('-');
+      } else {
+        $('td#<%= i*5 %>').append('-');
+      }
     <% } %>
-    console.log($('td')[<%= i %>*5]);
+    console.log($('td')[<%= i*5 %>], <%= i %>, <%= i*5 %>);
   <% } %>
-
+  console.log($('td'))
 </script>
 
   <!-- /.container-fluid -->
