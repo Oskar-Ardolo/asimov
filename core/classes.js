@@ -122,6 +122,14 @@ class DB {
       let query = "SELECT asimov_users.id,  asimov_users.nom,  asimov_users.prenom,  asimov_users.pseudo FROM asimov_users LEFT JOIN  asimov_enseignematiere ON  asimov_users.id =  asimov_enseignematiere.idprof WHERE asimov_enseignematiere.idmatiere ='"+id+"'";
       return this.doInsert(query);
     }
+    async getMatieresForOneClasse(id_classe) {
+      let query = "SELECT EM.idclasse, C.nomclasse, EM.idmatiere, M.nommatiere FROM asimov_etudiematiere AS EM JOIN asimov_matieres AS M ON M.id = EM.idmatiere JOIN asimov_classes AS C ON C.idclasse = EM.idclasse WHERE EM.idclasse='"+id_classe+"'"
+      return this.doQuery(query);
+    }
+    async getMatieresAndTheseProfsForOneClasse(id_classe) {
+      let query = "SELECT EM.idclasse, C.nomclasse, EM.idmatiere, M.nommatiere, Users.id, Users.nom FROM asimov_etudiematiere AS EM JOIN asimov_matieres AS M ON M.id = EM.idmatiere JOIN asimov_classes AS C ON C.idclasse = EM.idclasse JOIN asimov_enseignematiere AS Enseigne ON Enseigne.idmatiere = EM.idmatiere JOIN asimov_users AS Users ON Users.id = Enseigne.idprof WHERE EM.idclasse='"+id_classe+"'"
+      return this.doQuery(query);
+    }
 
 // _______________________________________
 //
@@ -163,12 +171,6 @@ class DB {
       return this.doQuery(query);
     }
 
-    /*SELECT N.id, N.note, C.bareme, C.description, C.date, C.coefficient, M.nommatiere
-FROM asimov_notes AS N
-JOIN asimov_control AS C ON C.id = N.id_ds
-JOIN asimov_matieres AS M ON M.id = N.id_matiere
-WHERE N.id_user = 13*/
-
 // _______________________________________
 //
 //               CONTRÔLES
@@ -190,7 +192,7 @@ WHERE N.id_user = 13*/
 // _______________________________________
 
     async getEdtForOneClasse(id) {
-      let query ='SELECT E.*, C.nomclasse, M.nommatiere, U.nom, U.prenom FROM asimov_edt AS E JOIN asimov_classes AS C ON C.idclasse = E.id_classe JOIN asimov_matieres AS M ON M.id = E.id_matiere JOIN asimov_users AS U ON U.id = E.id_prof WHERE E.id_classe = 1'
+      let query ='SELECT E.*, C.nomclasse, M.nommatiere, U.nom, U.prenom FROM asimov_edt AS E JOIN asimov_classes AS C ON C.idclasse = E.id_classe JOIN asimov_matieres AS M ON M.id = E.id_matiere JOIN asimov_users AS U ON U.id = E.id_prof WHERE E.id_classe = "'+id+'" ORDER BY E.debut'
       return this.doQuery(query);
     }
 

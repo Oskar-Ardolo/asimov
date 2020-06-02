@@ -5,27 +5,27 @@
 /!\ Attention, ne pas oublier de mettre des point virgules sur une ligne précédant (async function() { ... })
 la ligne est considéré comme faisant partie de la fonction !!!
 
-Profs : 
+Profs :
 	- édition de la fiche prof
 	- retirer matière enseignée
 
 
 Matieres :
-	- suppression matières 
+	- suppression matières
 
 
 Eleves :
 	- notes mdr
 
 
-Classes : 
+Classes :
 	- matières étudiées par classes
 		- prof correspondant (nouvelle table ?)
 
 
 
 Gestion users
-	- suppression/edition users 
+	- suppression/edition users
 	- réinitialiser password
 
 
@@ -35,10 +35,10 @@ Système de message
 
 note à moi même : faire évoluer au fur et à mesure le document quand nouvelle idée
 
-Ajouter des try catch => quand il y a plusieurs connexions simultanées les données ne se mettant pas a jour dynamiquement font planter 
+Ajouter des try catch => quand il y a plusieurs connexions simultanées les données ne se mettant pas a jour dynamiquement font planter
 			le serveur, par exemple quand une personne veut supprimer une classe puis qu'une autre essaye de faire pareil.
 
-Logs uniquements présent sur les post 
+Logs uniquements présent sur les post
 
 empêcher l'ajout de deux user avec le même nom
 
@@ -46,3 +46,5 @@ empêcher l'ajout de deux user avec le même nom
 [16/02/2020] : Empêcher l'ajout dans la BDD s'il y a des caractères spéciaux, nombre, etc..
 	       Empêcher l'ajout de deux professeurs identiques
 [06/05/2020] : Rmq, dans chaque res.render ajouter ceci : `client : req.session.user` (utilisé par msg.js pour garantir les notifications dynamiques).
+[27/05/2020] : Préciser le sexe de l'individu dans la BDD.
+[02/06/2020] : Fusionner les tables enseigne_matiere et etudie_matiere car une matière peut avoir plusieurs profs mais un prof par classe par matière

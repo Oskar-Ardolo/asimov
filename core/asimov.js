@@ -1414,70 +1414,81 @@ exports.getEdt = (req, res, db) => {
   if (req.session.rang >= 10) {
     let DBModel = new DB(db);
     (async ()=> {
-      let edt = await DBModel.getEdtForOneClasse();
-      console.log(edt)
 
-      let timetable = { Lundi : [], Mardi : [], Mercredi : [], Jeudi : [], Vendredi : [] }
+      let edt = await DBModel.getEdtForOneClasse(req.params.idclasse);
+      let classes = await DBModel.getClasses();
+      let matieres = await DBModel.getMatieresAndTheseProfsForOneClasse(req.params.idclasse);
 
-      for (let items in edt) {
-        for (let i = 8; i < 18; i++) {
-          if ((edt[items].heure).substring(0,2) == i) {
-            console.log(edt[items]);
-            let hour;
-            let minute;
-            let fin;
-            if ((edt[items].heure).substring(3,5) == 30 && (edt[items].duree).substring(3,5) == 30) {
-              hour = 1;
-              minute = '00';
-            } else {
-              minute = (parseInt((edt[items].heure).substring(3,5)) + parseInt((edt[items].duree).substring(3,5)))
-              if (minute = 0) minute = '00';
-            }
-            hour += parseInt((edt[items].heure).substring(0,2));
-
-            if (hour < 10) hour = '0' + fin.toString();
-            fin = hour + ':' + minute;
-            console.log(fin);
-            timetable["Lundi"].push({ matiere : edt[items].nommatiere, debut : (edt[items].heure).substring(0,5), fin : fin});
-            break;
-          }
-        }
+      let timetable = {
+        Lundi : { 8 : {}, 9 : {}, 10: {}, 11: {}, 12: {}, 13: {}, 14: {}, 15: {}, 16: {}, 17: {} },
+        Mardi : { 8 : {}, 9 : {}, 10: {}, 11: {}, 12: {}, 13: {}, 14: {}, 15: {}, 16: {}, 17: {} },
+        Mercredi : { 8 : {}, 9 : {}, 10: {}, 11: {}, 12: {}, 13: {}, 14: {}, 15: {}, 16: {}, 17: {} },
+        Jeudi : { 8 : {}, 9 : {}, 10: {}, 11: {}, 12: {}, 13: {}, 14: {}, 15: {}, 16: {}, 17: {} },
+        Vendredi : { 8 : {}, 9 : {}, 10: {}, 11: {}, 12: {}, 13: {}, 14: {}, 15: {}, 16: {}, 17: {} }
       }
 
-      console.log(timetable);
+      if (req.params.idclasse == 'index') timetable = null;
+      else {
 
-      let json = {
-        '8' : {},
-        '9' : {},
-        '10' : {},
-        '11' : {},
-        '12' : {},
-        '13' : {},
-        '14' : {},
-        '15' : {},
-        '16' : {},
-        '17' : {}
-      }
-      for (let items in edt) {
-        for (let i = 8; i < 18; i++) {
-          if ((edt[items].heure).substring(0,2) == i) {
-            if ((edt[items].heure).substring(0,2) == '30') {
+        let days = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
 
-            } else {
+        // POUR CHAQUE ELEMENTS DANS edt
+        for (let items in edt) {
+          // ON RECUPERE L'HEURE ET LA DUREE EN HEURE
+          let heure = parseInt((edt[items].debut).substring(0,2));
+          let duree = parseInt((edt[items].duree).substring(0,2));
 
-            }
-            for (let y = 0; y < (edt[items].duree).substring(0,2); y++) {
-              if (json[i + y]) {
-                json[i + y] = { matiere: edt[items].nommatiere, heure : edt[items].heure, duree : edt[items].duree }
+          // DANS LE CAS OU LE COURS COMMENCE A PILE
+          if (parseInt((edt[items].debut).substring(3,5)) != 30) {
+            // SI LA DUREE EXCEDE 0 (en h) ET DONC DIFFERENT DE 00:30 min
+            if (duree > 0) {
+              // ON REMPLI LE TABLEAU EN FONCTION DES HEURES OCCUPEES PAR LE COUR (ex: 8h00 -> 10h00)
+              for (let i = 0; i < duree; i ++) {
+                timetable[days[edt[items].jour]][heure + i] = { nom : edt[items].nommatiere, nom_prof : edt[items].nom, prenom_prof : edt[items].prenom, jour : days[edt[items].jour], debut : (edt[items].debut).substring(0,5), fin : (edt[items].fin).substring(0,5), duree : (edt[items].duree).substring(0,5) };
               }
             }
-            break;
+            // CONDITION POUR REMPLIR LA PREMIERE DEMI-HEURE SI LE COURS NE FINI PAS A PILE (ex: 8h00 -> 9h30)
+            if (parseInt((edt[items].fin).substring(3,5)) == 30 && duree > 0) {
+              timetable[days[edt[items].jour]][heure + duree] = [ { nom : edt[items].nommatiere, nom_prof : edt[items].nom, prenom_prof : edt[items].prenom, jour : days[edt[items].jour], debut :  (edt[items].debut).substring(0,5), fin : (edt[items].fin).substring(0,5), duree : (edt[items].duree).substring(0,5) }, {} ]
+            } else if (parseInt((edt[items].fin).substring(3,5)) == 30 && duree == 0) { // SI LE COURS NE DURE QUE 30 MIN ET COMMENCE A PILE (ex: 9h00 -> 9h30)
+              timetable[days[edt[items].jour]][heure] = [ { nom : edt[items].nommatiere, nom_prof : edt[items].nom, prenom_prof : edt[items].prenom, jour : days[edt[items].jour], debut : edt[items].debut, fin : edt[items].fin, duree : edt[items].duree }, {} ]
+            }
+          } else {
+            // ON VERIFIE SI LA CASE CONTIENT DEJA UNE DEMI-HEURE, SI NON ON CREER LES DEUX CASES, SI OUI ON MET A JOUR LA CASE
+            if (timetable[days[edt[items].jour]][heure].length == undefined) {
+              timetable[days[edt[items].jour]][heure] = [ {}, { nom : edt[items].nommatiere, nom_prof : edt[items].nom, prenom_prof : edt[items].prenom, jour : days[edt[items].jour], debut :  (edt[items].debut).substring(0,5), fin : (edt[items].fin).substring(0,5), duree : (edt[items].duree).substring(0,5)} ];
+              // ON REPREND LE PRINCIPE DE COURS QUI DURE PLUSIEURS HEURES
+              if (duree > 0) {
+                for (let i = 1; i < duree + 1; i ++) {
+                  timetable[days[edt[items].jour]][heure + i] = { nom : edt[items].nommatiere, nom_prof : edt[items].nom, prenom_prof : edt[items].prenom, jour : days[edt[items].jour], debut :  (edt[items].debut).substring(0,5), fin : (edt[items].fin).substring(0,5), duree : (edt[items].duree).substring(0,5) };
+                }
+              }
+            } else {
+              timetable[days[edt[items].jour]][heure][1] = { nom : edt[items].nommatiere, nom_prof : edt[items].nom, prenom_prof : edt[items].prenom, jour : days[edt[items].jour], debut :  (edt[items].debut).substring(0,5), fin : (edt[items].fin).substring(0,5), duree : (edt[items].duree).substring(0,5)};
+              if (duree > 0) {
+                for (let i = 1; i < duree + 1; i ++) {
+                  timetable[days[edt[items].jour]][heure + i] = { nom : edt[items].nommatiere, nom_prof : edt[items].nom, prenom_prof : edt[items].prenom, jour : days[edt[items].jour], debut :  (edt[items].debut).substring(0,5), fin : (edt[items].fin).substring(0,5), duree : (edt[items].duree).substring(0,5) };
+                }
+              }
+            }
           }
         }
       }
-      console.log(json);
-      res.render("admin/edt.ejs", { client : req.session.user, data : edt, json : json });
+
+      res.render("admin/edt.ejs", { client : req.session.user, data : edt, timetable : timetable, classes : classes, matieres : matieres, index : req.params.idclasse });
     })();
+  } else {
+    req.session.login = false;
+    req.session.rang = 0;
+    res.redirect("/admin");
+  }
+}
+
+exports.postEdt = (req, res, db) => {
+  if (req.session.rang >= 10) {
+    let html_timetable = JSON.parse(req.body.data_timetable);
+    console.log(1, html_timetable);
+    res.redirect("/admin/edt/"+req.params.id);
   } else {
     req.session.login = false;
     req.session.rang = 0;

@@ -1,5 +1,5 @@
 <%- include ../include/header.ejs %>
-
+<%= %>
 <div id="content-wrapper">
 
 <div class="container-fluid">
@@ -18,341 +18,140 @@
       <div class="col-9">
         <div class="card mb-4">
           <div class="card-header">
-            <i class="fas fa-calendar "></i> Editer
+            <i class="fas fa-calendar "></i> Emploi du temps
           </div>
           <div class="card-body">
-            <!--
-            <div class="row">
-              <select class="form-control" name="">
-                <option disabled selected>--Sélectionnez une classe--</option>
-                <option>Terminale S</option>
-              </select>
-            </div>
-            <hr>
-            <div class="row">
-              <div class="col-2">
-                <div class="row">
-                  <div class="card mb-1" style="width:100%;text-align:center">
-                    <div class="card-body">
-                      Horaire
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="card mb-1" style="width:100%;text-align:center">
-                    <div class="card-body" >
-                      08:00
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="card mb-1" style="width:100%;text-align:center">
-                    <div class="card-body">
-                      09:00
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="card mb-1" style="width:100%;text-align:center">
-                    <div class="card-body">
-                      10:00
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="card mb-1" style="width:100%;text-align:center">
-                    <div class="card-body">
-                      11:00
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="card mb-1" style="width:100%;text-align:center">
-                    <div class="card-body">
-                      12:00
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="card mb-1" style="width:100%;text-align:center">
-                    <div class="card-body">
-                      13:00
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="card mb-1" style="width:100%;text-align:center">
-                    <div class="card-body">
-                      14:00
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="card mb-1" style="width:100%;text-align:center">
-                    <div class="card-body">
-                      15:00
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="card mb-1" style="width:100%;text-align:center">
-                    <div class="card-body">
-                      16:00
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="card mb-1" style="width:100%;text-align:center">
-                    <div class="card-body">
-                      17:00
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-2">
-                <div class="row">
-                  <div class="card mb-1" style="width:100%;text-align:center">
-                    <div class="card-body">
-                      Lundi
-                    </div>
-                  </div>
-                </div>
-                <table class="table table-bordered" style="width:100%;text-align:center">
-                  <tbody>
-                    <tr>
-                      <div class="card mb-1" style="width:100%;text-align:center">
-                        <div class="card-body">
-                          SI4
-                        </div>
-                      </div>
-                    </tr>
-                    <tr>
-                      <div class="card mb-1" style="width:100%;text-align:center">
-                        <div class="card-body">
-                          SI5
-                        </div>
-                      </div>
-                    </tr>
-                  </tbody>
-                </table>
-
-                <% let y = 8 %>
-                <% for (let i = 0; i < 10; i++) { %>
-                <% if (data[i]) {  %>
-
-                    <div class="row">
-                      <div class="card mb-1" style="width:100%;text-align:center">
-                        <div class="card-body">
-                          <%= data[i].nommatiere %>
-                        </div>
-                      </div>
-                    </div>
-
-                  <% } else {%>
-                    <div class="row">
-                      <div class="card mb-1" style="width:100%;text-align:center">
-                        <div class="card-body">
-                          -
-                        </div>
-                      </div>
-                    </div>
+            <div class="form-group">
+              <form action="index.html" method="post">
+                <label for="">Classe : </label>
+                <select class="form-control" name="">
+                  <option value="" selected disabled>--Sélectionnez une classe--</option>
+                  <% for (let items in classes) { %>
+                    <option value="" onclick="location.href='/admin/edt/<%= classes[items].idclasse %>'"><%= classes[items].nomclasse %></option>
                   <% } %>
+                </select>
+              </form>
+            </div>
+            <div id="mytable"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="fas fa-calendar "></i> Editer
+          </div>
+          <div class="card-body" id="zone_edit">
+            <% if (timetable != null) { %>
+            <div class="">
+              <div class="text-muted">
+                Ajouter un cours
+              </div>
+              <hr>
+              <label for="">Matière :</label>
+              <select class="form-control" name="matieres">
+                <option value="" disabled selected>--Sélectionnez une matière--</option>
+                <% for (let items in matieres) { %>
+                  <option value="<%= matieres[items].nommatiere %>"><%= matieres[items].nommatiere %></option>
                 <% } %>
+              </select>
+              <label for="">Jour :</label>
+              <select class="form-control" name="days">
+                <option value="Lundi">Lundi</option>
+                <option value="Mardi">Mardi</option>
+                <option value="Mercredi">Mercredi</option>
+                <option value="Jeudi">Jeudi</option>
+                <option value="Vendredi">Vendredi</option>
+              </select>
+              <label for="">De :</label>
+              <div class="form-group" style="display:flex">
+                <input style="display:flex; flex: 0 0 50%;max-width:40%" class="form-control" type="number" name="heure_debut" min="8" max="17" value=""><p style="padding:5px">h</p>
+                <select style="display:flex; flex: 0 0 50%;max-width:40%" class="form-control" name="min_debut">
+                  <option value="00">00</option>
+                  <option value="30">30</option>
+                </select><p style="padding:5px">min</p>
               </div>
-              <div class="col-2">
-                <div class="row">
-                  <div class="card mb-1" style="width:100%;text-align:center">
-                    <div class="card-body">
-                      Mardi
-                    </div>
-                  </div>
-                </div>
+              <label for="">A :</label>
+              <div class="form-group" style="display:flex">
+                <input style="display:flex; flex: 0 0 50%;max-width:40%" class="form-control" type="number" name="heure_fin" min="8" max="18" value=""><p style="padding:5px">h</p>
+                <select style="display:flex; flex: 0 0 50%;max-width:40%" class="form-control" name="min_fin">
+                  <option value="00">00</option>
+                  <option value="30">30</option>
+                </select><p style="padding:5px">min</p>
               </div>
-              <div class="col-2">
-                <div class="row">
-                  <div class="card mb-1" style="width:100%;text-align:center">
-                    <div class="card-body">
-                      Mercredi
-                    </div>
-                  </div>
-                </div>
+              <input type="hidden" name="complete_data">
+              <div style="row">
+                <center>
+                  <button class="btn btn-danger" type="button" name="button" onclick="deleteData()">Supprimer</button>
+                  <button class="btn btn-success" type="button" name="button" onclick="verifyData()">Enregistrer</button>
+                </center>
               </div>
-              <div class="col-2">
-                <div class="row">
-                  <div class="card mb-1" style="width:100%;text-align:center">
-                    <div class="card-body">
-                      Jeudi
-                    </div>
-                  </div>
-                </div>
+              <br>
+              <div style="row">
+              <div class="text-muted">
+                Enregistrer l'emploi du temps
               </div>
-              <div class="col-2">
-                <div class="row">
-                  <div class="card mb-1" style="width:100%;text-align:center">
-                    <div class="card-body">
-                      Vendredi
-                    </div>
-                  </div>
-                </div>
+              <hr>
+                <center>
+                  <button id="btn_reinit" class="btn btn-danger" type="button" name="button" data-toggle="modal" data-target="">Réinitialiser</button>
+                  <button id="btn_update" class="btn btn-success" type="button" name="button" data-toggle="modal" data-target="">Terminer</button>
+                </center>
               </div>
             </div>
-            -->
-            <% console.log((data[0].heure).substring(0,2), (data[0].heure).substring(3,5), (data[0].heure).substring(6,8))%>
-            <table class="table table-bordered" style="text-align:center">
-              <thead>
-                  <tr>
-                    <th>Horaires</th>
-                    <th>Lundi</th>
-                    <th>Mardi</th>
-                    <th>Mercredi</th>
-                    <th>Jeudi</th>
-                    <th>Vendredi</th>
-                  </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th>8:00</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <th>9:00</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <th>10:00</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <th>11:00</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <th>12:00</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <th>13:00</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <th>14:00</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <th>15:00</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <th>16:00</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <th>17:00</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-              </tbody>
-            </table>
+            <% } else { %>
+              <h4>Veuillez sélectionnez une classe</h4>
+            <% } %>
           </div>
         </div>
       </div>
     </div>
-
   </div>
 
 <script src="/vendor/jquery/jquery-3.1.0.min.js"></script>
-<script type="text/javascript">
-  <% bg_color = {}; %>
-  <% for (let items in json) { %>
-    <% bg_color[json[items].matiere] = { color :'#'+Math.random().toString(16).substr(-6) }%>
-  <% } %>
+<script type="text/javascript" src="/js/admin/timetable.js" timetable="<%= JSON.stringify(timetable) %>" matieres="<%= JSON.stringify(matieres) %>"></script>
 
-  let x = 0;
-  for (let items in $('td')) {
-    if ($('td')[x] == undefined) {
-      break;
-    } else {
-      $('td')[x].setAttribute('id', x);
-      x++;
-    }
-  }
+<div id="timetable_notif"></div>
 
-  <% for (let i = 0; i<10; i++) { %>
-    // SI IL Y A UN COURS A L'HEURE i+8 DONC ENTRE 8h et 18H
-    <% if (json[i+8].matiere) { %>
-      <% console.log((json[i+8].duree).substring(3,5), parseInt((json[i+8].heure).substring(0,2)) + parseInt((json[i+8].duree).substring(0,2)), i) %>
-      // SI LE COURS NE COMMENCE PAS A LA DEMI HEURE ex: 8H00 et pas 8H30
-      <% if (parseInt((json[i+8].heure).substring(3,5)) != 30) { %>
-        $('td#<%= i*5 %>').append('<%= json[i+8].matiere %>');
-        $('td')[<%= i %>*5].setAttribute('style', 'background-color:<%= bg_color[json[i+8].matiere].color %>;border:none; ');
-        // SI LA DUREE NE CONTIENT UNE DEMI HEURE ET QUE L'HEURE (i+9) SOIT LA SOMME DE L'HEURE ET DE LA DUREE (placer la demi heure au bon endroit)
-        <% if ((json[i+8].duree).substring(3,5) == '30' && parseInt((json[i+8].heure).substring(0,2)) + parseInt((json[i+8].duree).substring(0,2)) == i+9) { %>
-          $('td')[<%= i+1 %>*5].setAttribute('style', 'padding:0;border:none');
-          $('td#'+<%= i+1 %>*5).append('<table class="table" style="margin:0; padding:0;border:none"><tr style="border:none;"><td style="padding:0;background-color:<%= bg_color[json[i+8].matiere].color %>; border:none"><%= json[i+8].matiere %></td></tr><tr><td style="padding:0;border:none"></td></tr></table>');
-          console.log($('td')[<%= i+1 %>*5].childElementCount);
-          <% console.log(true) %>
-        <% } %>
-      <% } else { %>
-        // SI IL EXISTE DEJA UNE DEMI HEURE DANS CETTE HEURE, ON REMPLI LA DEUXIEME CASE
-        if ($('td#'+<%= i %>*5).childElementCount > 0) {
-          $('td#'+<%= (i) %>*5).attr('style', 'padding:0;border:none')
-          $('td#'+<%= (i) %>*5).find("td")[1].setAttribute('style', 'padding:0;background-color:<%= bg_color[json[i+8].matiere].color %>; border:none');
-          $('td#'+<%= (i) %>*5).find("td")[1].append('<%= json[i+8].matiere %>')
-        } else {
-          $('td#<%= i*5 %>').attr('style', 'padding:0;border:none');
-          $('td#'+<%= (i) %>*5).append('<table class="table" style="margin:0; padding:0;border:none"><tr style="border:none;"><td style="border:none"></td></tr><tr><td style="padding:0;background-color:<%= bg_color[json[i+8].matiere].color %>; border:none"><%= json[i+8].matiere %></td></tr></table>');
-        }
-      <% } %>
-    <% } else { %>
-      if ($('td')[<%= i*5 %>].childElementCount > 0) {
-        $('td#<%= i*5 %>').find("td")[1].append('-');
-      } else {
-        $('td#<%= i*5 %>').append('-');
-      }
-    <% } %>
-    console.log($('td')[<%= i*5 %>], <%= i %>, <%= i*5 %>);
-  <% } %>
-  console.log($('td'))
-</script>
+<!-- Reinitialisation Modal-->
+<div class="modal fade" id="Reinit_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Êtes-vous sûr de vouloir réinitialiser l'emploi du temps ?</h5>
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">Cliquer sur <b>Confirmer</b> pour bien le réinitialiser</div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-dismiss="modal">Annuler</button>
+        <button class="btn btn-primary" data-dismiss="modal" onclick="reinitialisation()">Confirmer</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-  <!-- /.container-fluid -->
-  <%- include ../include/footer.ejs %>
+<!-- Reinitialisation Modal-->
+<div class="modal fade" id="Update_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Êtes-vous sûr de vouloir mettre à jour l'emploi du temps ?</h5>
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">Cliquer sur <b>Confirmer</b> pour bien le mettre à jour</div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-dismiss="modal">Annuler</button>
+        <form id="form_post_timetable"action="/admin/edt/update/<%= index %>" method="post">
+          <input type="hidden" name="data_timetable">
+          <button class="btn btn-primary" type="submit" onclick="push_data()">Confirmer</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- /.container-fluid -->
+<%- include ../include/footer.ejs %>

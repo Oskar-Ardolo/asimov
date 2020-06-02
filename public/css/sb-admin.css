@@ -613,7 +613,47 @@ pre code {
 
 /* End */
 
-/* Style for chat */
+/* Style for chat
+
+.section-on {
+  overflow:hidden;
+  transition:max-height 0.3s ease-out;
+  height:auto;
+  max-height:100px;
+}
+.section-on.collapsed {
+  max-height:0;
+}*/
+
+.section-on div {
+
+  padding: 0;
+  overflow:hidden;
+  max-height:0;
+  transition: max-height 1s ease-out;
+}
+
+.section-on:hover div{
+  max-height:100px;
+}
+
+.table-header-dark thead {
+  background-color:  #cacaca ;
+}
+
+
+/*
+.padding-on {
+  transition: padding 0.5s ease-out;
+}
+
+.padding-on:hover {
+  padding-bottom : 60px;
+}
+*/
+.bubule {
+  transition: background-color 0.5s ease-out;
+}
 
 .bubule:hover {
   background-color: #85c1e9;
