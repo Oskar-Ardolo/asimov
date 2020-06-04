@@ -114,20 +114,16 @@ class DB {
       let query = "SELECT E.idmatiere, M.nommatiere FROM asimov_enseignematiere AS E JOIN asimov_matieres AS M ON M.id = E.idmatiere WHERE E.idprof = '"+id+"'"
       return this.doQuery(query)
     }
-    async addMatiereToProf(idprof, idmatiere) {
-      let query = "INSERT INTO asimov_enseignematiere(idprof, idmatiere) VALUES (?, ?)";
-      return this.doInsert(query, [idprof, idmatiere]);
-    }
     async getProfsForOneMatiere(id) {
       let query = "SELECT asimov_users.id,  asimov_users.nom,  asimov_users.prenom,  asimov_users.pseudo FROM asimov_users LEFT JOIN  asimov_enseignematiere ON  asimov_users.id =  asimov_enseignematiere.idprof WHERE asimov_enseignematiere.idmatiere ='"+id+"'";
       return this.doInsert(query);
     }
     async getMatieresForOneClasse(id_classe) {
-      let query = "SELECT EM.idclasse, C.nomclasse, EM.idmatiere, M.nommatiere FROM asimov_etudiematiere AS EM JOIN asimov_matieres AS M ON M.id = EM.idmatiere JOIN asimov_classes AS C ON C.idclasse = EM.idclasse WHERE EM.idclasse='"+id_classe+"'"
+      let query = "SELECT EM.idclasse, C.nomclasse, EM.idmatiere, M.nommatiere FROM asimov_enseignematiere AS EM JOIN asimov_matieres AS M ON M.id = EM.idmatiere JOIN asimov_classes AS C ON C.idclasse = EM.idclasse WHERE EM.idclasse='"+id_classe+"'"
       return this.doQuery(query);
     }
     async getMatieresAndTheseProfsForOneClasse(id_classe) {
-      let query = "SELECT EM.idclasse, C.nomclasse, EM.idmatiere, M.nommatiere, Users.id, Users.nom FROM asimov_etudiematiere AS EM JOIN asimov_matieres AS M ON M.id = EM.idmatiere JOIN asimov_classes AS C ON C.idclasse = EM.idclasse JOIN asimov_enseignematiere AS Enseigne ON Enseigne.idmatiere = EM.idmatiere JOIN asimov_users AS Users ON Users.id = Enseigne.idprof WHERE EM.idclasse='"+id_classe+"'"
+      let query = "SELECT EM.idclasse, C.nomclasse, EM.idmatiere, M.nommatiere, Users.id, Users.nom FROM asimov_enseignematiere AS EM JOIN asimov_matieres AS M ON M.id = EM.idmatiere JOIN asimov_classes AS C ON C.idclasse = EM.idclasse JOIN asimov_users AS Users ON Users.id = EM.idprof WHERE EM.idclasse='"+id_classe+"'"
       return this.doQuery(query);
     }
 
@@ -192,7 +188,7 @@ class DB {
 // _______________________________________
 
     async getEdtForOneClasse(id) {
-      let query ='SELECT E.*, C.nomclasse, M.nommatiere, U.nom, U.prenom FROM asimov_edt AS E JOIN asimov_classes AS C ON C.idclasse = E.id_classe JOIN asimov_matieres AS M ON M.id = E.id_matiere JOIN asimov_users AS U ON U.id = E.id_prof WHERE E.id_classe = "'+id+'" ORDER BY E.debut'
+      let query ='SELECT E.*, C.nomclasse, M.nommatiere, U.nom, U.prenom FROM asimov_edt AS E JOIN asimov_classes AS C ON C.idclasse = E.id_classe JOIN asimov_matieres AS M ON M.id = E.id_matiere JOIN asimov_enseignematiere AS EM ON EM.idclasse = E.id_classe AND EM.idmatiere = E.id_matiere JOIN asimov_users AS U ON U.id = EM.idprof WHERE E.id_classe = "'+id+'" ORDER BY E.debut'
       return this.doQuery(query);
     }
 
@@ -238,6 +234,10 @@ class DB {
   		let query = "INSERT INTO asimov_matieres(id, nommatiere) VALUES ('', ?)"
   		return this.doInsert(query, [matiere])
   	}
+    async addMatiereToProf(idprof, idmatiere, idclasse) {
+      let query = "INSERT INTO asimov_enseignematiere(idprof, idmatiere, idclasse) VALUES (?, ?, ?)";
+      return this.doInsert(query, [idprof, idmatiere, idclasse]);
+    }
     async addClasseForUser(id, classe) {
       let query = "INSERT INTO asimov_dansclasse(iduser, idclasse) VALUES ('"+id+"', '"+classe+"')"
   		return this.doInsert(query)
@@ -274,6 +274,18 @@ class DB {
       });
     }
 
+// _______________________________________
+//
+//               EMPLOI DU TEMPS
+// _______________________________________
+
+  async addTimeTable(array, id_classe) {
+    let query = ''
+    for (let items in array) {
+      query +='INSERT INTO asimov_edt (id, id_classe, id_matiere, debut, fin, jour, duree) VALUES (NULL,'+id_classe+','+array[items].id_matiere+','+array[items].debut+','+array[items].fin+','+array[items].id_jour+','+array[items].duree+');'
+    }
+    return this.doQuery(query);
+  }
 
 // ======================================== UPDATE ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
@@ -372,7 +384,17 @@ class DB {
       return this.doQuery(query);
     }
 
-  	// VERIFICATIONS
+// _______________________________________
+//
+//               EMPLOI DU TEMPS
+// _______________________________________
+
+      async deleteTimeTable(id) {
+        let query = 'DELETE FROM asimov_edt WHERE id_classe ="'+id+'"';
+        return this.doQuery(query);
+      }
+
+// ======================================== VERIFICATIONS ==========================================================================================================================================================================================================================================================================================================================================================================================================================================================
   	async login(pseudo, password) {
   		let query = "SELECT * FROM asimov_users WHERE pseudo = '" + pseudo + "' AND password = '" + password + "'";
   		return this.doQuery(query);
@@ -382,6 +404,7 @@ class DB {
       let query = 'SELECT * FROM asimov_control AS C WHERE C.id = '+id;
       return this.doQuery(query);
     }
+
 
 
 

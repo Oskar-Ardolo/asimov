@@ -11,14 +11,14 @@
       <li class="breadcrumb-item">
         <a href="/admin">Admin</a>
       </li>
-      <li class="breadcrumb-item active">Emplois du temps</li>
+      <li class="breadcrumb-item active">Emplois du temps </li>
     </ol>
 
     <div class="row">
       <div class="col-9">
         <div class="card mb-4">
           <div class="card-header">
-            <i class="fas fa-calendar "></i> Emploi du temps
+            <i class="fas fa-calendar "></i> Emploi du temps <% for (let items in classes) { if (classes[items].idclasse == index) {%>: <%= classes[items].nomclasse%><%} }%>
           </div>
           <div class="card-body">
             <div class="form-group">

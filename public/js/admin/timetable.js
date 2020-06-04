@@ -9,11 +9,12 @@ let matiere = {};
 for (let items in matieres) {
   if (matieres[items].nommatiere) {
     if (matiere[matieres[items].nommatiere]) {
-      matiere[matieres[items].nommatiere].color = colors[items]
-      matiere[matieres[items].nommatiere].id_prof = matieres[items].id
-      matiere[matieres[items].nommatiere].nom_prof = matieres[items].nom
+      matiere[matieres[items].nommatiere].color = colors[items];
+      matiere[matieres[items].nommatiere].id_prof = matieres[items].id;
+      matiere[matieres[items].nommatiere].nom_prof = matieres[items].nom;
+      matiere[matieres[items].nommatiere].id_matiere = matieres[items].idmatiere;
     }
-    else matiere[matieres[items].nommatiere] = { color : colors[items], id_prof : matieres[items].id, nom_prof : matieres[items].nom }
+    else matiere[matieres[items].nommatiere] = { color : colors[items], id_prof : matieres[items].id, nom_prof : matieres[items].nom, id_matiere : matieres[items].idmatiere };
   }
 }
 console.log(matiere, matieres);
@@ -99,6 +100,7 @@ function verifyData() {
   let min_debut = parseInt($('select[name=min_debut]').val());
   let min_fin = parseInt($('select[name=min_fin]').val());
   let nom_prof = matiere[$('select[name=matieres]').val()].nom_prof;
+  let nom_Matiere = $('select[name=matieres]').val();
   let checked = true;
   let check_data;
 
@@ -141,10 +143,10 @@ function verifyData() {
   if ($('select[name=matieres]').val() && $('select[name=days]').val() && $('input[name=heure_debut]').val() && $('select[name=min_debut]').val() && $('input[name=heure_fin]').val() && $('select[name=min_fin]').val()) {
     if ((heure_fin < heure_debut) || (heure_fin == heure_debut && min_fin <= min_debut) || (heure_fin == 18 && min_fin == 30)) {
       checked = false;
-      check_data = { nom : $('select[name=matieres]').val(), nom_prof : nom_prof, jour : $('select[name=days]').val(), debut : debut, fin : fin}
+      check_data = { id_matiere: matiere[nom_Matiere].id_matiere, nom : $('select[name=matieres]').val(), nom_prof : nom_prof, jour : $('select[name=days]').val(), debut : debut, fin : fin}
       return updateData(checked, check_data);
     } else {
-      check_data = { nom : $('select[name=matieres]').val(), nom_prof : nom_prof, jour : $('select[name=days]').val(), debut : debut, fin : fin, duree : ''}
+      check_data = { id_matiere: matiere[nom_Matiere].id_matiere, nom : $('select[name=matieres]').val(), nom_prof : nom_prof, jour : $('select[name=days]').val(), debut : debut, fin : fin, duree : ''}
       // CHECK IF THERE IS THE SAME SUBJECT BEFORE AND AFTER. IF YES, FUSIONNED THEM.
       if (min_debut == 0) {
         console.log(1, check_data);
@@ -177,15 +179,7 @@ function verifyData() {
       }
 
       let duree = calc_duree(parseInt(check_data.debut.substring(0,2)), parseInt(check_data.debut.substring(3,5)), parseInt(check_data.fin.substring(0,2)), parseInt(check_data.fin.substring(3,5)));
-
       check_data.duree = duree;
-      /*
-      if ($('select[name=min_fin]').val() == 0 && $('select[name=min_debut]').val() == 30) {
-        duree = $('input[name=heure_fin]').val() - $('input[name=heure_debut]').val() - 1 + ':' + Math.abs($('select[name=min_fin]').val() - $('select[name=min_debut]').val());
-      } else {
-        duree = $('input[name=heure_fin]').val() - $('input[name=heure_debut]').val() + ':' + Math.abs($('select[name=min_fin]').val() - $('select[name=min_debut]').val());
-      }*/
-      //check_data = { nom : $('select[name=matieres]').val(), jour : $('select[name=days]').val(), debut : debut, fin : fin, duree: duree }
 
       for (let i = parseInt(check_data.debut.substring(0,2)); i < parseInt(check_data.fin.substring(0,2)); i++) {
 
@@ -249,33 +243,33 @@ function updateData(checked, check_data) {
       if (duree > 0) {
         // ON REMPLI LE TABLEAU EN FONCTION DES HEURES OCCUPEES PAR LE COUR (ex: 8h00 -> 10h00)
         for (let i = 0; i < duree; i ++) {
-          mytable[check_data.jour][heure + i] = { nom : check_data.nom, nom_prof : check_data.nom_prof , prenom_prof : check_data.prenom_prof, jour : check_data.jour, debut : check_data.debut, fin : check_data.fin, duree : check_data.fin };
+          mytable[check_data.jour][heure + i] = { id_matiere: check_data.id_matiere, nom : check_data.nom, nom_prof : check_data.nom_prof , prenom_prof : check_data.prenom_prof, jour : check_data.jour, debut : check_data.debut, fin : check_data.fin, duree : check_data.fin };
         }
       }
       // CONDITION POUR REMPLIR LA PREMIERE DEMI-HEURE SI LE COURS NE FINI PAS A PILE (ex: 8h00 -> 9h30)
       if (parseInt((check_data.fin).substring(3,5)) == 30 && duree > 0) {
-        if (mytable[check_data.jour][heure + duree].length == undefined) mytable[check_data.jour][heure + duree] = [{ nom : check_data.nom, nom_prof : check_data.nom_prof , prenom_prof : check_data.prenom_prof, jour : check_data.jour, debut : check_data.debut, fin : check_data.fin, duree : check_data.fin }, {}];
-        else mytable[check_data.jour][heure + duree][0] = { nom : check_data.nom, nom_prof : check_data.nom_prof , prenom_prof : check_data.prenom_prof, jour : check_data.jour, debut : check_data.debut, fin : check_data.fin, duree : check_data.fin };
+        if (mytable[check_data.jour][heure + duree].length == undefined) mytable[check_data.jour][heure + duree] = [{ id_matiere: check_data.id_matiere, nom : check_data.nom, nom_prof : check_data.nom_prof , prenom_prof : check_data.prenom_prof, jour : check_data.jour, debut : check_data.debut, fin : check_data.fin, duree : check_data.fin }, {}];
+        else mytable[check_data.jour][heure + duree][0] = { id_matiere: check_data.id_matiere, nom : check_data.nom, nom_prof : check_data.nom_prof , prenom_prof : check_data.prenom_prof, jour : check_data.jour, debut : check_data.debut, fin : check_data.fin, duree : check_data.fin };
 
       } else if (parseInt((check_data.fin).substring(3,5)) == 30 && duree == 0) { // SI LE COURS NE DURE QUE 30 MIN ET COMMENCE A PILE (ex: 9h00 -> 9h30)
-        if (mytable[check_data.jour][heure + duree].length == undefined) mytable[check_data.jour][heure] = [ { nom : check_data.nom, nom_prof : check_data.nom_prof , prenom_prof : check_data.prenom_prof , jour : check_data.jour, debut : check_data.debut, fin : check_data.fin, duree : check_data.fin }, {} ]
-        else mytable[check_data.jour][heure][0] = { nom : check_data.nom, nom_prof : check_data.nom_prof , prenom_prof : check_data.prenom_prof , jour : check_data.jour, debut : check_data.debut, fin : check_data.fin, duree : check_data.fin };
+        if (mytable[check_data.jour][heure + duree].length == undefined) mytable[check_data.jour][heure] = [ { id_matiere: check_data.id_matiere, nom : check_data.nom, nom_prof : check_data.nom_prof , prenom_prof : check_data.prenom_prof , jour : check_data.jour, debut : check_data.debut, fin : check_data.fin, duree : check_data.fin }, {} ]
+        else mytable[check_data.jour][heure][0] = { id_matiere: check_data.id_matiere, nom : check_data.nom, nom_prof : check_data.nom_prof , prenom_prof : check_data.prenom_prof , jour : check_data.jour, debut : check_data.debut, fin : check_data.fin, duree : check_data.fin };
       }
     } else {
       // ON VERIFIE SI LA CASE CONTIENT DEJA UNE DEMI-HEURE, SI NON ON CREER LES DEUX CASES, SI OUI ON MET A JOUR LA CASE
       if (mytable[check_data.jour][heure].length == undefined) {
-        mytable[check_data.jour][heure] = [ {}, { nom : check_data.nom, nom_prof : check_data.nom_prof , prenom_prof : check_data.prenom_prof, jour : check_data.jour, debut : check_data.debut, fin : check_data.fin, duree : check_data.fin } ];
+        mytable[check_data.jour][heure] = [ {}, { id_matiere: check_data.id_matiere, nom : check_data.nom, nom_prof : check_data.nom_prof , prenom_prof : check_data.prenom_prof, jour : check_data.jour, debut : check_data.debut, fin : check_data.fin, duree : check_data.fin } ];
         // ON REPREND LE PRINCIPE DE COURS QUI DURE PLUSIEURS HEURES
         if (duree > 0) {
           for (let i = 1; i < duree + 1; i ++) {
-            mytable[check_data.jour][heure + i] = { nom : check_data.nom, nom_prof : check_data.nom_prof , prenom_prof : check_data.prenom_prof, jour : check_data.jour, debut : check_data.debut, fin : check_data.fin, duree : check_data.fin };
+            mytable[check_data.jour][heure + i] = { id_matiere: check_data.id_matiere, nom : check_data.nom, nom_prof : check_data.nom_prof , prenom_prof : check_data.prenom_prof, jour : check_data.jour, debut : check_data.debut, fin : check_data.fin, duree : check_data.fin };
           }
         }
       } else {
-        mytable[check_data.jour][heure][1] = { nom : check_data.nom, nom_prof : check_data.nom_prof , prenom_prof : check_data.prenom_prof, jour : check_data.jour, debut : check_data.debut, fin : check_data.fin, duree : check_data.fin };
+        mytable[check_data.jour][heure][1] = { id_matiere: check_data.id_matiere, nom : check_data.nom, nom_prof : check_data.nom_prof , prenom_prof : check_data.prenom_prof, jour : check_data.jour, debut : check_data.debut, fin : check_data.fin, duree : check_data.fin };
         if (duree > 0) {
           for (let i = 1; i < duree + 1; i ++) {
-            mytable[check_data.jour][heure + i] = { nom : check_data.nom, nom_prof : check_data.nom_prof , prenom_prof : check_data.prenom_prof, jour : check_data.jour, debut : check_data.debut, fin : check_data.fin, duree : check_data.fin };
+            mytable[check_data.jour][heure + i] = { id_matiere: check_data.id_matiere, nom : check_data.nom, nom_prof : check_data.nom_prof , prenom_prof : check_data.prenom_prof, jour : check_data.jour, debut : check_data.debut, fin : check_data.fin, duree : check_data.fin };
           }
         }
       }
@@ -420,6 +414,7 @@ function reinitialisation() {
   }
 }
 
+// ADD DATA TO FORM ON SUBMIT
 function push_data() {
   $('#form_post_timetable input').val(JSON.stringify(mytable));
 }
