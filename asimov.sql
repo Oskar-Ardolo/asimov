@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le :  ven. 15 mai 2020 à 18:29
+-- Généré le :  lun. 08 juin 2020 à 22:08
 -- Version du serveur :  10.4.10-MariaDB
 -- Version de PHP :  7.3.12
 
@@ -63,6 +63,8 @@ INSERT INTO `asimov_classes` (`idclasse`, `nomclasse`, `profprincipal`) VALUES
 CREATE TABLE `asimov_control` (
   `id` int(11) NOT NULL,
   `id_prof` int(11) NOT NULL,
+  `id_classe` int(11) NOT NULL,
+  `id_matiere` int(11) NOT NULL,
   `description` varchar(30) NOT NULL,
   `coefficient` int(11) NOT NULL,
   `bareme` int(11) NOT NULL,
@@ -73,8 +75,13 @@ CREATE TABLE `asimov_control` (
 -- Déchargement des données de la table `asimov_control`
 --
 
-INSERT INTO `asimov_control` (`id`, `id_prof`, `description`, `coefficient`, `bareme`, `date`) VALUES
-(3, 70, 'BTS BLANC', 3, 20, '0000-00-00');
+INSERT INTO `asimov_control` (`id`, `id_prof`, `id_classe`, `id_matiere`, `description`, `coefficient`, `bareme`, `date`) VALUES
+(5, 70, 1, 4, 'Congruences', 1, 10, '0000-00-00'),
+(11, 70, 1, 4, 'BTS BLANC', 2, 20, '2020-05-06'),
+(12, 70, 1, 4, 'Fonctions', 2, 20, '2020-05-06'),
+(13, 70, 1, 5, 'Participation', 1, 10, '2020-05-27'),
+(14, 70, 1, 5, 'JavaScript', 3, 15, '2020-05-30'),
+(15, 70, 1, 4, 'Classes C#', 2, 20, '2020-05-15');
 
 -- --------------------------------------------------------
 
@@ -98,7 +105,6 @@ INSERT INTO `asimov_conversations` (`id`, `id_firstuser`, `id_seconduser`) VALUE
 (8, 1, 68),
 (11, 1, 20),
 (13, 1, 69),
-(14, 70, 9),
 (15, 70, 1),
 (16, 70, 126),
 (17, 70, 62),
@@ -134,7 +140,7 @@ INSERT INTO `asimov_dansclasse` (`iduser`, `idclasse`) VALUES
 (10, 7),
 (11, 7),
 (12, 7),
-(13, 7),
+(13, 1),
 (14, 7),
 (15, 7),
 (16, 7),
@@ -240,32 +246,50 @@ INSERT INTO `asimov_dansclasse` (`iduser`, `idclasse`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `asimov_edt`
+--
+
+CREATE TABLE `asimov_edt` (
+  `id` int(11) NOT NULL,
+  `id_classe` int(11) NOT NULL,
+  `id_matiere` int(11) NOT NULL,
+  `debut` time NOT NULL,
+  `fin` time NOT NULL,
+  `jour` int(11) NOT NULL,
+  `duree` time NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `asimov_enseignematiere`
 --
 
 CREATE TABLE `asimov_enseignematiere` (
   `idprof` int(11) NOT NULL,
-  `idmatiere` int(11) NOT NULL
+  `idmatiere` int(11) NOT NULL,
+  `idclasse` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Déchargement des données de la table `asimov_enseignematiere`
 --
 
-INSERT INTO `asimov_enseignematiere` (`idprof`, `idmatiere`) VALUES
-(70, 4),
-(70, 5),
-(71, 2),
-(71, 3),
-(73, 5),
-(78, 7),
-(79, 2),
-(79, 3),
-(79, 4),
-(87, 1),
-(89, 1),
-(91, 1),
-(92, 2);
+INSERT INTO `asimov_enseignematiere` (`idprof`, `idmatiere`, `idclasse`) VALUES
+(70, 4, 1),
+(70, 5, 1),
+(71, 2, 1),
+(71, 3, 0),
+(73, 5, 0),
+(78, 7, 0),
+(79, 2, 0),
+(79, 3, 0),
+(79, 4, 0),
+(79, 5, 0),
+(87, 1, 0),
+(89, 1, 0),
+(91, 1, 1),
+(92, 2, 0);
 
 -- --------------------------------------------------------
 
@@ -277,6 +301,16 @@ CREATE TABLE `asimov_etudiematiere` (
   `idclasse` int(11) NOT NULL,
   `idmatiere` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Déchargement des données de la table `asimov_etudiematiere`
+--
+
+INSERT INTO `asimov_etudiematiere` (`idclasse`, `idmatiere`) VALUES
+(1, 1),
+(1, 2),
+(1, 4),
+(1, 5);
 
 -- --------------------------------------------------------
 
@@ -385,17 +419,13 @@ INSERT INTO `asimov_messages` (`id`, `idconvers`, `iduser`, `libelle`, `date`, `
 (225, 1, 1, 'bbvb', '0000-00-00', 1),
 (227, 2, 1, 'gfdfgdfg', '0000-00-00', 0),
 (228, 1, 1, 'wsh', '0000-00-00', 1),
-(229, 1, 1, 'mange ta mère', '0000-00-00', 1),
 (230, 1, 1, 'WSH', '0000-00-00', 1),
 (231, 1, 1, 'BG', '0000-00-00', 1),
 (232, 1, 1, 'DSF', '0000-00-00', 1),
 (233, 1, 13, 'DFDDF', '0000-00-00', 1),
 (234, 1, 13, 'je t\'aime', '0000-00-00', 1),
-(235, 1, 13, 'suce', '0000-00-00', 1),
 (236, 1, 13, 'hello', '0000-00-00', 1),
 (237, 1, 13, 'je t\'aime', '0000-00-00', 1),
-(238, 1, 13, 'ntm', '0000-00-00', 1),
-(239, 1, 1, 'jvais t\'éclater', '0000-00-00', 1),
 (240, 1, 1, '????', '0000-00-00', 1),
 (241, 1, 1, 'bg', '0000-00-00', 1),
 (242, 1, 13, 'eh', '0000-00-00', 1),
@@ -405,7 +435,6 @@ INSERT INTO `asimov_messages` (`id`, `idconvers`, `iduser`, `libelle`, `date`, `
 (246, 1, 13, 'qssdsd', '0000-00-00', 1),
 (247, 1, 13, 'je t\'aime', '0000-00-00', 1),
 (248, 1, 13, 'hello', '0000-00-00', 1),
-(249, 2, 1, 'ntm', '0000-00-00', 0),
 (250, 2, 1, 'hey', '0000-00-00', 0),
 (251, 1, 13, 'salut', '0000-00-00', 1),
 (252, 1, 1, 'gfhfdg', '0000-00-00', 1),
@@ -414,20 +443,16 @@ INSERT INTO `asimov_messages` (`id`, `idconvers`, `iduser`, `libelle`, `date`, `
 (255, 1, 1, 'mange tes mort', '0000-00-00', 1),
 (256, 2, 1, 'fdp', '0000-00-00', 0),
 (257, 2, 1, 'jhghjgjhgjh', '0000-00-00', 0),
-(258, 1, 1, 'wsh', '0000-00-00', 1),
 (259, 2, 1, 'hein?', '0000-00-00', 0),
 (260, 1, 1, 'bg', '0000-00-00', 1),
 (261, 2, 1, 'bg', '0000-00-00', 0),
 (262, 2, 1, 'hello', '0000-00-00', 0),
-(263, 1, 1, 'ntm', '0000-00-00', 1),
 (264, 1, 1, 'je', '0000-00-00', 1),
 (265, 1, 1, 'te', '0000-00-00', 1),
 (266, 1, 13, 'quoi', '0000-00-00', 1),
 (267, 1, 1, 'feur', '0000-00-00', 1),
 (268, 1, 1, 'rien', '0000-00-00', 1),
-(269, 1, 13, 'fuck', '0000-00-00', 1),
 (270, 1, 1, 'mange', '0000-00-00', 1),
-(271, 1, 13, 'ta mère', '0000-00-00', 1),
 (272, 1, 13, 'hey mec', '0000-00-00', 1),
 (273, 1, 1, 'oui', '0000-00-00', 1),
 (274, 1, 13, 'rien enft', '0000-00-00', 1),
@@ -459,25 +484,13 @@ INSERT INTO `asimov_messages` (`id`, `idconvers`, `iduser`, `libelle`, `date`, `
 (300, 1, 13, 'gggfd', '0000-00-00', 1),
 (301, 1, 13, 'je t\'aime', '0000-00-00', 1),
 (302, 1, 13, 'je t\'aime', '0000-00-00', 1),
-(303, 8, 1, 'hey bg', '0000-00-00', 0),
-(304, 8, 1, 'hey bg', '0000-00-00', 0),
-(306, 11, 1, 'wsh mon gars', '0000-00-00', 1),
-(307, 11, 1, 'hey bg', '0000-00-00', 1),
-(308, 11, 1, 'wsh', '0000-00-00', 1),
 (309, 11, 1, 'wtf', '0000-00-00', 1),
 (310, 11, 1, 'f', '0000-00-00', 1),
 (311, 11, 1, 'f', '0000-00-00', 1),
-(312, 11, 20, 'ntm', '0000-00-00', 1),
-(313, 13, 1, 'wsh', '0000-00-00', 0),
-(314, 2, 1, 'je t\'encule', '0000-00-00', 0),
-(315, 2, 1, 'wsh', '0000-00-00', 0),
-(316, 2, 1, 'wsh', '0000-00-00', 0),
 (317, 2, 1, 'hey', '0000-00-00', 0),
 (318, 13, 1, 'slt', '0000-00-00', 0),
-(319, 14, 70, 'hey petite salope', '0000-00-00', 0),
-(322, 15, 70, 'slt', '0000-00-00', 0),
+(322, 15, 70, 'slt', '0000-00-00', 1),
 (323, 16, 70, 'slt', '0000-00-00', 0),
-(324, 17, 70, 'wsh', '0000-00-00', 0),
 (325, 18, 70, 'hello', '0000-00-00', 0),
 (326, 19, 70, 'dd', '0000-00-00', 0),
 (327, 20, 70, 'ssss', '0000-00-00', 0),
@@ -492,7 +505,7 @@ INSERT INTO `asimov_messages` (`id`, `idconvers`, `iduser`, `libelle`, `date`, `
 
 CREATE TABLE `asimov_notes` (
   `id` int(11) NOT NULL,
-  `note` int(11) NOT NULL,
+  `note` varchar(10) NOT NULL,
   `id_user` int(11) NOT NULL,
   `id_ds` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -502,13 +515,53 @@ CREATE TABLE `asimov_notes` (
 --
 
 INSERT INTO `asimov_notes` (`id`, `note`, `id_user`, `id_ds`) VALUES
-(6, 2, 39, 3),
-(7, 6, 65, 3),
-(8, 3, 2, 3),
-(9, 6, 6, 3),
-(10, 11, 4, 3),
-(11, 13, 61, 3),
-(12, 15, 125, 3);
+(15, '0', 4, 5),
+(16, '3', 61, 5),
+(17, '8', 125, 5),
+(18, 'ABS', 39, 5),
+(19, '7', 65, 5),
+(20, '6', 2, 5),
+(21, 'Non noté', 6, 5),
+(43, '1', 13, 11),
+(44, '5', 4, 11),
+(45, '3', 61, 11),
+(46, '2', 125, 11),
+(47, '12', 2, 11),
+(48, '13', 6, 11),
+(49, '11', 39, 11),
+(50, 'ABS', 65, 11),
+(51, 'ABS', 13, 12),
+(52, '11', 4, 12),
+(53, '20', 61, 12),
+(54, '4', 125, 12),
+(55, '8', 2, 12),
+(56, '7', 6, 12),
+(57, '20', 39, 12),
+(58, '11', 65, 12),
+(59, 'Non noté', 13, 13),
+(60, '4', 4, 13),
+(61, '8', 61, 13),
+(62, '7', 125, 13),
+(63, '8', 2, 13),
+(64, '7', 6, 13),
+(65, '9', 39, 13),
+(66, '9', 65, 13),
+(67, '1', 4, 14),
+(68, '0', 61, 14),
+(69, '4', 125, 14),
+(70, '3', 2, 14),
+(71, '11', 6, 14),
+(72, '12', 39, 14),
+(73, '11', 65, 14),
+(74, '11', 13, 14),
+(75, '2', 4, 15),
+(76, '3', 61, 15),
+(77, '8', 125, 15),
+(78, '6', 2, 15),
+(79, '13', 6, 15),
+(80, '10', 39, 15),
+(81, '7', 65, 15),
+(82, '16', 13, 15);
 
 -- --------------------------------------------------------
 
@@ -686,6 +739,12 @@ ALTER TABLE `asimov_dansclasse`
   ADD PRIMARY KEY (`iduser`,`idclasse`);
 
 --
+-- Index pour la table `asimov_edt`
+--
+ALTER TABLE `asimov_edt`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Index pour la table `asimov_enseignematiere`
 --
 ALTER TABLE `asimov_enseignematiere`
@@ -742,13 +801,19 @@ ALTER TABLE `asimov_classes`
 -- AUTO_INCREMENT pour la table `asimov_control`
 --
 ALTER TABLE `asimov_control`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT pour la table `asimov_conversations`
 --
 ALTER TABLE `asimov_conversations`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+
+--
+-- AUTO_INCREMENT pour la table `asimov_edt`
+--
+ALTER TABLE `asimov_edt`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT pour la table `asimov_faq`
@@ -772,7 +837,7 @@ ALTER TABLE `asimov_messages`
 -- AUTO_INCREMENT pour la table `asimov_notes`
 --
 ALTER TABLE `asimov_notes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
 
 --
 -- AUTO_INCREMENT pour la table `asimov_users`
