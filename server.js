@@ -1,26 +1,29 @@
-const PORT = 3000;
+const port = process.env.PORT || 3000;
+const iniparser = require('iniparser');
+const configDB = iniparser.parseSync('DB.ini'); 
+/*
 const DB_HOST = "localhost"
 const DB_NAME = "asimov"
 const DB_USER = "root"
-const DB_PASS = ""
+const DB_PASS = ""*/
 
-var fs = require('fs');
-var toastr = require('express-toastr');
-var flash = require('connect-flash')
-var asimov = require("./core/asimov.js");
-var socket = require("./core/socket.js")
-var express = require('express');
-var session = require('express-session')
-var socketSession = require("socket.io-session-middleware");
-var bodyParser = require("body-parser");
-var crypto = require('crypto');
-var cookieParser = require('cookie-parser');
-var mysql = require('mysql');
+const fs = require('fs');
+const toastr = require('express-toastr');
+const flash = require('connect-flash')
+const asimov = require("./core/asimov.js");
+const socket = require("./core/socket.js")
+const express = require('express');
+const session = require('express-session')
+const socketSession = require("socket.io-session-middleware");
+const bodyParser = require("body-parser");
+const crypto = require('crypto');
+const cookieParser = require('cookie-parser');
+const mysql = require('mysql');
 var db = mysql.createConnection({
-  host: DB_HOST,
-  user: DB_USER,
-  password: DB_PASS,
-  database: DB_NAME,
+  host:configDB['dev']['host'],
+  user:configDB['dev']['user'],
+  password:configDB['dev']['password'],
+  database:configDB['dev']['database'],
   multipleStatements: true
 });
 
@@ -40,7 +43,7 @@ app.use(session({secret: "Shh, its a secret!", resave: true, saveUninitialized: 
 
 db.connect(function(err) {
   	if (err) throw err;
-  	console.log("Connecté à la base de données '"+ DB_NAME +"'");
+  	console.log("Connecté à la base de données '"+ configDB['dev']['database'] +"'");
 
     socket.listen(io, db, ent, session);
 
@@ -240,5 +243,5 @@ db.connect(function(err) {
 
 
 
-http.listen(PORT);
-console.log("Server running : http://localhost:"+PORT+"/");
+http.listen(port);
+console.log("Server running : http://localhost:"+port+"/");

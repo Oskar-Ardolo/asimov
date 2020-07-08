@@ -2,7 +2,8 @@
 (function() {
 
     // Create connection
-    var socket = io.connect("http://localhost:3000");
+    //var socket = io.connect("http://localhost:3000");
+    const socket = io.connect("https://fontanaen-asimov.herokuapp.com/");
 
     // Global variables
     var pseudo = document.currentScript.getAttribute('pseudo');
@@ -185,7 +186,8 @@ function loadchat(idconv, iduser, pseudo) {
 }
 
 function find_users(value, pseudo) {
-  var socket = io("http://localhost:3000");
+  //var socket = io("http://localhost:3000");
+  const socket = io.connect("https://fontanaen-asimov.herokuapp.com/");
   socket.emit('find_users', { value : value, username : pseudo });
   //$('#list_users').append('<option value="'+val+'">');
 }
