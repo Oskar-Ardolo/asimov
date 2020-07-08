@@ -181,7 +181,8 @@
 })();
 
 function loadchat(idconv, iduser, pseudo) {
-  var socket = io("http://localhost:3000");
+  //var socket = io("http://localhost:3000");
+  const socket = io.connect("https://fontanaen-asimov.herokuapp.com/");
   socket.emit("add-the-chat", {id : idconv, iduser : iduser, username : pseudo});
 }
 
