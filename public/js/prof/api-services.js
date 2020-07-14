@@ -1,4 +1,5 @@
-const Base_Url = "http://localhost:3000"
+//const Base_Url = "http://localhost:3000"
+const Base_Url = "https://fontanaen-asimov.herokuapp.com"
 
 class API_services {
     static update_notes(id) {

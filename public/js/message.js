@@ -1,5 +1,5 @@
-//const url = "https://fontanaen-asimov.herokuapp.com/"
-const url = "http://localhost:3000/";
+const url = "https://fontanaen-asimov.herokuapp.com/"
+//const url = "http://localhost:3000/";
 
 (async () => {
 
