@@ -1,142 +1,147 @@
+const fs = require('fs');
+
 class Logs {
-  constructor() {
-  }
 
-  async readdirectory(fs, path) {
-    let promise = new Promise((resolve, reject) => {
-      if(fs.existsSync(path)) {
-        fs.readdir(path, (err, data) => {
-          if (err) console.log(err);
-          resolve(data);
-        });
-      } else {
-        resolve([]);
-      }
-
-    });
-    return promise.then((val) => {
-      return val
+  static readdirectory(path) {
+    return new Promise( async (resolve, reject) => {
+        try {
+            if(fs.existsSync(path)) {
+                await fs.readdir(path, (err, data) => {
+                    if (err) console.log(err);
+                    resolve(data);
+                });
+            } else {
+                resolve([]);
+            } 
+        } catch (err) {
+            reject(err);
+        }
     });
   }
 
-  async readfile(fs, path, directory) {
-    let promise = new Promise((resolve, reject) => {
-      let tab = new Array();
-      let jsoncontent;
-      fs.readFile(path + directory, (err, value) => {
-        if (err) console.log(err);
-        jsoncontent = JSON.parse(value);
-        let x = 0;
-        for (let items in jsoncontent.action) {
-          let y = 1;
-          tab[x] = new Array();
-          tab[x][0] = jsoncontent.pseudo;
-          for (let j in jsoncontent.action[items]) {
-            tab[x][y] = jsoncontent.action[items][j];
-            y = y + 1;
-          }
-            x = x + 1;
-          }
-          resolve(tab);
-      });
-    });
-    return promise.then((val) => {
-      return val
-    });
-  }
-
-  async readfileForOneUser(fs, fullpath, id) {
-      let promise = new Promise((resolve, reject) => {
-        let content;
+  static readfile(path, directory) {
+    return new Promise( async (resolve, reject) => {
+      try {
+        let tab = new Array();
         let jsoncontent;
-        fs.readFile(fullpath, (err, data) => {
+        await fs.readFile(path + directory, (err, value) => {
           if (err) console.log(err);
-          jsoncontent = JSON.parse(data);
+          jsoncontent = JSON.parse(value);
+          let x = 0;
           for (let items in jsoncontent.action) {
-            if (jsoncontent.action[items].id == id) {
-              content = jsoncontent.action[items];
-              return resolve(content);
+            let y = 1;
+            tab[x] = new Array();
+            tab[x][0] = jsoncontent.pseudo;
+            for (let j in jsoncontent.action[items]) {
+              tab[x][y] = jsoncontent.action[items][j];
+              y = y + 1;
             }
-          }
-          reject("error");
+              x = x + 1;
+            }
+            resolve(tab);
         });
-      });
-      return promise.then((val) => {
-        return val
+      } catch (err) {
+        reject(err);
+      }
+      
+    });
+  }
+
+  static readfileForOneUser(fullpath, id) {
+      return new Promise((resolve, reject) => {
+        try {
+          let content;
+          let jsoncontent;
+          fs.readFile(fullpath, (err, data) => {
+            if (err) reject(err);
+            jsoncontent = JSON.parse(data);
+            for (let items in jsoncontent.action) {
+              if (jsoncontent.action[items].id == id) {
+                content = jsoncontent.action[items];
+                return resolve(content);
+              }
+            }
+          });
+        } catch (err) {
+          reject(err);
+        }
+        
       });
   }
 
-  async getIdLog(fs, pseudo, time) {
-      let promise = new Promise((resolve, reject) => {
+  static getIdLog(pseudo, time) {
+      return new Promise((resolve, reject) => {
+        try {
+          let file = "log-["+pseudo+"]_["+time+"].json";
+          let path = "./Logs/["+time+"]/";
+          let fullpath = path + file;
+          let jsoncontent;
+          let id = 0;
+          if(fs.existsSync(fullpath)) {
+            fs.readFile(fullpath, (err, result) => {
+              if (err)reject(err);
+              else {
+                jsoncontent = JSON.parse(result);
+                for (let items in jsoncontent.action) {
+                  id += 1;
+                }
+                resolve(id.toString());
+              }
+            });
+          } else {
+            resolve("0");
+          }
+        } catch (err) {
+          reject(err);
+        }
+        
+      });
+  }
+
+  static writeLog(data, time, pseudo) {
+    return new Promise( async (resolve, reject) => {
+      try {
+        let day = new Date();
         let file = "log-["+pseudo+"]_["+time+"].json";
         let path = "./Logs/["+time+"]/";
         let fullpath = path + file;
-        let jsoncontent;
-        let id = 0;
-        if(fs.existsSync(fullpath)) {
-          fs.readFile(fullpath, (err, result) => {
-            if (err) console.log(err);
-            else {
-              jsoncontent = JSON.parse(result);
-              for (let items in jsoncontent.action) {
-                id += 1;
+          if(!fs.existsSync(fullpath)) {
+            let obj = { "pseudo" : pseudo, "action": [data] }
+            let json = JSON.stringify(obj, null, 4);
+  
+            // Create directory if it doesn't exist
+            fs.mkdir(path, { recursive : true }, (err) => {
+              if (err) console.log(err);
+            });
+  
+            // Create file or write into this file
+            fs.writeFile(fullpath, json, 'utf8', (err) => {
+              if (err) console.log(err);
+              else resolve(true);
+            });
+          } else {
+            fs.readFile(fullpath, (err, value) => {
+              if (err) {
+                console.log(err);
+                reject(false);
               }
-              resolve(id.toString());
-            }
-          });
-        } else {
-          resolve("0");
-        }
-      });
-      return promise.then((val) => {
-        return val
-      });
-  }
+              else {
+                let obj;
+                let json;
+                obj = JSON.parse(value);
+                obj.action.push(data);
+                json = JSON.stringify(obj, null, 4);
+                fs.writeFile(fullpath, json, 'utf8', function(err) {
+                  if (err) reject(err);
+                });
+                resolve(true);
+              }
+            });
+          }
+      } catch (err) {
+        reject(err);
+      }
 
-  async writeLog(data, fs, time, pseudo) {
-    let promise = new Promise((resolve, reject) => {
-      let day = new Date();
-      let file = "log-["+pseudo+"]_["+time+"].json";
-      let path = "./Logs/["+time+"]/";
-      let fullpath = path + file;
-      (async function() {
-        if(!fs.existsSync(fullpath)) {
-          let obj = { "pseudo" : pseudo, "action": [data] }
-          let json = JSON.stringify(obj, null, 4);
-
-          // Create directory if it doesn't exist
-          fs.mkdir(path, { recursive : true }, (err) => {
-            if (err) console.log(err);
-          });
-
-          // Create file or write into this file
-          fs.writeFile(fullpath, json, 'utf8', (err) => {
-            if (err) console.log(err);
-            else resolve(true);
-          });
-        } else {
-          fs.readFile(fullpath, (err, value) => {
-            if (err) {
-              console.log(err);
-              reject(false);
-            }
-            else {
-              let obj;
-              let json;
-              obj = JSON.parse(value);
-              obj.action.push(data);
-              json = JSON.stringify(obj, null, 4);
-              fs.writeFile(fullpath, json, 'utf8', function(err) {
-                if (err) console.log(err);
-              });
-              resolve(true);
-            }
-          });
-        }
-      })();
-    });
-    return promise.then((val) => {
-      return val
     });
   }
 

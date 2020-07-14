@@ -4,7 +4,8 @@
   "description": "Logiciel de gestion d'élèves en milieu scolaire dans le cadre de la Fondation Asimov.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js"
   },
   "repository": {
     "type": "git",
@@ -19,10 +20,12 @@
   "dependencies": {
     "@fullcalendar/core": "^4.4.0",
     "@fullcalendar/resource-timegrid": "^4.4.0",
+    "axios": "^0.19.2",
     "body-parser": "^1.19.0",
     "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.4",
     "cookie-session": "^1.4.0",
+    "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "ejs": "^2.7.1",
     "ent": "^2.2.0",
@@ -32,6 +35,7 @@
     "express-toastr": "^2.0.2",
     "fs": "0.0.1-security",
     "http": "0.0.1-security",
+    "https": "^1.0.0",
     "iniparser": "^1.0.5",
     "mysql": "^2.17.1",
     "request-promise": "^4.2.5",
@@ -39,5 +43,8 @@
     "socket.io": "^2.3.0",
     "socket.io-session-middleware": "^0.1.0",
     "toastr": "^2.1.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
   }
 }

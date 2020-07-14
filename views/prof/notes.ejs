@@ -22,7 +22,7 @@
               <% if(data_control) { %>
               <h4>Récapitulatif</h4>
               <hr>
-              <form id="form-edit" method="post" action="/prof/notes/edit-ds/<%= index %>">
+              <form id="form-edit" method="put" action="/prof/notes/<%= index %>">
                 <% for (let items in control) { %>
                   <% if (control[items].id == index) { %>
                     <label>Classe</label>
@@ -89,7 +89,7 @@
                 </form>
                 <div class="row">
                   <div class="col-6">
-                    <center><button id="btn_delete" data-toggle="modal" data-target="#Delete_dsModal" type="submit" class="btn btn-danger" name="button">Supprimer</button></center>
+                    <center><button id="btn_delete" data-toggle="modal" data-target="#Delete_dsModal" class="btn btn-danger" name="button">Supprimer</button></center>
                   </div>
                   <div class="col-6">
                     <center><button id="btn_modify" form="form-edit" type="submit" disabled class="btn btn-success" name="button">Modifier</button></center>
@@ -150,11 +150,14 @@
     </div>
 </div>
 
+
 <script src="/vendor/jquery/jquery-3.1.0.min.js"></script>
+
 <script type="text/javascript" src='/js/prof/AddNewDs.js' classes='<%= JSON.stringify(classes) %>' matiere='<%= JSON.stringify(matiere) %>'></script>
 
 <% try { %>
   <% if (index) { %>
+    <% console.log(index) %>
     <!-- Logout Modal-->
     <div class="modal fade" id="Delete_dsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
@@ -168,15 +171,18 @@
           <div class="modal-body">Cliquer sur <b>Confirmer</b> pour le supprimer</div>
           <div class="modal-footer">
             <button class="btn btn-secondary" type="button" data-dismiss="modal">Annuler</button>
-            <form id="form-delete" action="/prof/notes/delete-ds/<%= index %>" method="post">
-              <center><button id="btn_delete" form="form-delete" type="submit" class="btn btn-danger" name="button">Supprimer</button></center>
-            </form>
+            
+            <center><button id="btn_delete" onclick="API_services.delete_notes('<%= index %>')" class="btn btn-danger" name="button">Supprimer</button></center>
+            
           </div>
         </div>
       </div>
     </div>
   <% } %>
-<% } catch (err) {} %>
+<% } catch (err) { } %>
+
+<script type="text/javascript" src="/js/axios/axios.min.js"></script>
+<script type="text/javascript" src="/js/prof/api-services.js"></script>
 
 <!-- /.container-fluid -->
 <% include ../include/footer.ejs %>

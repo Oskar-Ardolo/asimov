@@ -1,3 +1,5 @@
+
+
 let data = JSON.parse(document.currentScript.getAttribute('classes'));
 let matiere = JSON.parse(document.currentScript.getAttribute('matiere'));
 
@@ -34,7 +36,7 @@ function btn_devoir() {
 }
 
 // ACTION ON INPUT SELECT CLASSES
-function getclasse(e) {
+function getclasse() {
 
   let value = $('#list_classes').val();
   let txt = $('#list_classes option:selected').text();
@@ -138,7 +140,7 @@ function btn_recap() {
   }
 
   $('#zones_notes').empty()
-  let recap = '<h4>Récapitulatif</h4><hr><form method="post" action="/prof/notes/add-ds"><label>Classe</label><input type="text" class="form-control" disabled value="'+new_ds["header"].classe.nom+'"><label>Matière</label><input class="form-control" type="text" disabled value="'+new_ds["header"].matiere.nom+'"/><label>Description</label><input type="text" class="form-control" disabled value="'+new_ds["header"].description+'"><label>Date</label><input type="text" class="form-control" disabled value="'+new_ds["header"].date+'"><label>Bareme</label><input type="text" class="form-control" disabled value="'+new_ds["header"].bareme+'"><label>Coéfficient</label><input type="text" class="form-control" disabled value="'+new_ds["header"].coefficient+'"/><table class="table table-bordered"><thead><th>Nom prénom</th><th>Note</th><thead>';
+  let recap = '<h4>Récapitulatif</h4><hr><form method="post" action="/prof/notes"><label>Classe</label><input type="text" class="form-control" disabled value="'+new_ds["header"].classe.nom+'"><label>Matière</label><input class="form-control" type="text" disabled value="'+new_ds["header"].matiere.nom+'"/><label>Description</label><input type="text" class="form-control" disabled value="'+new_ds["header"].description+'"><label>Date</label><input type="text" class="form-control" disabled value="'+new_ds["header"].date+'"><label>Bareme</label><input type="text" class="form-control" disabled value="'+new_ds["header"].bareme+'"><label>Coéfficient</label><input type="text" class="form-control" disabled value="'+new_ds["header"].coefficient+'"/><table class="table table-bordered"><thead><th>Nom prénom</th><th>Note</th><thead>';
   for (let items in new_ds["body"]) {
     recap += '<tr><td><label>'+new_ds["body"][items].nom+' '+new_ds["body"][items].prenom+'</label></td><td><input type="text" class="form-control" value="'+new_ds["body"][items].notes+'" disabled></td></tr>';
   }
