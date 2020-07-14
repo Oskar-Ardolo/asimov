@@ -1,0 +1,16 @@
+{
+    "pseudo": "oldfieldgraham",
+    "action": [
+        {
+            "id": "0",
+            "nom": "Connexion failed",
+            "date": "13-7-2020",
+            "heure": "01:18",
+            "description": [
+                {
+                    "Error message": "Error: Cannot enqueue Query after invoking quit."
+                }
+            ]
+        }
+    ]
+}
